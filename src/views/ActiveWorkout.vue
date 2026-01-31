@@ -91,11 +91,11 @@
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium mb-2">Weight (kg)</label>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 w-full">
               <button
                 type="button"
                 @click="decrementWeight"
-                class="w-14 h-14 flex-shrink-0 flex items-center justify-center text-3xl font-bold bg-white text-red-600 border-2 border-red-600 rounded-lg hover:bg-red-50 active:bg-red-100 transition-colors"
+                class="w-12 h-12 flex-shrink-0 flex items-center justify-center text-2xl font-bold bg-white text-red-600 border-2 border-red-600 rounded-lg active:bg-red-100"
               >
                 −
               </button>
@@ -103,13 +103,13 @@
                 v-model="setWeight"
                 type="number"
                 step="0.5"
-                class="input flex-1 text-3xl text-center font-semibold py-3"
+                class="input flex-1 min-w-0 text-2xl text-center font-semibold py-2"
                 inputmode="decimal"
               />
               <button
                 type="button"
                 @click="incrementWeight"
-                class="w-14 h-14 flex-shrink-0 flex items-center justify-center text-3xl font-bold bg-white text-red-600 border-2 border-red-600 rounded-lg hover:bg-red-50 active:bg-red-100 transition-colors"
+                class="w-12 h-12 flex-shrink-0 flex items-center justify-center text-2xl font-bold bg-white text-red-600 border-2 border-red-600 rounded-lg active:bg-red-100"
               >
                 +
               </button>
@@ -118,24 +118,24 @@
 
           <div>
             <label class="block text-sm font-medium mb-2">Reps</label>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 w-full">
               <button
                 type="button"
                 @click="decrementReps"
-                class="w-14 h-14 flex-shrink-0 flex items-center justify-center text-3xl font-bold bg-white text-red-600 border-2 border-red-600 rounded-lg hover:bg-red-50 active:bg-red-100 transition-colors"
+                class="w-12 h-12 flex-shrink-0 flex items-center justify-center text-2xl font-bold bg-white text-red-600 border-2 border-red-600 rounded-lg active:bg-red-100"
               >
                 −
               </button>
               <input
                 v-model="setReps"
                 type="number"
-                class="input flex-1 text-3xl text-center font-semibold py-3"
+                class="input flex-1 min-w-0 text-2xl text-center font-semibold py-2"
                 inputmode="numeric"
               />
               <button
                 type="button"
                 @click="incrementReps"
-                class="w-14 h-14 flex-shrink-0 flex items-center justify-center text-3xl font-bold bg-white text-red-600 border-2 border-red-600 rounded-lg hover:bg-red-50 active:bg-red-100 transition-colors"
+                class="w-12 h-12 flex-shrink-0 flex items-center justify-center text-2xl font-bold bg-white text-red-600 border-2 border-red-600 rounded-lg active:bg-red-100"
               >
                 +
               </button>
