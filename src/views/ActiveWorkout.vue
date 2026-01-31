@@ -90,29 +90,56 @@
 
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium mb-1">Weight (kg)</label>
-            <input
-              v-model="setWeight"
-              type="number"
-              step="0.5"
-              class="input w-full text-lg text-center"
-              inputmode="decimal"
-              autofocus
-            />
+            <label class="block text-sm font-medium mb-2">Weight (kg)</label>
+            <div class="flex items-center gap-2">
+              <button
+                @click="decrementWeight"
+                class="w-12 h-12 flex items-center justify-center text-2xl font-bold text-primary border-2 border-primary rounded-lg active:bg-primary/10"
+              >
+                −
+              </button>
+              <input
+                v-model="setWeight"
+                type="number"
+                step="0.5"
+                class="input flex-1 text-2xl text-center font-semibold"
+                inputmode="decimal"
+              />
+              <button
+                @click="incrementWeight"
+                class="w-12 h-12 flex items-center justify-center text-2xl font-bold text-primary border-2 border-primary rounded-lg active:bg-primary/10"
+              >
+                +
+              </button>
+            </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">Reps</label>
-            <input
-              v-model="setReps"
-              type="number"
-              class="input w-full text-lg text-center"
-              inputmode="numeric"
-            />
+            <label class="block text-sm font-medium mb-2">Reps</label>
+            <div class="flex items-center gap-2">
+              <button
+                @click="decrementReps"
+                class="w-12 h-12 flex items-center justify-center text-2xl font-bold text-primary border-2 border-primary rounded-lg active:bg-primary/10"
+              >
+                −
+              </button>
+              <input
+                v-model="setReps"
+                type="number"
+                class="input flex-1 text-2xl text-center font-semibold"
+                inputmode="numeric"
+              />
+              <button
+                @click="incrementReps"
+                class="w-12 h-12 flex items-center justify-center text-2xl font-bold text-primary border-2 border-primary rounded-lg active:bg-primary/10"
+              >
+                +
+              </button>
+            </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">RPE (optional)</label>
+            <label class="block text-sm font-medium mb-2">RPE (optional)</label>
             <input
               v-model="setRPE"
               type="number"
@@ -236,5 +263,29 @@ function skipExercise(index) {
 async function endWorkout() {
   await sessionsStore.endSession(sessionNotes.value)
   router.push('/history')
+}
+
+function incrementWeight() {
+  const current = parseFloat(setWeight.value) || 0
+  setWeight.value = (current + 2.5).toFixed(1)
+}
+
+function decrementWeight() {
+  const current = parseFloat(setWeight.value) || 0
+  if (current > 0) {
+    setWeight.value = Math.max(0, current - 2.5).toFixed(1)
+  }
+}
+
+function incrementReps() {
+  const current = parseInt(setReps.value) || 0
+  setReps.value = current + 1
+}
+
+function decrementReps() {
+  const current = parseInt(setReps.value) || 0
+  if (current > 0) {
+    setReps.value = Math.max(0, current - 1)
+  }
 }
 </script>
