@@ -8,9 +8,14 @@
       <!-- Header -->
       <div class="mb-6">
         <h1 class="text-2xl font-bold">{{ session.dayName }}</h1>
-        <p class="text-sm text-gray-600">
-          Started: {{ formatTime(session.startTime) }}
-        </p>
+        <div class="flex items-center justify-between">
+          <p class="text-sm text-gray-600">
+            Started: {{ formatTime(session.startTime) }}
+          </p>
+          <p class="text-sm font-semibold text-primary">
+            {{ workoutDuration }}
+          </p>
+        </div>
       </div>
 
       <!-- Exercises -->
@@ -24,11 +29,23 @@
           <div class="flex items-start justify-between mb-3">
             <div class="flex-1">
               <div class="flex items-center gap-2">
-                <span class="text-lg font-semibold">{{ index + 1 }}. {{ exercise.exerciseName }}</span>
+                <a
+                  v-if="getExerciseData(index)?.demoUrl"
+                  :href="getExerciseData(index).demoUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-lg font-semibold text-primary hover:underline"
+                >
+                  {{ index + 1 }}. {{ exercise.exerciseName }} 🔗
+                </a>
+                <span v-else class="text-lg font-semibold">{{ index + 1 }}. {{ exercise.exerciseName }}</span>
                 <span v-if="exercise.sets.length > 0" class="text-success">✓</span>
               </div>
               <p class="text-sm text-gray-600">
                 {{ exercise.prescribedSets }}×{{ exercise.prescribedReps }}
+                <span v-if="getExerciseData(index)?.restSeconds">
+                  · {{ getExerciseData(index).restSeconds }}s rest
+                </span>
               </p>
             </div>
             
@@ -39,6 +56,15 @@
             >
               Skip
             </button>
+          </div>
+
+          <!-- Rest Timer -->
+          <div
+            v-if="restTimer.exerciseIndex === index && restTimer.secondsLeft > 0"
+            class="mb-3 p-3 bg-primary/10 border border-primary rounded-lg text-center"
+          >
+            <p class="text-sm font-medium text-primary">Rest Timer</p>
+            <p class="text-3xl font-bold text-primary">{{ formatRestTime(restTimer.secondsLeft) }}</p>
           </div>
 
           <!-- Logged Sets -->
@@ -87,6 +113,15 @@
         <h3 class="text-lg font-bold mb-4">
           Log Set - {{ session.exercises[currentExerciseIndex]?.exerciseName }}
         </h3>
+
+        <!-- Same as Last Set Button -->
+        <button
+          v-if="lastSetData"
+          @click="useLastSet"
+          class="btn-secondary w-full mb-4 text-sm"
+        >
+          📋 Same as Last Set ({{ lastSetData.weight }}kg × {{ lastSetData.reps }} reps)
+        </button>
 
         <div class="space-y-4">
           <div>
@@ -196,7 +231,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useSessionsStore } from '../stores/sessions'
 import { useProgramsStore } from '../stores/programs'
@@ -215,6 +250,32 @@ const setReps = ref('')
 const setRPE = ref('')
 const showEndModal = ref(false)
 const sessionNotes = ref('')
+const currentProgram = ref(null)
+
+// Rest timer
+const restTimer = ref({
+  exerciseIndex: null,
+  secondsLeft: 0,
+  interval: null
+})
+
+// Workout duration
+const workoutElapsed = ref(0)
+const workoutDurationInterval = ref(null)
+
+// Computed properties
+const workoutDuration = computed(() => {
+  const minutes = Math.floor(workoutElapsed.value / 60)
+  const seconds = workoutElapsed.value % 60
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+})
+
+const lastSetData = computed(() => {
+  if (!session.value) return null
+  const exercise = session.value.exercises[currentExerciseIndex.value]
+  const lastSet = exercise?.sets.slice(-1)[0]
+  return lastSet || null
+})
 
 onMounted(async () => {
   await programsStore.loadPrograms()
@@ -227,9 +288,25 @@ onMounted(async () => {
   )
 
   if (program && day) {
+    currentProgram.value = program
     sessionsStore.startSession(program, day)
+    
+    // Start workout duration timer
+    workoutDurationInterval.value = setInterval(() => {
+      workoutElapsed.value++
+    }, 1000)
   } else {
     router.push('/programs')
+  }
+})
+
+onUnmounted(() => {
+  // Clear intervals
+  if (workoutDurationInterval.value) {
+    clearInterval(workoutDurationInterval.value)
+  }
+  if (restTimer.value.interval) {
+    clearInterval(restTimer.value.interval)
   }
 })
 
@@ -239,6 +316,58 @@ function formatTime(isoString) {
     hour: '2-digit', 
     minute: '2-digit' 
   })
+}
+
+function formatRestTime(seconds) {
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  if (mins > 0) {
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+  return `${secs}s`
+}
+
+function getExerciseData(index) {
+  if (!currentProgram.value || !session.value) return null
+  
+  const day = currentProgram.value.workoutDays.find(
+    d => d.dayId === session.value.dayId
+  )
+  return day?.exercises[index] || null
+}
+
+function startRestTimer(exerciseIndex) {
+  // Clear existing timer
+  if (restTimer.value.interval) {
+    clearInterval(restTimer.value.interval)
+  }
+  
+  // Get rest time from exercise data
+  const exerciseData = getExerciseData(exerciseIndex)
+  const restSeconds = exerciseData?.restSeconds || 90
+  
+  restTimer.value.exerciseIndex = exerciseIndex
+  restTimer.value.secondsLeft = restSeconds
+  
+  restTimer.value.interval = setInterval(() => {
+    restTimer.value.secondsLeft--
+    
+    if (restTimer.value.secondsLeft <= 0) {
+      clearInterval(restTimer.value.interval)
+      // Optional: play sound or vibrate
+      if ('vibrate' in navigator) {
+        navigator.vibrate([200, 100, 200])
+      }
+    }
+  }, 1000)
+}
+
+function useLastSet() {
+  if (lastSetData.value) {
+    setWeight.value = lastSetData.value.weight
+    setReps.value = lastSetData.value.reps
+    setRPE.value = lastSetData.value.rpe || ''
+  }
 }
 
 function openSetModal(index) {
@@ -258,6 +387,9 @@ function saveSet() {
     setRPE.value || null
   )
   setModalOpen.value = false
+  
+  // Start rest timer
+  startRestTimer(currentExerciseIndex.value)
 }
 
 function skipExercise(index) {
