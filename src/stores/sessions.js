@@ -183,8 +183,11 @@ export const useSessionsStore = defineStore('sessions', {
       const end = new Date(this.activeSession.endTime)
       this.activeSession.duration = Math.round((end - start) / 1000 / 60) // minutes
 
-      await db.sessions.add(this.activeSession)
-      await this.syncToCloud(this.activeSession)
+      // Create a clean serializable copy for IndexedDB (no circular refs)
+      const sessionToSave = JSON.parse(JSON.stringify(this.activeSession))
+
+      await db.sessions.add(sessionToSave)
+      await this.syncToCloud(sessionToSave)
       await this.loadSessions()
 
       this.activeSession = null
