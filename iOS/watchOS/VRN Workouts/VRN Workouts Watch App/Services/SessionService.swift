@@ -29,25 +29,40 @@ class SessionService: ObservableObject {
         let stats = activeSession.calculateStats()
         let endTime = Date()
         
-        // Convert exercises to JSONB format
+        // Convert exercises to JSON string for JSONB column
         let exercisesData = try JSONEncoder().encode(activeSession.exercises)
-        let exercisesJson = try JSONSerialization.jsonObject(with: exercisesData) as! [String: Any]
+        let exercisesJsonString = String(data: exercisesData, encoding: .utf8) ?? "[]"
         
-        // Use RPC function to save session
-        let params: [String: Any] = [
-            "p_device_id": deviceId,
-            "p_session_id": activeSession.sessionId,
-            "p_program_id": activeSession.programId,
-            "p_day_id": activeSession.dayId,
-            "p_day_name": activeSession.dayName,
-            "p_start_time": ISO8601DateFormatter().string(from: activeSession.startTime),
-            "p_end_time": ISO8601DateFormatter().string(from: endTime),
-            "p_exercises": exercisesJson,
-            "p_notes": notes.isEmpty ? NSNull() : notes,
-            "p_total_volume": stats.volume,
-            "p_total_sets": stats.sets,
-            "p_duration": stats.duration
-        ]
+        // Create properly typed parameters struct
+        struct SaveSessionParams: Encodable {
+            let p_device_id: String
+            let p_session_id: String
+            let p_program_id: String
+            let p_day_id: String
+            let p_day_name: String
+            let p_start_time: String
+            let p_end_time: String
+            let p_exercises: String // JSON string
+            let p_notes: String?
+            let p_total_volume: Int
+            let p_total_sets: Int
+            let p_duration: Int
+        }
+        
+        let params = SaveSessionParams(
+            p_device_id: deviceId,
+            p_session_id: activeSession.sessionId,
+            p_program_id: activeSession.programId,
+            p_day_id: activeSession.dayId,
+            p_day_name: activeSession.dayName,
+            p_start_time: ISO8601DateFormatter().string(from: activeSession.startTime),
+            p_end_time: ISO8601DateFormatter().string(from: endTime),
+            p_exercises: exercisesJsonString,
+            p_notes: notes.isEmpty ? nil : notes,
+            p_total_volume: stats.volume,
+            p_total_sets: stats.sets,
+            p_duration: stats.duration
+        )
         
         let _: UUID = try await client.rpc(
             "insert_session_for_device",
@@ -73,9 +88,13 @@ class SessionService: ObservableObject {
         
         do {
             // Use RPC function to fetch sessions for this device
+            struct GetSessionsParams: Encodable {
+                let p_device_id: String
+            }
+            
             let response: [WorkoutSession] = try await client.rpc(
                 "get_sessions_for_device",
-                params: ["p_device_id": deviceId]
+                params: GetSessionsParams(p_device_id: deviceId)
             ).execute().value
             
             await MainActor.run {

@@ -68,9 +68,9 @@ CREATE OR REPLACE FUNCTION insert_session_for_device(
     p_program_id TEXT,
     p_day_id TEXT,
     p_day_name TEXT,
-    p_start_time TIMESTAMPTZ,
-    p_end_time TIMESTAMPTZ,
-    p_exercises JSONB,
+    p_start_time TEXT,
+    p_end_time TEXT,
+    p_exercises TEXT, -- JSON string, will be cast to JSONB
     p_notes TEXT,
     p_total_volume INTEGER,
     p_total_sets INTEGER,
@@ -97,7 +97,7 @@ BEGIN
         RAISE EXCEPTION 'Device not authorized';
     END IF;
     
-    -- Insert session
+    -- Insert session (cast TEXT params to proper types)
     INSERT INTO sessions (
         user_id,
         session_id,
@@ -117,10 +117,10 @@ BEGIN
         p_program_id,
         p_day_id,
         p_day_name,
-        p_start_time,
-        p_end_time,
-        p_exercises,
-        p_notes,
+        p_start_time::TIMESTAMPTZ,
+        p_end_time::TIMESTAMPTZ,
+        p_exercises::JSONB,
+        NULLIF(p_notes, ''),
         p_total_volume,
         p_total_sets,
         p_duration
@@ -134,7 +134,7 @@ $$;
 -- Grant execute to anon (watch uses anon key)
 GRANT EXECUTE ON FUNCTION get_programs_for_device(TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION get_sessions_for_device(TEXT) TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION insert_session_for_device(TEXT, TEXT, TEXT, TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ, JSONB, TEXT, INTEGER, INTEGER, INTEGER) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION insert_session_for_device(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, INTEGER, INTEGER, INTEGER) TO anon, authenticated;
 
 COMMENT ON FUNCTION get_programs_for_device IS 'Get programs for an authorized device (bypasses RLS)';
 COMMENT ON FUNCTION get_sessions_for_device IS 'Get sessions for an authorized device (bypasses RLS)';

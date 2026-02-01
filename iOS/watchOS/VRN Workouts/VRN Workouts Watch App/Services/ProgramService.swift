@@ -36,9 +36,13 @@ class ProgramService: ObservableObject {
         
         do {
             // Use RPC function to fetch programs for this device
+            struct GetProgramsParams: Encodable {
+                let p_device_id: String
+            }
+            
             let response: [Program] = try await client.rpc(
                 "get_programs_for_device",
-                params: ["p_device_id": deviceId]
+                params: GetProgramsParams(p_device_id: deviceId)
             ).execute().value
             
             await MainActor.run {
