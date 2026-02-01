@@ -91,18 +91,38 @@
                 <div
                   v-for="(exercise, idx) in day.exercises"
                   :key="exercise.exerciseId"
-                  class="bg-white p-2 rounded border border-gray-200"
+                  class="bg-white rounded border border-gray-200 overflow-hidden"
                 >
-                  <div class="flex items-start gap-2">
-                    <span class="text-xs font-semibold text-gray-400 mt-0.5">{{ idx + 1 }}</span>
-                    <div class="flex-1">
-                      <div class="font-medium text-sm">{{ exercise.name }}</div>
-                      <div class="text-xs text-gray-600 mt-0.5">
-                        {{ exercise.prescribedSets }}×{{ exercise.prescribedReps }}
-                        <span v-if="exercise.restSeconds" class="ml-2">• Rest: {{ formatRestTime(exercise.restSeconds) }}</span>
-                      </div>
-                      <div v-if="exercise.notes" class="text-xs text-gray-500 italic mt-1">
-                        {{ exercise.notes }}
+                  <!-- Exercise Image (if available) -->
+                  <div
+                    v-if="exercise.demoUrl"
+                    class="relative aspect-video bg-gray-100 overflow-hidden"
+                  >
+                    <img
+                      :src="exercise.demoUrl"
+                      :alt="exercise.name"
+                      class="w-full h-full object-cover"
+                      @error="handleImageError"
+                    />
+                    <!-- Exercise number badge -->
+                    <div class="absolute top-2 left-2 bg-black bg-opacity-70 text-white text-xs font-semibold px-2 py-1 rounded">
+                      {{ idx + 1 }}
+                    </div>
+                  </div>
+
+                  <!-- Exercise Details -->
+                  <div class="p-2">
+                    <div class="flex items-start gap-2">
+                      <span v-if="!exercise.demoUrl" class="text-xs font-semibold text-gray-400 mt-0.5">{{ idx + 1 }}</span>
+                      <div class="flex-1">
+                        <div class="font-medium text-sm">{{ exercise.name }}</div>
+                        <div class="text-xs text-gray-600 mt-0.5">
+                          {{ exercise.prescribedSets }}×{{ exercise.prescribedReps }}
+                          <span v-if="exercise.restSeconds" class="ml-2">• Rest: {{ formatRestTime(exercise.restSeconds) }}</span>
+                        </div>
+                        <div v-if="exercise.notes" class="text-xs text-gray-500 italic mt-1">
+                          {{ exercise.notes }}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -225,6 +245,16 @@ function formatRestTime(seconds) {
   const remainingSeconds = seconds % 60
   if (remainingSeconds === 0) return `${minutes}m`
   return `${minutes}m ${remainingSeconds}s`
+}
+
+function handleImageError(event) {
+  // Hide broken images gracefully
+  event.target.style.display = 'none'
+  // Show fallback if parent exists
+  const parent = event.target.parentElement
+  if (parent) {
+    parent.classList.add('hidden')
+  }
 }
 
 function startWorkout(day) {

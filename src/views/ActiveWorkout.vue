@@ -23,40 +23,54 @@
         <div
           v-for="(exercise, index) in session.exercises"
           :key="exercise.exerciseId"
-          class="card"
+          class="card overflow-hidden p-0"
         >
-          <!-- Exercise Header -->
-          <div class="flex items-start justify-between mb-3">
-            <div class="flex-1">
-              <div class="flex items-center gap-2">
-                <a
-                  v-if="getExerciseData(index)?.demoUrl"
-                  :href="getExerciseData(index).demoUrl"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-lg font-semibold text-primary hover:underline"
-                >
-                  {{ index + 1 }}. {{ exercise.exerciseName }} 🔗
-                </a>
-                <span v-else class="text-lg font-semibold">{{ index + 1 }}. {{ exercise.exerciseName }}</span>
-                <span v-if="exercise.sets.length > 0" class="text-success">✓</span>
-              </div>
-              <p class="text-sm text-gray-600">
-                {{ exercise.prescribedSets }}×{{ exercise.prescribedReps }}
-                <span v-if="getExerciseData(index)?.restSeconds">
-                  · {{ getExerciseData(index).restSeconds }}s rest
-                </span>
-              </p>
+          <!-- Exercise Image -->
+          <div
+            v-if="getExerciseData(index)?.demoUrl"
+            class="relative aspect-video bg-gray-100 overflow-hidden"
+          >
+            <img
+              :src="getExerciseData(index).demoUrl"
+              :alt="exercise.exerciseName"
+              class="w-full h-full object-cover"
+              @error="handleImageError"
+            />
+            <div class="absolute top-2 left-2 bg-black bg-opacity-70 text-white text-sm font-semibold px-3 py-1 rounded">
+              Exercise {{ index + 1 }} of {{ session.exercises.length }}
             </div>
-            
-            <button
-              v-if="exercise.sets.length === 0 && !exercise.skipped"
-              @click="skipExercise(index)"
-              class="text-sm text-gray-500 hover:text-gray-700"
-            >
-              Skip
-            </button>
+            <span v-if="exercise.sets.length > 0" class="absolute top-2 right-2 bg-green-500 text-white text-2xl rounded-full w-8 h-8 flex items-center justify-center">
+              ✓
+            </span>
           </div>
+
+          <!-- Exercise Content -->
+          <div class="p-4">
+            <!-- Exercise Header -->
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg font-semibold">
+                    <span v-if="!getExerciseData(index)?.demoUrl">{{ index + 1 }}. </span>{{ exercise.exerciseName }}
+                  </span>
+                  <span v-if="exercise.sets.length > 0 && !getExerciseData(index)?.demoUrl" class="text-success">✓</span>
+                </div>
+                <p class="text-sm text-gray-600">
+                  {{ exercise.prescribedSets }}×{{ exercise.prescribedReps }}
+                  <span v-if="getExerciseData(index)?.restSeconds">
+                    · {{ getExerciseData(index).restSeconds }}s rest
+                  </span>
+                </p>
+              </div>
+              
+              <button
+                v-if="exercise.sets.length === 0 && !exercise.skipped"
+                @click="skipExercise(index)"
+                class="text-sm text-gray-500 hover:text-gray-700"
+              >
+                Skip
+              </button>
+            </div>
 
           <!-- Rest Timer -->
           <div
@@ -92,6 +106,7 @@
           >
             + Add Set
           </button>
+          </div>
         </div>
       </div>
 
@@ -325,6 +340,15 @@ function formatRestTime(seconds) {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
   return `${secs}s`
+}
+
+function handleImageError(event) {
+  // Hide broken images gracefully
+  event.target.style.display = 'none'
+  const parent = event.target.parentElement
+  if (parent) {
+    parent.classList.add('hidden')
+  }
 }
 
 function getExerciseData(index) {
