@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 struct WorkoutSession: Codable, Identifiable {
     let id: UUID
