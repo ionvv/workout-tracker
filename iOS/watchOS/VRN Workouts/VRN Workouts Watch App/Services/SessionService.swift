@@ -3,7 +3,7 @@ import Combine
 import Supabase
 
 // Parameter structs for RPC calls (must be outside MainActor context)
-private struct SaveSessionParams: Encodable {
+private struct SaveSessionParams: Encodable, Sendable {
     let p_device_id: String
     let p_session_id: String
     let p_program_id: String
@@ -18,7 +18,7 @@ private struct SaveSessionParams: Encodable {
     let p_duration: Int
 }
 
-private struct GetSessionsParams: Encodable {
+private struct GetSessionsParams: Encodable, Sendable {
     let p_device_id: String
 }
 
