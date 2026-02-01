@@ -9,7 +9,7 @@ struct WorkoutTrackerApp: App {
             if authService.isAuthenticated {
                 ProgramsView()
             } else {
-                LoginView()
+                DevicePairingView()
             }
         }
     }

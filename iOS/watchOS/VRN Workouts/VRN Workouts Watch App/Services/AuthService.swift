@@ -16,9 +16,10 @@ class AuthService: ObservableObject {
             supabaseKey: Config.supabaseAnonKey
         )
         
-        // Check for existing session
+        // Check for existing session or device authorization
         Task {
             await checkSession()
+            await checkDeviceAuthorization()
         }
     }
     
@@ -59,5 +60,25 @@ class AuthService: ObservableObject {
     
     var userId: UUID? {
         return currentUser?.id
+    }
+    
+    func checkDeviceAuthorization() async {
+        // Check if device has been authorized via pairing flow
+        guard let authorizedUserId = UserDefaults.standard.string(forKey: "authorizedUserId"),
+              let deviceAuthorized = UserDefaults.standard.object(forKey: "deviceAuthorized") as? Bool,
+              deviceAuthorized else {
+            return
+        }
+        
+        // Device is authorized, create a "virtual" user session
+        // In production, you'd want to exchange this for a proper Supabase session
+        if let userId = UUID(uuidString: authorizedUserId) {
+            self.currentUser = User(
+                id: userId,
+                email: "watch-user@device",
+                createdAt: Date()
+            )
+            self.isAuthenticated = true
+        }
     }
 }

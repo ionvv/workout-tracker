@@ -74,13 +74,23 @@
         </form>
 
         <!-- Continue Offline -->
-        <div class="mt-6 text-center">
+        <div class="mt-6 text-center space-y-3">
           <button
             @click="continueOffline"
             class="text-sm text-gray-600 hover:text-gray-900 underline"
           >
             Continue without signing in (offline only)
           </button>
+          
+          <!-- Pair Device Link -->
+          <div class="pt-3 border-t">
+            <router-link
+              to="/pair-device"
+              class="text-sm text-blue-600 hover:text-blue-700 underline flex items-center justify-center gap-2"
+            >
+              ⌚ Pair Apple Watch
+            </router-link>
+          </div>
         </div>
       </div>
 

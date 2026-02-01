@@ -31,6 +31,11 @@ const router = createRouter({
       path: '/analytics',
       name: 'analytics',
       component: () => import('../views/Analytics.vue')
+    },
+    {
+      path: '/pair-device',
+      name: 'pair-device',
+      component: () => import('../views/PairDevice.vue')
     }
   ]
 })
