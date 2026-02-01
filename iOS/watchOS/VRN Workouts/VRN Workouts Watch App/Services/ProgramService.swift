@@ -17,9 +17,11 @@ class ProgramService: ObservableObject {
         )
     }
     
-    func fetchPrograms() async {
-        guard AuthService.shared.isAuthenticated else {
-            self.error = "Not authenticated"
+    nonisolated func fetchPrograms() async {
+        guard await AuthService.shared.isAuthenticated else {
+            await MainActor.run {
+                self.error = "Not authenticated"
+            }
             return
         }
         

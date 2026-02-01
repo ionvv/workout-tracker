@@ -17,8 +17,8 @@ class SessionService: ObservableObject {
         )
     }
     
-    func saveSession(_ activeSession: ActiveWorkoutSession, notes: String = "") async throws {
-        guard AuthService.shared.isAuthenticated else {
+    nonisolated func saveSession(_ activeSession: ActiveWorkoutSession, notes: String = "") async throws {
+        guard await AuthService.shared.isAuthenticated else {
             throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
@@ -26,21 +26,21 @@ class SessionService: ObservableObject {
             throw NSError(domain: "SessionService", code: 400, userInfo: [NSLocalizedDescriptionKey: "Device not paired"])
         }
         
-        let stats = activeSession.calculateStats()
+        let stats = await activeSession.calculateStats()
         let endTime = Date()
         
         // Convert exercises to JSON string for JSONB column
-        let exercisesData = try JSONEncoder().encode(activeSession.exercises)
+        let exercisesData = try JSONEncoder().encode(await activeSession.exercises)
         let exercisesJsonString = String(data: exercisesData, encoding: .utf8) ?? "[]"
         
         // Create properly typed parameters
         let params = SaveSessionParams(
             p_device_id: deviceId,
-            p_session_id: activeSession.sessionId,
-            p_program_id: activeSession.programId,
-            p_day_id: activeSession.dayId,
-            p_day_name: activeSession.dayName,
-            p_start_time: ISO8601DateFormatter().string(from: activeSession.startTime),
+            p_session_id: await activeSession.sessionId,
+            p_program_id: await activeSession.programId,
+            p_day_id: await activeSession.dayId,
+            p_day_name: await activeSession.dayName,
+            p_start_time: ISO8601DateFormatter().string(from: await activeSession.startTime),
             p_end_time: ISO8601DateFormatter().string(from: endTime),
             p_exercises: exercisesJsonString,
             p_notes: notes.isEmpty ? nil : notes,
@@ -55,9 +55,11 @@ class SessionService: ObservableObject {
         ).execute().value
     }
     
-    func fetchSessions() async {
-        guard AuthService.shared.isAuthenticated else {
-            self.error = "Not authenticated"
+    nonisolated func fetchSessions() async {
+        guard await AuthService.shared.isAuthenticated else {
+            await MainActor.run {
+                self.error = "Not authenticated"
+            }
             return
         }
         
