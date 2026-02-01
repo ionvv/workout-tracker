@@ -87,7 +87,20 @@ export const useProgramsStore = defineStore('programs', {
     async addProgram(program) {
       const programData = {
         ...program,
+        programId: program.programId || `program-${Date.now()}`,
         createdAt: new Date().toISOString()
+      }
+      
+      // Add dayId to each day if missing
+      if (programData.workoutDays) {
+        programData.workoutDays = programData.workoutDays.map((day, idx) => ({
+          ...day,
+          dayId: day.dayId || `day-${idx + 1}`,
+          exercises: day.exercises.map((ex, exIdx) => ({
+            ...ex,
+            exerciseId: ex.exerciseId || `ex-${idx}-${exIdx}`
+          }))
+        }))
       }
       
       const id = await db.programs.add(programData)
@@ -148,8 +161,10 @@ export const useProgramsStore = defineStore('programs', {
         // Day name (## Day A - ...)
         else if (trimmed.startsWith('##')) {
           if (currentDay) program.workoutDays.push(currentDay)
+          const dayName = trimmed.replace('##', '').trim()
           currentDay = {
-            dayName: trimmed.replace('##', '').trim(),
+            dayId: `day-${program.workoutDays.length + 1}`,
+            dayName: dayName,
             exercises: []
           }
         }
@@ -185,6 +200,7 @@ export const useProgramsStore = defineStore('programs', {
       const demoUrl = demoMatch ? demoMatch[1] : ''
 
       return {
+        exerciseId: `ex-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         name: name.trim(),
         prescribedSets: parseInt(sets),
         prescribedReps: reps.trim(),

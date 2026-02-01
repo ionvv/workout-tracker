@@ -38,12 +38,15 @@
         </div>
 
         <!-- Form -->
-        <form @submit.prevent="handleSubmit" class="space-y-4">
+        <form @submit.prevent="handleSubmit" class="space-y-4" autocomplete="on">
           <div>
-            <label class="block text-sm font-medium mb-1">Email</label>
+            <label for="email" class="block text-sm font-medium mb-1">Email</label>
             <input
+              id="email"
               v-model="email"
               type="email"
+              name="email"
+              autocomplete="email"
               required
               class="input w-full"
               placeholder="you@example.com"
@@ -52,10 +55,13 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">Password</label>
+            <label for="password" class="block text-sm font-medium mb-1">Password</label>
             <input
+              id="password"
               v-model="password"
               type="password"
+              name="password"
+              :autocomplete="mode === 'signin' ? 'current-password' : 'new-password'"
               required
               minlength="6"
               class="input w-full"
