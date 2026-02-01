@@ -1,11 +1,14 @@
 import { defineStore } from 'pinia'
 import { db } from '../utils/db'
+import { supabase } from '../utils/supabase'
+import { useAuthStore } from './auth'
 
 export const useSessionsStore = defineStore('sessions', {
   state: () => ({
     sessions: [],
     activeSession: null,
-    loading: false
+    loading: false,
+    syncing: false
   }),
 
   getters: {
@@ -38,11 +41,87 @@ export const useSessionsStore = defineStore('sessions', {
     async loadSessions() {
       this.loading = true
       try {
+        // Load from IndexedDB first
         this.sessions = await db.sessions.toArray()
+        
+        // Sync from cloud if authenticated
+        const authStore = useAuthStore()
+        if (authStore.isAuthenticated) {
+          await this.syncFromCloud()
+        }
       } catch (error) {
         console.error('Failed to load sessions:', error)
       } finally {
         this.loading = false
+      }
+    },
+
+    async syncFromCloud() {
+      if (this.syncing) return
+      
+      this.syncing = true
+      try {
+        const { data, error } = await supabase
+          .from('sessions')
+          .select('*')
+          .order('start_time', { ascending: false })
+        
+        if (error) throw error
+        
+        if (data && data.length > 0) {
+          // Clear local and replace with cloud data
+          await db.sessions.clear()
+          
+          for (const session of data) {
+            await db.sessions.add({
+              sessionId: session.session_id,
+              programId: session.program_id,
+              dayId: session.day_id,
+              dayName: session.day_name,
+              startTime: session.start_time,
+              endTime: session.end_time,
+              exercises: session.exercises,
+              notes: session.notes,
+              totalVolume: session.total_volume,
+              totalSets: session.total_sets,
+              duration: session.duration
+            })
+          }
+          
+          this.sessions = await db.sessions.toArray()
+        }
+      } catch (error) {
+        console.error('Sync from cloud failed:', error)
+      } finally {
+        this.syncing = false
+      }
+    },
+
+    async syncToCloud(session) {
+      const authStore = useAuthStore()
+      if (!authStore.isAuthenticated) return
+      
+      try {
+        const { error } = await supabase
+          .from('sessions')
+          .upsert({
+            user_id: authStore.user.id,
+            session_id: session.sessionId,
+            program_id: session.programId,
+            day_id: session.dayId,
+            day_name: session.dayName,
+            start_time: session.startTime,
+            end_time: session.endTime,
+            exercises: session.exercises,
+            notes: session.notes,
+            total_volume: session.totalVolume,
+            total_sets: session.totalSets,
+            duration: session.duration
+          })
+        
+        if (error) throw error
+      } catch (error) {
+        console.error('Sync session to cloud failed:', error)
       }
     },
 
@@ -105,6 +184,7 @@ export const useSessionsStore = defineStore('sessions', {
       this.activeSession.duration = Math.round((end - start) / 1000 / 60) // minutes
 
       await db.sessions.add(this.activeSession)
+      await this.syncToCloud(this.activeSession)
       await this.loadSessions()
 
       this.activeSession = null

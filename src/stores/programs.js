@@ -1,17 +1,27 @@
 import { defineStore } from 'pinia'
 import { db } from '../utils/db'
+import { supabase } from '../utils/supabase'
+import { useAuthStore } from './auth'
 
 export const useProgramsStore = defineStore('programs', {
   state: () => ({
     programs: [],
-    loading: false
+    loading: false,
+    syncing: false
   }),
 
   actions: {
     async loadPrograms() {
       this.loading = true
       try {
+        // Load from IndexedDB first (offline-first)
         this.programs = await db.programs.toArray()
+        
+        // Then sync from Supabase if authenticated
+        const authStore = useAuthStore()
+        if (authStore.isAuthenticated) {
+          await this.syncFromCloud()
+        }
       } catch (error) {
         console.error('Failed to load programs:', error)
       } finally {
@@ -19,22 +29,93 @@ export const useProgramsStore = defineStore('programs', {
       }
     },
 
+    async syncFromCloud() {
+      if (this.syncing) return
+      
+      this.syncing = true
+      try {
+        const { data, error } = await supabase
+          .from('programs')
+          .select('*')
+          .order('created_at', { ascending: false })
+        
+        if (error) throw error
+        
+        if (data && data.length > 0) {
+          // Clear local DB and replace with cloud data
+          await db.programs.clear()
+          
+          for (const program of data) {
+            await db.programs.add({
+              programId: program.program_id,
+              programName: program.program_name,
+              workoutDays: program.workout_days,
+              createdAt: program.created_at
+            })
+          }
+          
+          this.programs = await db.programs.toArray()
+        }
+      } catch (error) {
+        console.error('Sync from cloud failed:', error)
+      } finally {
+        this.syncing = false
+      }
+    },
+
+    async syncToCloud(program) {
+      const authStore = useAuthStore()
+      if (!authStore.isAuthenticated) return
+      
+      try {
+        const { error } = await supabase
+          .from('programs')
+          .upsert({
+            user_id: authStore.user.id,
+            program_id: program.programId,
+            program_name: program.programName,
+            workout_days: program.workoutDays,
+            created_at: program.createdAt
+          })
+        
+        if (error) throw error
+      } catch (error) {
+        console.error('Sync to cloud failed:', error)
+      }
+    },
+
     async addProgram(program) {
-      const id = await db.programs.add({
+      const programData = {
         ...program,
         createdAt: new Date().toISOString()
-      })
+      }
+      
+      const id = await db.programs.add(programData)
+      await this.syncToCloud(programData)
       await this.loadPrograms()
       return id
     },
 
     async updateProgram(programId, updates) {
       await db.programs.update(programId, updates)
+      const program = await db.programs.get(programId)
+      await this.syncToCloud(program)
       await this.loadPrograms()
     },
 
     async deleteProgram(programId) {
+      const program = await db.programs.get(programId)
       await db.programs.delete(programId)
+      
+      const authStore = useAuthStore()
+      if (authStore.isAuthenticated && program) {
+        await supabase
+          .from('programs')
+          .delete()
+          .eq('user_id', authStore.user.id)
+          .eq('program_id', program.programId)
+      }
+      
       await this.loadPrograms()
     },
 

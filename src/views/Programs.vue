@@ -1,7 +1,30 @@
 <template>
   <div class="p-4">
+    <!-- Header with sync status -->
+    <div class="mb-4">
+      <div class="flex items-center justify-between mb-2">
+        <h1 class="text-2xl font-bold">Programs</h1>
+        <button
+          v-if="authStore.isAuthenticated"
+          @click="authStore.signOut"
+          class="text-sm text-gray-600 hover:text-gray-900"
+        >
+          Sign Out
+        </button>
+      </div>
+      
+      <div v-if="authStore.isAuthenticated" class="flex items-center gap-2 text-sm text-gray-600">
+        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+        <span>Synced to cloud · {{ authStore.user.email }}</span>
+      </div>
+      <div v-else class="flex items-center gap-2 text-sm text-gray-600">
+        <span class="w-2 h-2 rounded-full bg-gray-400"></span>
+        <span>Offline only · <router-link to="/login" class="text-primary underline">Sign in to sync</router-link></span>
+      </div>
+    </div>
+
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold">Programs</h1>
+      <div></div>
       <button @click="showImportModal = true" class="btn-primary">
         + New Program
       </button>
@@ -110,10 +133,12 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProgramsStore } from '../stores/programs'
+import { useAuthStore } from '../stores/auth'
 import { storeToRefs } from 'pinia'
 
 const router = useRouter()
 const programsStore = useProgramsStore()
+const authStore = useAuthStore()
 const { programs } = storeToRefs(programsStore)
 
 const selectedProgram = ref(null)

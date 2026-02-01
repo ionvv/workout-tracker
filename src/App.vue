@@ -1,12 +1,12 @@
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Main Content -->
-    <main class="flex-1 pb-20">
+    <main :class="showNav ? 'flex-1 pb-20' : 'flex-1'">
       <router-view />
     </main>
 
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-area-inset-bottom">
+    <nav v-if="showNav" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-area-inset-bottom">
       <div class="flex justify-around items-center h-16">
         <router-link
           to="/programs"
@@ -46,5 +46,16 @@
 </template>
 
 <script setup>
-// No additional logic needed here
+import { computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useAuthStore } from './stores/auth'
+
+const route = useRoute()
+const authStore = useAuthStore()
+
+const showNav = computed(() => route.path !== '/login')
+
+onMounted(async () => {
+  await authStore.init()
+})
 </script>
