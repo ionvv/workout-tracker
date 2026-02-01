@@ -2,6 +2,11 @@ import Foundation
 import Combine
 import Supabase
 
+// Parameter struct for RPC calls (must be outside MainActor context)
+private struct GetProgramsParams: Encodable {
+    let p_device_id: String
+}
+
 class ProgramService: ObservableObject {
     static let shared = ProgramService()
     
@@ -36,10 +41,6 @@ class ProgramService: ObservableObject {
         
         do {
             // Use RPC function to fetch programs for this device
-            struct GetProgramsParams: Encodable {
-                let p_device_id: String
-            }
-            
             let response: [Program] = try await client.rpc(
                 "get_programs_for_device",
                 params: GetProgramsParams(p_device_id: deviceId)

@@ -2,6 +2,26 @@ import Foundation
 import Combine
 import Supabase
 
+// Parameter structs for RPC calls (must be outside MainActor context)
+private struct SaveSessionParams: Encodable {
+    let p_device_id: String
+    let p_session_id: String
+    let p_program_id: String
+    let p_day_id: String
+    let p_day_name: String
+    let p_start_time: String
+    let p_end_time: String
+    let p_exercises: String
+    let p_notes: String?
+    let p_total_volume: Int
+    let p_total_sets: Int
+    let p_duration: Int
+}
+
+private struct GetSessionsParams: Encodable {
+    let p_device_id: String
+}
+
 class SessionService: ObservableObject {
     static let shared = SessionService()
     
@@ -33,22 +53,7 @@ class SessionService: ObservableObject {
         let exercisesData = try JSONEncoder().encode(activeSession.exercises)
         let exercisesJsonString = String(data: exercisesData, encoding: .utf8) ?? "[]"
         
-        // Create properly typed parameters struct
-        struct SaveSessionParams: Encodable {
-            let p_device_id: String
-            let p_session_id: String
-            let p_program_id: String
-            let p_day_id: String
-            let p_day_name: String
-            let p_start_time: String
-            let p_end_time: String
-            let p_exercises: String // JSON string
-            let p_notes: String?
-            let p_total_volume: Int
-            let p_total_sets: Int
-            let p_duration: Int
-        }
-        
+        // Create properly typed parameters
         let params = SaveSessionParams(
             p_device_id: deviceId,
             p_session_id: activeSession.sessionId,
@@ -88,10 +93,6 @@ class SessionService: ObservableObject {
         
         do {
             // Use RPC function to fetch sessions for this device
-            struct GetSessionsParams: Encodable {
-                let p_device_id: String
-            }
-            
             let response: [WorkoutSession] = try await client.rpc(
                 "get_sessions_for_device",
                 params: GetSessionsParams(p_device_id: deviceId)
