@@ -1,0 +1,496 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		5251C8472F2FA6BF006E7F16 /* VRN Workouts Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 5251C8462F2FA6BF006E7F16 /* VRN Workouts Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		5251C85C2F2FA814006E7F16 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 5251C85B2F2FA814006E7F16 /* Auth */; };
+		5251C85E2F2FA814006E7F16 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = 5251C85D2F2FA814006E7F16 /* PostgREST */; };
+		5251C8612F2FA83E006E7F16 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 5251C8602F2FA83E006E7F16 /* Supabase */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5251C8482F2FA6BF006E7F16 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5251C83A2F2FA6BE006E7F16 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5251C8452F2FA6BF006E7F16;
+			remoteInfo = "VRN Workouts Watch App";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		5251C8562F2FA6C1006E7F16 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				5251C8472F2FA6BF006E7F16 /* VRN Workouts Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		5251C8402F2FA6BF006E7F16 /* VRN Workouts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "VRN Workouts.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5251C8462F2FA6BF006E7F16 /* VRN Workouts Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "VRN Workouts Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		5251C84A2F2FA6BF006E7F16 /* VRN Workouts Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "VRN Workouts Watch App";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5251C8432F2FA6BF006E7F16 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5251C85E2F2FA814006E7F16 /* PostgREST in Frameworks */,
+				5251C85C2F2FA814006E7F16 /* Auth in Frameworks */,
+				5251C8612F2FA83E006E7F16 /* Supabase in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		5251C8392F2FA6BE006E7F16 = {
+			isa = PBXGroup;
+			children = (
+				5251C84A2F2FA6BF006E7F16 /* VRN Workouts Watch App */,
+				5251C85F2F2FA83E006E7F16 /* Frameworks */,
+				5251C8412F2FA6BF006E7F16 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5251C8412F2FA6BF006E7F16 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5251C8402F2FA6BF006E7F16 /* VRN Workouts.app */,
+				5251C8462F2FA6BF006E7F16 /* VRN Workouts Watch App.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5251C85F2F2FA83E006E7F16 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5251C83F2F2FA6BF006E7F16 /* VRN Workouts */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5251C8572F2FA6C1006E7F16 /* Build configuration list for PBXNativeTarget "VRN Workouts" */;
+			buildPhases = (
+				5251C83E2F2FA6BF006E7F16 /* Resources */,
+				5251C8562F2FA6C1006E7F16 /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5251C8492F2FA6BF006E7F16 /* PBXTargetDependency */,
+			);
+			name = "VRN Workouts";
+			packageProductDependencies = (
+			);
+			productName = "VRN Workouts";
+			productReference = 5251C8402F2FA6BF006E7F16 /* VRN Workouts.app */;
+			productType = "com.apple.product-type.application.watchapp2-container";
+		};
+		5251C8452F2FA6BF006E7F16 /* VRN Workouts Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5251C8532F2FA6C1006E7F16 /* Build configuration list for PBXNativeTarget "VRN Workouts Watch App" */;
+			buildPhases = (
+				5251C8422F2FA6BF006E7F16 /* Sources */,
+				5251C8432F2FA6BF006E7F16 /* Frameworks */,
+				5251C8442F2FA6BF006E7F16 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				5251C84A2F2FA6BF006E7F16 /* VRN Workouts Watch App */,
+			);
+			name = "VRN Workouts Watch App";
+			packageProductDependencies = (
+				5251C85B2F2FA814006E7F16 /* Auth */,
+				5251C85D2F2FA814006E7F16 /* PostgREST */,
+				5251C8602F2FA83E006E7F16 /* Supabase */,
+			);
+			productName = "VRN Workouts Watch App";
+			productReference = 5251C8462F2FA6BF006E7F16 /* VRN Workouts Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		5251C83A2F2FA6BE006E7F16 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2610;
+				LastUpgradeCheck = 2610;
+				TargetAttributes = {
+					5251C83F2F2FA6BF006E7F16 = {
+						CreatedOnToolsVersion = 26.1.1;
+					};
+					5251C8452F2FA6BF006E7F16 = {
+						CreatedOnToolsVersion = 26.1.1;
+					};
+				};
+			};
+			buildConfigurationList = 5251C83D2F2FA6BE006E7F16 /* Build configuration list for PBXProject "VRN Workouts" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 5251C8392F2FA6BE006E7F16;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				5251C85A2F2FA814006E7F16 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 5251C8412F2FA6BF006E7F16 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5251C83F2F2FA6BF006E7F16 /* VRN Workouts */,
+				5251C8452F2FA6BF006E7F16 /* VRN Workouts Watch App */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		5251C83E2F2FA6BF006E7F16 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5251C8442F2FA6BF006E7F16 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5251C8422F2FA6BF006E7F16 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5251C8492F2FA6BF006E7F16 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5251C8452F2FA6BF006E7F16 /* VRN Workouts Watch App */;
+			targetProxy = 5251C8482F2FA6BF006E7F16 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		5251C8512F2FA6C1006E7F16 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = KU98G3WTWD;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		5251C8522F2FA6C1006E7F16 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = KU98G3WTWD;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		5251C8542F2FA6C1006E7F16 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = KU98G3WTWD;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "VRN Workouts";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKWatchOnly = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "net.vrinceanu.VRN-Workouts.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.1;
+			};
+			name = Debug;
+		};
+		5251C8552F2FA6C1006E7F16 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = KU98G3WTWD;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "VRN Workouts";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKWatchOnly = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "net.vrinceanu.VRN-Workouts.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 26.1;
+			};
+			name = Release;
+		};
+		5251C8582F2FA6C1006E7F16 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = KU98G3WTWD;
+				INFOPLIST_KEY_CFBundleDisplayName = "VRN Workouts";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "net.vrinceanu.VRN-Workouts";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		5251C8592F2FA6C1006E7F16 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = KU98G3WTWD;
+				INFOPLIST_KEY_CFBundleDisplayName = "VRN Workouts";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "net.vrinceanu.VRN-Workouts";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5251C83D2F2FA6BE006E7F16 /* Build configuration list for PBXProject "VRN Workouts" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5251C8512F2FA6C1006E7F16 /* Debug */,
+				5251C8522F2FA6C1006E7F16 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5251C8532F2FA6C1006E7F16 /* Build configuration list for PBXNativeTarget "VRN Workouts Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5251C8542F2FA6C1006E7F16 /* Debug */,
+				5251C8552F2FA6C1006E7F16 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5251C8572F2FA6C1006E7F16 /* Build configuration list for PBXNativeTarget "VRN Workouts" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5251C8582F2FA6C1006E7F16 /* Debug */,
+				5251C8592F2FA6C1006E7F16 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		5251C85A2F2FA814006E7F16 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase-community/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5251C85B2F2FA814006E7F16 /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5251C85A2F2FA814006E7F16 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		5251C85D2F2FA814006E7F16 /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5251C85A2F2FA814006E7F16 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = PostgREST;
+		};
+		5251C8602F2FA83E006E7F16 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5251C85A2F2FA814006E7F16 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 5251C83A2F2FA6BE006E7F16 /* Project object */;
+}
