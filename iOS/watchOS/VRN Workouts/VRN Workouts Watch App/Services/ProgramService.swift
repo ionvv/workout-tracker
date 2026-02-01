@@ -23,15 +23,23 @@ class ProgramService: ObservableObject {
             return
         }
         
+        // Get device ID
+        guard let deviceId = UserDefaults.standard.string(forKey: "deviceId") else {
+            await MainActor.run {
+                self.error = "Device not paired"
+                self.isLoading = false
+            }
+            return
+        }
+        
         await MainActor.run { self.isLoading = true }
         
         do {
-            let response: [Program] = try await client.database
-                .from("programs")
-                .select()
-                .order("created_at", ascending: false)
-                .execute()
-                .value
+            // Use RPC function to fetch programs for this device
+            let response: [Program] = try await client.rpc(
+                "get_programs_for_device",
+                params: ["p_device_id": deviceId]
+            ).execute().value
             
             await MainActor.run {
                 self.programs = response
@@ -42,6 +50,7 @@ class ProgramService: ObservableObject {
             await MainActor.run {
                 self.error = error.localizedDescription
                 self.isLoading = false
+                print("Error fetching programs:", error)
             }
         }
     }

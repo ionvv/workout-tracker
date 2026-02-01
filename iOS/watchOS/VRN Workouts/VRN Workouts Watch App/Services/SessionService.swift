@@ -18,34 +18,41 @@ class SessionService: ObservableObject {
     }
     
     func saveSession(_ activeSession: ActiveWorkoutSession, notes: String = "") async throws {
-        guard let userId = AuthService.shared.userId else {
-            throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])
+        guard AuthService.shared.isAuthenticated else {
+            throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
+        }
+        
+        guard let deviceId = UserDefaults.standard.string(forKey: "deviceId") else {
+            throw NSError(domain: "SessionService", code: 400, userInfo: [NSLocalizedDescriptionKey: "Device not paired"])
         }
         
         let stats = activeSession.calculateStats()
+        let endTime = Date()
         
-        let session = WorkoutSession(
-            id: UUID(),
-            userId: userId,
-            sessionId: activeSession.sessionId,
-            programId: activeSession.programId,
-            dayId: activeSession.dayId,
-            dayName: activeSession.dayName,
-            startTime: activeSession.startTime,
-            endTime: Date(),
-            exercises: activeSession.exercises,
-            notes: notes.isEmpty ? nil : notes,
-            totalVolume: stats.volume,
-            totalSets: stats.sets,
-            duration: stats.duration,
-            createdAt: Date(),
-            updatedAt: Date()
-        )
+        // Convert exercises to JSONB format
+        let exercisesData = try JSONEncoder().encode(activeSession.exercises)
+        let exercisesJson = try JSONSerialization.jsonObject(with: exercisesData) as! [String: Any]
         
-        try await client.database
-            .from("sessions")
-            .insert(session)
-            .execute()
+        // Use RPC function to save session
+        let params: [String: Any] = [
+            "p_device_id": deviceId,
+            "p_session_id": activeSession.sessionId,
+            "p_program_id": activeSession.programId,
+            "p_day_id": activeSession.dayId,
+            "p_day_name": activeSession.dayName,
+            "p_start_time": ISO8601DateFormatter().string(from: activeSession.startTime),
+            "p_end_time": ISO8601DateFormatter().string(from: endTime),
+            "p_exercises": exercisesJson,
+            "p_notes": notes.isEmpty ? NSNull() : notes,
+            "p_total_volume": stats.volume,
+            "p_total_sets": stats.sets,
+            "p_duration": stats.duration
+        ]
+        
+        let _: UUID = try await client.rpc(
+            "insert_session_for_device",
+            params: params
+        ).execute().value
     }
     
     func fetchSessions() async {
@@ -54,16 +61,22 @@ class SessionService: ObservableObject {
             return
         }
         
+        guard let deviceId = UserDefaults.standard.string(forKey: "deviceId") else {
+            await MainActor.run {
+                self.error = "Device not paired"
+                self.isLoading = false
+            }
+            return
+        }
+        
         await MainActor.run { self.isLoading = true }
         
         do {
-            let response: [WorkoutSession] = try await client.database
-                .from("sessions")
-                .select()
-                .order("start_time", ascending: false)
-                .limit(50)
-                .execute()
-                .value
+            // Use RPC function to fetch sessions for this device
+            let response: [WorkoutSession] = try await client.rpc(
+                "get_sessions_for_device",
+                params: ["p_device_id": deviceId]
+            ).execute().value
             
             await MainActor.run {
                 self.sessions = response
@@ -74,6 +87,7 @@ class SessionService: ObservableObject {
             await MainActor.run {
                 self.error = error.localizedDescription
                 self.isLoading = false
+                print("Error fetching sessions:", error)
             }
         }
     }

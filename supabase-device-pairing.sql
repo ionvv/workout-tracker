@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS device_auth_codes (
     code TEXT NOT NULL UNIQUE,
     device_id TEXT NOT NULL, -- Unique identifier from watch (e.g., UUID)
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    access_token TEXT, -- Supabase access token for the watch to use
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     expires_at TIMESTAMPTZ NOT NULL,
     authorized BOOLEAN NOT NULL DEFAULT false,
