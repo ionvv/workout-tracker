@@ -6,7 +6,7 @@ struct SetLoggerView: View {
     
     @Environment(\.dismiss) private var dismiss
     @State private var weight: Double = 0
-    @State private var reps: Int = 0
+    @State private var reps: Double = 0
     @State private var rpe: Int? = nil
     @FocusState private var focusedField: Field?
     
@@ -98,7 +98,7 @@ struct SetLoggerView: View {
                             }
                             .buttonStyle(.plain)
                             
-                            Text("\(reps)")
+                            Text("\(Int(reps))")
                                 .font(.system(size: 32, weight: .bold, design: .rounded))
                                 .frame(minWidth: 60)
                                 .focusable()
@@ -106,7 +106,7 @@ struct SetLoggerView: View {
                                     $reps,
                                     from: 0,
                                     through: 50,
-                                    by: 1,
+                                    by: 1.0,
                                     sensitivity: .low
                                 )
                                 .focused($focusedField, equals: .reps)
@@ -162,7 +162,7 @@ struct SetLoggerView: View {
                         if let lastSet = exercise.sets.last {
                             Button {
                                 weight = lastSet.weight
-                                reps = lastSet.reps
+                                reps = Double(lastSet.reps)
                                 rpe = lastSet.rpe
                                 WKInterfaceDevice.current().play(.click)
                             } label: {
@@ -173,7 +173,7 @@ struct SetLoggerView: View {
                         }
                         
                         Button {
-                            onSave(weight, reps, rpe)
+                            onSave(weight, Int(reps), rpe)
                         } label: {
                             Label("Save Set", systemImage: "checkmark")
                                 .fontWeight(.semibold)
@@ -198,7 +198,7 @@ struct SetLoggerView: View {
             // Pre-fill with last set if available
             if let lastSet = exercise.sets.last {
                 weight = lastSet.weight
-                reps = lastSet.reps
+                reps = Double(lastSet.reps)
             } else {
                 // Default starting values
                 weight = 20
