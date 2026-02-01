@@ -95,7 +95,12 @@ class SessionService: ObservableObject {
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
             
             let (data, _) = try await URLSession.shared.data(for: request)
-            let response = try JSONDecoder().decode([WorkoutSession].self, from: data)
+            
+            // Configure decoder for ISO8601 dates
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            
+            let response = try decoder.decode([WorkoutSession].self, from: data)
             
             await MainActor.run {
                 self.sessions = response

@@ -68,7 +68,11 @@ class ProgramService: ObservableObject {
                 print("📥 Response data:", responseString)
             }
             
-            let response = try JSONDecoder().decode([Program].self, from: data)
+            // Configure decoder for ISO8601 dates
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            
+            let response = try decoder.decode([Program].self, from: data)
             
             print("✅ Decoded \(response.count) programs")
             
