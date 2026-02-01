@@ -12,17 +12,31 @@ struct DevicePairingView: View {
                     .font(.caption)
                     .foregroundColor(.gray)
             } else if let code = viewModel.pairingCode {
-                // Display pairing code
-                VStack(spacing: 8) {
-                    Text("Enter this code on web:")
+                // Instructions
+                VStack(spacing: 4) {
+                    Text("Pair Your Watch")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                    
+                    Text("1. Open website and login")
                         .font(.caption2)
                         .foregroundColor(.gray)
-                        .multilineTextAlignment(.center)
-                    
-                    Text(code)
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
-                        .tracking(8)
-                        .foregroundColor(.blue)
+                    Text("2. Go to Profile → Pair Watch")
+                        .font(.caption2)
+                        .foregroundColor(.gray)
+                    Text("3. Enter this code:")
+                        .font(.caption2)
+                        .foregroundColor(.gray)
+                }
+                .multilineTextAlignment(.center)
+                .padding(.bottom, 8)
+                
+                // Display pairing code (bigger, no tracking to prevent cutoff)
+                Text(code)
+                    .font(.system(size: 56, weight: .bold, design: .rounded))
+                    .foregroundColor(.blue)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
                     
                     // Countdown timer
                     if let timeRemaining = viewModel.timeRemaining {

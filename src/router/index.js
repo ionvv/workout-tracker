@@ -35,7 +35,12 @@ const router = createRouter({
     {
       path: '/pair-device',
       name: 'pair-device',
-      component: () => import('../views/PairDevice.vue')
+      redirect: '/profile'
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('../views/Profile.vue')
     }
   ]
 })

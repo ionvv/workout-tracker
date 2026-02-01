@@ -4,13 +4,14 @@
     <div class="mb-4">
       <div class="flex items-center justify-between mb-2">
         <h1 class="text-2xl font-bold">Programs</h1>
-        <button
+        <router-link
           v-if="authStore.isAuthenticated"
-          @click="authStore.signOut"
-          class="text-sm text-gray-600 hover:text-gray-900"
+          to="/profile"
+          class="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
         >
-          Sign Out
-        </button>
+          <span>Profile</span>
+          <span>→</span>
+        </router-link>
       </div>
       
       <div v-if="authStore.isAuthenticated" class="flex items-center gap-2 text-sm text-gray-600">
