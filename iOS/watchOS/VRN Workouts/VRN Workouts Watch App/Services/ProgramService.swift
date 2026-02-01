@@ -2,11 +2,6 @@ import Foundation
 import Combine
 import Supabase
 
-// Parameter struct for RPC calls (must be outside MainActor context)
-private struct GetProgramsParams: Encodable, Sendable {
-    let p_device_id: String
-}
-
 class ProgramService: ObservableObject {
     static let shared = ProgramService()
     

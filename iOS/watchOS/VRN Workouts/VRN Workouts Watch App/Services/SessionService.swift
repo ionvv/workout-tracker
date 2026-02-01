@@ -2,26 +2,6 @@ import Foundation
 import Combine
 import Supabase
 
-// Parameter structs for RPC calls (must be outside MainActor context)
-private struct SaveSessionParams: Encodable, Sendable {
-    let p_device_id: String
-    let p_session_id: String
-    let p_program_id: String
-    let p_day_id: String
-    let p_day_name: String
-    let p_start_time: String
-    let p_end_time: String
-    let p_exercises: String
-    let p_notes: String?
-    let p_total_volume: Int
-    let p_total_sets: Int
-    let p_duration: Int
-}
-
-private struct GetSessionsParams: Encodable, Sendable {
-    let p_device_id: String
-}
-
 class SessionService: ObservableObject {
     static let shared = SessionService()
     
