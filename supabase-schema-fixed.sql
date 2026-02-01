@@ -1,5 +1,5 @@
 -- Workout Tracker Database Schema
--- Run this in Supabase SQL Editor: https://supabase.com/dashboard/project/fpatywrdrltaeftjjyjj/editor
+-- Run this in Supabase SQL Editor
 
 -- Programs table
 CREATE TABLE IF NOT EXISTS programs (
