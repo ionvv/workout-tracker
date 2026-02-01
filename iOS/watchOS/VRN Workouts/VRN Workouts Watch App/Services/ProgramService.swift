@@ -17,11 +17,9 @@ class ProgramService: ObservableObject {
         )
     }
     
-    nonisolated func fetchPrograms() async {
-        guard await AuthService.shared.isAuthenticated else {
-            await MainActor.run {
-                self.error = "Not authenticated"
-            }
+    func fetchPrograms() async {
+        guard AuthService.shared.isAuthenticated else {
+            self.error = "Not authenticated"
             return
         }
         
@@ -37,11 +35,19 @@ class ProgramService: ObservableObject {
         await MainActor.run { self.isLoading = true }
         
         do {
-            // Use RPC function to fetch programs for this device
-            let response: [Program] = try await client.rpc(
-                "get_programs_for_device",
-                params: GetProgramsParams(p_device_id: deviceId)
-            ).execute().value
+            // Use raw HTTP call to avoid MainActor isolation issues
+            let url = URL(string: "\(Config.supabaseURL)/rest/v1/rpc/get_programs_for_device")!
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue(Config.supabaseAnonKey, forHTTPHeaderField: "apikey")
+            request.setValue("Bearer \(Config.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+            
+            let body = ["p_device_id": deviceId]
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+            
+            let (data, _) = try await URLSession.shared.data(for: request)
+            let response = try JSONDecoder().decode([Program].self, from: data)
             
             await MainActor.run {
                 self.programs = response
