@@ -67,16 +67,58 @@
           <div
             v-for="day in selectedProgram.workoutDays"
             :key="day.dayId"
-            class="border border-gray-200 rounded-lg p-3"
+            class="border border-gray-200 rounded-lg overflow-hidden"
           >
-            <h3 class="font-semibold mb-2">{{ day.dayName }}</h3>
-            <p class="text-sm text-gray-600 mb-3">{{ day.exercises?.length || 0 }} exercises</p>
-            <button
-              @click="startWorkout(day)"
-              class="btn-primary w-full"
+            <!-- Day Header - Clickable to expand/collapse -->
+            <div
+              @click="toggleDay(day.dayId)"
+              class="p-3 cursor-pointer hover:bg-gray-50 transition"
             >
-              Start Workout
-            </button>
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="font-semibold">{{ day.dayName }}</h3>
+                  <p class="text-sm text-gray-600">{{ day.exercises?.length || 0 }} exercises</p>
+                </div>
+                <span class="text-gray-400 transition-transform" :class="{ 'rotate-180': expandedDays.has(day.dayId) }">
+                  ▼
+                </span>
+              </div>
+            </div>
+
+            <!-- Exercise List - Expanded -->
+            <div v-if="expandedDays.has(day.dayId)" class="border-t border-gray-200 bg-gray-50">
+              <div class="p-3 space-y-2">
+                <div
+                  v-for="(exercise, idx) in day.exercises"
+                  :key="exercise.exerciseId"
+                  class="bg-white p-2 rounded border border-gray-200"
+                >
+                  <div class="flex items-start gap-2">
+                    <span class="text-xs font-semibold text-gray-400 mt-0.5">{{ idx + 1 }}</span>
+                    <div class="flex-1">
+                      <div class="font-medium text-sm">{{ exercise.name }}</div>
+                      <div class="text-xs text-gray-600 mt-0.5">
+                        {{ exercise.prescribedSets }}×{{ exercise.prescribedReps }}
+                        <span v-if="exercise.restSeconds" class="ml-2">• Rest: {{ formatRestTime(exercise.restSeconds) }}</span>
+                      </div>
+                      <div v-if="exercise.notes" class="text-xs text-gray-500 italic mt-1">
+                        {{ exercise.notes }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Start Workout Button -->
+              <div class="p-3 pt-0">
+                <button
+                  @click.stop="startWorkout(day)"
+                  class="btn-primary w-full"
+                >
+                  Start Workout
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -146,6 +188,7 @@ const selectedProgram = ref(null)
 const showImportModal = ref(false)
 const importType = ref('markdown')
 const importData = ref('')
+const expandedDays = ref(new Set())
 
 const markdownExample = `# Program Name: My Program
 
@@ -163,6 +206,25 @@ onMounted(() => {
 
 function selectProgram(program) {
   selectedProgram.value = program
+  expandedDays.value = new Set() // Reset expanded state
+}
+
+function toggleDay(dayId) {
+  if (expandedDays.value.has(dayId)) {
+    expandedDays.value.delete(dayId)
+  } else {
+    expandedDays.value.add(dayId)
+  }
+  // Trigger reactivity
+  expandedDays.value = new Set(expandedDays.value)
+}
+
+function formatRestTime(seconds) {
+  if (seconds < 60) return `${seconds}s`
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = seconds % 60
+  if (remainingSeconds === 0) return `${minutes}m`
+  return `${minutes}m ${remainingSeconds}s`
 }
 
 function startWorkout(day) {
