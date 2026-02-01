@@ -3,7 +3,6 @@ import SwiftUI
 struct SummaryView: View {
     let session: ActiveWorkoutSession
     @Environment(\.dismiss) private var dismiss
-    @State private var notes: String = ""
     
     var body: some View {
         NavigationView {

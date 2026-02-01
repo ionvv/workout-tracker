@@ -3,7 +3,6 @@ import SwiftUI
 struct ProgramsView: View {
     @StateObject private var viewModel = ProgramsViewModel()
     @StateObject private var authService = AuthService.shared
-    @State private var selectedProgram: Program?
     
     var body: some View {
         NavigationView {
@@ -41,7 +40,7 @@ struct ProgramsView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         Task {
-                            await AuthViewModel().signOut()
+                            try? await authService.signOut()
                         }
                     } label: {
                         Image(systemName: "arrow.right.square")
