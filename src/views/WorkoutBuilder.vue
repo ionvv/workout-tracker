@@ -2,7 +2,7 @@
   <div class="p-4 pb-20">
     <div class="mb-6">
       <h1 class="text-2xl font-bold mb-2">Workout Builder</h1>
-      <p class="text-gray-600 text-sm">Build your custom workout from 100+ exercises</p>
+      <p class="text-gray-600 text-sm">Build your custom workout from 600+ exercises</p>
     </div>
 
     <!-- Workout Name -->
@@ -81,21 +81,28 @@
         </button>
       </div>
 
-      <div v-else class="space-y-3">
-        <div
-          v-for="exercise in filteredExercises"
-          :key="exercise.id"
-          class="card"
-        >
-          <!-- Exercise Image -->
-          <div v-if="exercise.media?.gifUrl" class="mb-3 relative aspect-video bg-gray-100 rounded overflow-hidden">
-            <img
-              :src="exercise.media.gifUrl"
-              :alt="exercise.name"
-              class="w-full h-full object-cover"
-              @error="handleImageError"
-            />
-          </div>
+      <div v-else>
+        <!-- Results count -->
+        <div class="mb-3 text-sm text-gray-600">
+          Showing {{ paginatedExercises.length }} of {{ filteredExercises.length }} exercises
+        </div>
+
+        <div class="space-y-3">
+          <div
+            v-for="exercise in paginatedExercises"
+            :key="exercise.id"
+            class="card"
+          >
+            <!-- Exercise Image -->
+            <div v-if="exercise.media?.gifUrl" class="mb-3 relative aspect-video bg-gray-100 rounded overflow-hidden">
+              <img
+                :src="exercise.media.gifUrl"
+                :alt="exercise.name"
+                loading="lazy"
+                class="w-full h-full object-cover"
+                @error="handleImageError"
+              />
+            </div>
 
           <!-- Exercise Info -->
           <h3 class="font-semibold mb-1">{{ exercise.name }}</h3>
@@ -131,6 +138,17 @@
             class="btn-secondary w-full text-sm"
           >
             ✓ Added
+          </button>
+        </div>
+        </div>
+
+        <!-- Load More Button -->
+        <div v-if="hasMoreExercises" class="mt-4">
+          <button
+            @click="loadMore"
+            class="btn-secondary w-full"
+          >
+            Load More ({{ filteredExercises.length - paginatedExercises.length }} remaining)
           </button>
         </div>
       </div>
@@ -247,7 +265,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProgramsStore } from '../stores/programs'
 
@@ -264,6 +282,8 @@ const filterCategory = ref('')
 const showSelectedView = ref(false)
 const workoutName = ref('')
 const selectedExercises = ref([])
+const pageSize = ref(20)
+const currentPage = ref(1)
 
 onMounted(async () => {
   try {
@@ -275,6 +295,11 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+})
+
+// Reset pagination when filters change
+watch([searchQuery, filterMuscle, filterEquipment, filterDifficulty, filterCategory], () => {
+  currentPage.value = 1
 })
 
 const muscleGroups = computed(() => {
@@ -338,6 +363,15 @@ const filteredExercises = computed(() => {
   return filtered
 })
 
+const paginatedExercises = computed(() => {
+  const end = currentPage.value * pageSize.value
+  return filteredExercises.value.slice(0, end)
+})
+
+const hasMoreExercises = computed(() => {
+  return paginatedExercises.value.length < filteredExercises.value.length
+})
+
 const canSave = computed(() => {
   return workoutName.value.trim() && selectedExercises.value.length > 0
 })
@@ -363,6 +397,11 @@ function clearFilters() {
   filterEquipment.value = ''
   filterDifficulty.value = ''
   filterCategory.value = ''
+  currentPage.value = 1
+}
+
+function loadMore() {
+  currentPage.value++
 }
 
 function isSelected(exerciseId) {
