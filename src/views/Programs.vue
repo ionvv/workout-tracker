@@ -41,10 +41,41 @@
         class="card hover:shadow-md transition-shadow cursor-pointer"
         @click="selectProgram(program)"
       >
-        <h3 class="font-semibold text-lg">{{ program.programName }}</h3>
-        <p class="text-sm text-gray-600 mt-1">
-          {{ program.workoutDays?.length || 0 }} workout days
+        <div class="flex items-start justify-between mb-2">
+          <h3 class="font-semibold text-lg">{{ program.programName }}</h3>
+          <span
+            v-if="program.difficulty"
+            class="text-xs px-2 py-1 rounded-full"
+            :class="{
+              'bg-green-100 text-green-700': program.difficulty === 'beginner',
+              'bg-blue-100 text-blue-700': program.difficulty === 'intermediate',
+              'bg-purple-100 text-purple-700': program.difficulty === 'advanced'
+            }"
+          >
+            {{ program.difficulty }}
+          </span>
+        </div>
+        
+        <div class="flex items-center gap-4 text-sm text-gray-600">
+          <span v-if="program.duration">📅 {{ program.duration }} weeks</span>
+          <span v-if="program.weeklyFrequency">🔁 {{ program.weeklyFrequency }}x/week</span>
+          <span v-if="program.workoutDays">💪 {{ program.workoutDays.length }} workouts</span>
+        </div>
+        
+        <p v-if="program.description" class="text-sm text-gray-600 mt-2 line-clamp-2">
+          {{ program.description }}
         </p>
+        
+        <div v-if="program.phases && program.phases.length > 0" class="mt-3 flex gap-1">
+          <span
+            v-for="phase in program.phases"
+            :key="phase.phaseId"
+            class="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded"
+            :title="`${phase.phaseName}: Weeks ${phase.weeks.join(', ')}`"
+          >
+            {{ phase.phaseName }}
+          </span>
+        </div>
       </div>
     </div>
 
@@ -61,10 +92,54 @@
     >
       <div class="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[80vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-bold">{{ selectedProgram.programName }}</h2>
-          <button @click="selectedProgram = null" class="text-gray-600">✕</button>
+          <div>
+            <h2 class="text-xl font-bold">{{ selectedProgram.programName }}</h2>
+            <div v-if="selectedProgram.description" class="text-sm text-gray-600 mt-1">
+              {{ selectedProgram.description }}
+            </div>
+          </div>
+          <button @click="selectedProgram = null" class="text-gray-600 text-2xl">✕</button>
         </div>
 
+        <!-- Program Metadata -->
+        <div v-if="selectedProgram.duration || selectedProgram.difficulty || selectedProgram.goal" class="mb-4 p-3 bg-gray-50 rounded-lg space-y-2 text-sm">
+          <div v-if="selectedProgram.duration" class="flex items-center gap-2">
+            <span class="text-gray-500">Duration:</span>
+            <span class="font-medium">{{ selectedProgram.duration }} weeks</span>
+          </div>
+          <div v-if="selectedProgram.weeklyFrequency" class="flex items-center gap-2">
+            <span class="text-gray-500">Frequency:</span>
+            <span class="font-medium">{{ selectedProgram.weeklyFrequency }}x per week</span>
+          </div>
+          <div v-if="selectedProgram.difficulty" class="flex items-center gap-2">
+            <span class="text-gray-500">Level:</span>
+            <span class="font-medium capitalize">{{ selectedProgram.difficulty }}</span>
+          </div>
+          <div v-if="selectedProgram.goal" class="flex items-center gap-2">
+            <span class="text-gray-500">Goal:</span>
+            <span class="font-medium capitalize">{{ selectedProgram.goal.replace(/-/g, ' ') }}</span>
+          </div>
+        </div>
+
+        <!-- Phases -->
+        <div v-if="selectedProgram.phases && selectedProgram.phases.length > 0" class="mb-4">
+          <h3 class="text-sm font-semibold text-gray-700 mb-2">📈 Training Phases</h3>
+          <div class="space-y-2">
+            <div
+              v-for="phase in selectedProgram.phases"
+              :key="phase.phaseId"
+              class="p-2 border border-gray-200 rounded-lg"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium">{{ phase.phaseName }}</span>
+                <span class="text-xs text-gray-500">Weeks {{ phase.weeks.join(', ') }}</span>
+              </div>
+              <p v-if="phase.notes" class="text-xs text-gray-600 mt-1">{{ phase.notes }}</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="text-sm font-semibold text-gray-700 mb-3">💪 Workout Days</h3>
         <div class="space-y-3">
           <div
             v-for="day in selectedProgram.workoutDays"
