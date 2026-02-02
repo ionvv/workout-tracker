@@ -25,13 +25,13 @@
           :key="exercise.exerciseId"
           class="card overflow-hidden p-0"
         >
-          <!-- Exercise Image -->
+          <!-- Exercise GIF -->
           <div
-            v-if="getExerciseData(index)?.demoUrl"
+            v-if="getExerciseData(index)?.gifUrl"
             class="relative aspect-video bg-gray-100 overflow-hidden"
           >
             <img
-              :src="getExerciseData(index).demoUrl"
+              :src="getExerciseData(index).gifUrl"
               :alt="exercise.exerciseName"
               class="w-full h-full object-cover"
               @error="handleImageError"
@@ -51,9 +51,21 @@
               <div class="flex-1">
                 <div class="flex items-center gap-2">
                   <span class="text-lg font-semibold">
-                    <span v-if="!getExerciseData(index)?.demoUrl">{{ index + 1 }}. </span>{{ exercise.exerciseName }}
+                    <span v-if="!getExerciseData(index)?.gifUrl">{{ index + 1 }}. </span>{{ exercise.exerciseName }}
                   </span>
-                  <span v-if="exercise.sets.length > 0 && !getExerciseData(index)?.demoUrl" class="text-success">✓</span>
+                  <a
+                    v-if="getExerciseData(index)?.demoUrl"
+                    :href="getExerciseData(index).demoUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-blue-600 hover:text-blue-700"
+                    title="View exercise details"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                  </a>
+                  <span v-if="exercise.sets.length > 0 && !getExerciseData(index)?.gifUrl" class="text-success">✓</span>
                 </div>
                 <p class="text-sm text-gray-600">
                   {{ exercise.prescribedSets }}×{{ exercise.prescribedReps }}

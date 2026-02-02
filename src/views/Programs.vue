@@ -93,13 +93,13 @@
                   :key="exercise.exerciseId"
                   class="bg-white rounded border border-gray-200 overflow-hidden"
                 >
-                  <!-- Exercise Image (if available) -->
+                  <!-- Exercise GIF (if available) -->
                   <div
-                    v-if="exercise.demoUrl"
+                    v-if="exercise.gifUrl"
                     class="relative aspect-video bg-gray-100 overflow-hidden"
                   >
                     <img
-                      :src="exercise.demoUrl"
+                      :src="exercise.gifUrl"
                       :alt="exercise.name"
                       class="w-full h-full object-cover"
                       @error="handleImageError"
@@ -113,9 +113,23 @@
                   <!-- Exercise Details -->
                   <div class="p-2">
                     <div class="flex items-start gap-2">
-                      <span v-if="!exercise.demoUrl" class="text-xs font-semibold text-gray-400 mt-0.5">{{ idx + 1 }}</span>
+                      <span v-if="!exercise.gifUrl" class="text-xs font-semibold text-gray-400 mt-0.5">{{ idx + 1 }}</span>
                       <div class="flex-1">
-                        <div class="font-medium text-sm">{{ exercise.name }}</div>
+                        <div class="flex items-center gap-2">
+                          <span class="font-medium text-sm">{{ exercise.name }}</span>
+                          <a
+                            v-if="exercise.demoUrl"
+                            :href="exercise.demoUrl"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-blue-600 hover:text-blue-700"
+                            title="View exercise details"
+                          >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                          </a>
+                        </div>
                         <div class="text-xs text-gray-600 mt-0.5">
                           {{ exercise.prescribedSets }}×{{ exercise.prescribedReps }}
                           <span v-if="exercise.restSeconds" class="ml-2">• Rest: {{ formatRestTime(exercise.restSeconds) }}</span>

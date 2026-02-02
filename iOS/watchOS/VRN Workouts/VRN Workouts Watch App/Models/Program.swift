@@ -42,6 +42,7 @@ struct Exercise: Codable, Identifiable {
     let notes: String?
     let restSeconds: Int
     let demoUrl: String?
+    let gifUrl: String?
     let type: String
     
     var id: String { exerciseId }
@@ -54,6 +55,7 @@ struct Exercise: Codable, Identifiable {
         case notes
         case restSeconds = "restSeconds"
         case demoUrl = "demoUrl"
+        case gifUrl = "gifUrl"
         case type
     }
 }

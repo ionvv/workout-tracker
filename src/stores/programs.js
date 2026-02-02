@@ -182,7 +182,7 @@ export const useProgramsStore = defineStore('programs', {
     },
 
     parseExerciseLine(line) {
-      // Format: - ExerciseName: 4×6-8 (rest: 180s, notes: ..., demo: ...)
+      // Format: - ExerciseName: 4×6-8 (rest: 180s, notes: ..., demo: ..., gif: ...)
       const match = line.match(/^-\s+([^:]+):\s+(\d+)×([\d-]+)(.*)/)
       if (!match) return null
 
@@ -196,9 +196,13 @@ export const useProgramsStore = defineStore('programs', {
       const notesMatch = rest.match(/notes:\s*([^,)]+)/)
       const notes = notesMatch ? notesMatch[1].trim() : ''
 
-      // Extract demo URL
+      // Extract demo URL (link to exercise details)
       const demoMatch = rest.match(/demo:\s*(https?:\/\/[^\s),]+)/)
       const demoUrl = demoMatch ? demoMatch[1] : ''
+
+      // Extract GIF URL (animated image)
+      const gifMatch = rest.match(/gif:\s*(https?:\/\/[^\s),]+)/)
+      const gifUrl = gifMatch ? gifMatch[1] : ''
 
       return {
         exerciseId: `ex-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -208,6 +212,7 @@ export const useProgramsStore = defineStore('programs', {
         restSeconds,
         notes,
         demoUrl,
+        gifUrl,
         type: 'compound' // default
       }
     }
