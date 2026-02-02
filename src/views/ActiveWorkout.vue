@@ -18,7 +18,28 @@
         </div>
       </div>
 
-      <!-- Exercises -->
+      <!-- Warm-up Section -->
+      <div v-if="currentDay?.warmup && currentDay.warmup.exercises?.length > 0" class="mb-6">
+        <div class="flex items-center gap-2 mb-3">
+          <h2 class="text-lg font-semibold">🔥 Warm-up</h2>
+          <span class="text-sm text-gray-500">({{ currentDay.warmup.duration || 5 }} min)</span>
+        </div>
+        <div class="card p-4 bg-orange-50 border-orange-200">
+          <ul class="space-y-2 text-sm">
+            <li v-for="(ex, idx) in currentDay.warmup.exercises" :key="idx" class="flex items-start gap-2">
+              <span class="text-gray-400">{{  idx + 1 }}.</span>
+              <div class="flex-1">
+                <span class="font-medium">{{ ex.name }}</span>
+                <span v-if="ex.duration" class="text-gray-600 ml-2">({{ ex.duration }}s)</span>
+                <span v-if="ex.reps" class="text-gray-600 ml-2">({{ ex.reps }} reps)</span>
+                <span v-if="ex.sets" class="text-gray-600 ml-2">× {{ ex.sets }}</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Main Exercises -->
       <div class="space-y-4">
         <div
           v-for="(exercise, index) in session.exercises"
@@ -119,6 +140,27 @@
             + Add Set
           </button>
           </div>
+        </div>
+      </div>
+
+      <!-- Cool-down Section -->
+      <div v-if="currentDay?.cooldown && currentDay.cooldown.exercises?.length > 0" class="mt-6">
+        <div class="flex items-center gap-2 mb-3">
+          <h2 class="text-lg font-semibold">🧘 Cool-down</h2>
+          <span class="text-sm text-gray-500">({{ currentDay.cooldown.duration || 5 }} min)</span>
+        </div>
+        <div class="card p-4 bg-blue-50 border-blue-200">
+          <ul class="space-y-2 text-sm">
+            <li v-for="(ex, idx) in currentDay.cooldown.exercises" :key="idx" class="flex items-start gap-2">
+              <span class="text-gray-400">{{ idx + 1 }}.</span>
+              <div class="flex-1">
+                <span class="font-medium">{{ ex.name }}</span>
+                <span v-if="ex.duration" class="text-gray-600 ml-2">({{ ex.duration }}s)</span>
+                <span v-if="ex.reps" class="text-gray-600 ml-2">({{ ex.reps }} reps)</span>
+                <span v-if="ex.sets" class="text-gray-600 ml-2">× {{ ex.sets }}</span>
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
 
@@ -278,6 +320,7 @@ const setRPE = ref('')
 const showEndModal = ref(false)
 const sessionNotes = ref('')
 const currentProgram = ref(null)
+const currentDay = ref(null)
 
 // Rest timer
 const restTimer = ref({
@@ -316,6 +359,7 @@ onMounted(async () => {
 
   if (program && day) {
     currentProgram.value = program
+    currentDay.value = day
     sessionsStore.startSession(program, day)
     
     // Start workout duration timer
