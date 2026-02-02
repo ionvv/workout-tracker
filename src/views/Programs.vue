@@ -175,6 +175,22 @@
           <p class="text-sm text-red-600">{{ importError }}</p>
         </div>
 
+        <!-- Pre-built Programs -->
+        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h3 class="font-semibold text-sm mb-2">📦 Pre-built Programs</h3>
+          <button
+            @click="loadModifiedRomanianProgram"
+            class="w-full p-3 bg-white border border-gray-200 rounded-lg text-left hover:border-primary hover:bg-primary/5 transition"
+            :disabled="importLoading"
+          >
+            <div class="font-semibold text-sm">Modified Romanian 3-Day Recomp</div>
+            <div class="text-xs text-gray-600 mt-1">12 weeks • 3 days/week • Intermediate</div>
+            <div class="text-xs text-gray-500 mt-1">💪 Strength + Fat Loss • Full periodization</div>
+          </button>
+        </div>
+
+        <div class="text-sm text-gray-500 mb-3 text-center">— or paste your own —</div>
+
         <div class="space-y-3 mb-4">
           <button
             @click="importType = 'markdown'"
@@ -295,6 +311,30 @@ function closeImportModal() {
   showImportModal.value = false
   importData.value = ''
   importError.value = null
+}
+
+async function loadModifiedRomanianProgram() {
+  importError.value = null
+  importLoading.value = true
+  
+  try {
+    const response = await fetch('/programs/modified-romanian-program.json')
+    if (!response.ok) {
+      throw new Error('Failed to load program file')
+    }
+    
+    const programData = await response.json()
+    const jsonString = JSON.stringify(programData, null, 2)
+    await programsStore.importFromJSON(jsonString)
+    
+    // Success!
+    closeImportModal()
+  } catch (error) {
+    console.error('Load program error:', error)
+    importError.value = 'Failed to load Modified Romanian program. ' + error.message
+  } finally {
+    importLoading.value = false
+  }
 }
 
 async function handleImport() {

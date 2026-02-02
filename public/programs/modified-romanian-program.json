@@ -1,0 +1,1637 @@
+{
+  "programId": "modified-romanian-v1",
+  "programName": "Modified Romanian 3-Day Recomp",
+  "programType": "strength-recomp",
+  "version": "1.0",
+  "createdAt": "2026-02-02T20:00:00Z",
+  "duration": 12,
+  "weeklyFrequency": 3,
+  "difficulty": "intermediate",
+  "goal": "fat-loss-muscle-gain",
+  "targetUser": {
+    "level": "intermediate-returning",
+    "notes": "Returning from break, needs ramp-up period"
+  },
+  "description": "12-week full-body recomp program focusing on fat loss and muscle gain. 3 workouts per week, progressive overload with proper periodization.",
+  
+  "phases": [
+    {
+      "phaseId": "phase-1",
+      "phaseName": "Re-adaptation",
+      "weeks": [1, 2],
+      "intensityPercent": 70,
+      "volumeLevel": "low",
+      "weeklySetCount": 38,
+      "rpe": "6-7",
+      "rir": "3-4",
+      "notes": "Focus on form, controlled tempo, getting back into rhythm. No weight increases.",
+      "goals": ["Perfect technique", "Build work capacity", "Prepare joints and tendons"]
+    },
+    {
+      "phaseId": "phase-2",
+      "phaseName": "Build",
+      "weeks": [3, 4],
+      "intensityPercent": 75,
+      "volumeLevel": "moderate",
+      "weeklySetCount": 42,
+      "rpe": "7-8",
+      "rir": "2-3",
+      "notes": "Progressive overload begins. Add weight when hitting top of rep range.",
+      "goals": ["Begin progressive overload", "Track all weights", "Build strength base"]
+    },
+    {
+      "phaseId": "phase-3",
+      "phaseName": "Progressive Overload",
+      "weeks": [5, 6, 7, 8],
+      "intensityPercent": 82,
+      "volumeLevel": "moderate-high",
+      "weeklySetCount": 45,
+      "rpe": "8",
+      "rir": "2",
+      "notes": "Increase volume on accessories. Optional finisher 1x/week (Day A only).",
+      "goals": ["Consistent strength gains", "Add accessory volume", "Optional conditioning"]
+    },
+    {
+      "phaseId": "phase-4",
+      "phaseName": "Deload",
+      "weeks": [9],
+      "intensityPercent": 60,
+      "volumeLevel": "low",
+      "weeklySetCount": 20,
+      "rpe": "5-6",
+      "rir": "4+",
+      "notes": "Active recovery week. Reduce weight by 40%, keep exercises. Skip core and finishers.",
+      "goals": ["Full recovery", "Joint decompression", "Prepare for peak"]
+    },
+    {
+      "phaseId": "phase-5",
+      "phaseName": "Peak",
+      "weeks": [10, 11, 12],
+      "intensityPercent": 88,
+      "volumeLevel": "high",
+      "weeklySetCount": 48,
+      "rpe": "8-9",
+      "rir": "1-2",
+      "notes": "Push for PRs. Add finishers 2x/week (Day A and C). All accessories at 3 sets.",
+      "goals": ["New personal records", "Maximum effort", "Complete transformation"]
+    }
+  ],
+
+  "workoutDays": [
+    {
+      "dayId": "day-a",
+      "dayName": "Day A - Push + Light Legs",
+      "dayType": "push",
+      "estimatedTime": 40,
+      "focusMuscles": ["chest", "shoulders", "triceps", "quadriceps"],
+      "secondaryMuscles": ["core"],
+      
+      "warmup": {
+        "duration": 5,
+        "exercises": [
+          {
+            "name": "Jumping Jacks",
+            "duration": 60,
+            "reps": null,
+            "sets": 1
+          },
+          {
+            "name": "Arm Circles",
+            "duration": 60,
+            "reps": null,
+            "sets": 1,
+            "notes": "30 sec forward, 30 sec backward"
+          },
+          {
+            "name": "Band Pull-Aparts",
+            "duration": null,
+            "reps": 20,
+            "sets": 1
+          },
+          {
+            "name": "Empty Bar Bench Press",
+            "duration": null,
+            "reps": 10,
+            "sets": 2
+          },
+          {
+            "name": "Dynamic Chest Stretch",
+            "duration": 60,
+            "reps": null,
+            "sets": 1,
+            "notes": "30 sec each side"
+          }
+        ]
+      },
+
+      "exercises": [
+        {
+          "exerciseId": "ex003",
+          "exerciseDbId": "ex003",
+          "name": "Barbell Bench Press",
+          "slug": "barbell-bench-press",
+          "category": "compound",
+          "muscleGroups": {
+            "primary": ["chest"],
+            "secondary": ["triceps", "front-deltoids"]
+          },
+          "equipment": ["barbell", "bench"],
+          "difficulty": "intermediate",
+          
+          "warmupSets": 2,
+          "warmupProtocol": [
+            { "setNumber": 1, "weightPercent": 50, "reps": 10 },
+            { "setNumber": 2, "weightPercent": 70, "reps": 5 }
+          ],
+          
+          "workingSets": 4,
+          "repsMin": 8,
+          "repsMax": 10,
+          "tempo": "3-1-1-0",
+          "tempoDescription": "3 sec down, 1 sec pause, 1 sec up, no pause at top",
+          "restSeconds": 90,
+          "rpe": 8,
+          "rir": 2,
+          
+          "progressionRule": {
+            "type": "linear",
+            "increment": 2.5,
+            "condition": "hit-top-reps",
+            "description": "When you hit 4x10, add 2.5kg next session"
+          },
+          
+          "formCues": [
+            "Retract shoulder blades before starting",
+            "Bar touches mid-chest",
+            "Feet flat on floor",
+            "Drive through legs"
+          ],
+          
+          "substitutions": [
+            {
+              "exerciseId": "dumbbell-bench",
+              "exerciseDbId": "ex014",
+              "reason": "No barbell available",
+              "notes": "Use slightly higher rep range (10-12)"
+            },
+            {
+              "exerciseId": "push-ups",
+              "exerciseDbId": "ex033",
+              "reason": "Home workout",
+              "notes": "Add weight vest or elevate feet"
+            }
+          ],
+          
+          "media": {
+            "gifUrl": "https://gymvisual.com/img/p/1/7/5/5/2/17552.gif",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "supersetType": null,
+          
+          "weekVariations": {
+            "9": {
+              "workingSets": 4,
+              "weightPercent": 60,
+              "notes": "Deload week - 60% of normal weight"
+            }
+          }
+        },
+        
+        {
+          "exerciseId": "ex007",
+          "exerciseDbId": "ex007",
+          "name": "Barbell Overhead Press",
+          "slug": "barbell-overhead-press",
+          "category": "compound",
+          "muscleGroups": {
+            "primary": ["front-deltoids", "middle-deltoids"],
+            "secondary": ["triceps", "upper-chest", "core"]
+          },
+          "equipment": ["barbell"],
+          "difficulty": "intermediate",
+          
+          "warmupSets": 1,
+          "warmupProtocol": [
+            { "setNumber": 1, "weightPercent": 60, "reps": 8 }
+          ],
+          
+          "workingSets": 3,
+          "repsMin": 8,
+          "repsMax": 10,
+          "tempo": "2-0-1-0",
+          "tempoDescription": "2 sec down, no pause, 1 sec up, no pause",
+          "restSeconds": 60,
+          "rpe": 7,
+          "rir": 3,
+          
+          "progressionRule": {
+            "type": "linear",
+            "increment": 1.25,
+            "condition": "hit-top-reps",
+            "description": "When you hit 3x10, add 1.25kg"
+          },
+          
+          "formCues": [
+            "Core tight, glutes engaged",
+            "Press slightly back over head",
+            "Full lockout at top",
+            "Don't hyperextend lower back"
+          ],
+          
+          "substitutions": [
+            {
+              "exerciseId": "dumbbell-shoulder-press",
+              "exerciseDbId": "ex023",
+              "reason": "No barbell or shoulder mobility issues"
+            },
+            {
+              "exerciseId": "landmine-press",
+              "exerciseDbId": "ex068",
+              "reason": "Shoulder-friendly alternative"
+            }
+          ],
+          
+          "media": {
+            "gifUrl": "https://gymvisual.com/img/p/2/0/8/8/4/20884.gif",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "supersetType": null,
+          
+          "weekVariations": {
+            "9": {
+              "workingSets": 3,
+              "weightPercent": 60,
+              "notes": "Deload week"
+            }
+          }
+        },
+
+        {
+          "exerciseId": "ex002",
+          "exerciseDbId": "ex002",
+          "name": "Goblet Squat",
+          "slug": "goblet-squat",
+          "category": "compound",
+          "muscleGroups": {
+            "primary": ["quadriceps", "glutes"],
+            "secondary": ["core", "shoulders"]
+          },
+          "equipment": ["dumbbell", "kettlebell"],
+          "difficulty": "beginner",
+          
+          "warmupSets": 0,
+          "workingSets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "tempo": "2-1-1-0",
+          "tempoDescription": "2 sec down, 1 sec pause, 1 sec up",
+          "restSeconds": 60,
+          "rpe": 7,
+          "rir": 3,
+          
+          "progressionRule": {
+            "type": "reps-first",
+            "increment": 2.5,
+            "condition": "hit-top-reps",
+            "description": "Focus on depth and form, not weight"
+          },
+          
+          "formCues": [
+            "Dumbbell/kettlebell at chest",
+            "Squat between legs (knees out)",
+            "Full depth (ATG if possible)",
+            "Upright torso"
+          ],
+          
+          "substitutions": [
+            {
+              "exerciseId": "front-squat",
+              "exerciseDbId": "ex051",
+              "reason": "More advanced quad work"
+            }
+          ],
+          
+          "media": {
+            "gifUrl": "https://gymvisual.com/img/p/1/0/2/8/3/10283.gif",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "weekVariations": {
+            "9": { "workingSets": 2, "weightPercent": 60 }
+          }
+        },
+
+        {
+          "exerciseId": "lateral-raises",
+          "exerciseDbId": "ex036",
+          "name": "Lateral Raises",
+          "slug": "lateral-raises",
+          "category": "accessory",
+          "muscleGroups": {
+            "primary": ["middle-deltoids"],
+            "secondary": []
+          },
+          "equipment": ["dumbbells"],
+          "difficulty": "beginner",
+          
+          "warmupSets": 0,
+          "workingSets": 2,
+          "repsMin": 12,
+          "repsMax": 15,
+          "tempo": "2-1-1-1",
+          "tempoDescription": "2 sec up, 1 sec squeeze, 1 sec down, 1 sec pause",
+          "restSeconds": 45,
+          "rpe": 6,
+          "rir": 4,
+          
+          "progressionRule": {
+            "type": "reps-first",
+            "increment": 1.25,
+            "condition": "hit-top-reps",
+            "description": "Light weight, strict form. Add reps before weight."
+          },
+          
+          "formCues": [
+            "Slight forward lean",
+            "Lead with elbows, not hands",
+            "Don't go above shoulder height",
+            "Light weight, strict form"
+          ],
+          
+          "substitutions": [
+            {
+              "exerciseId": "cable-lateral-raise",
+              "reason": "Better constant tension"
+            }
+          ],
+          
+          "media": {
+            "gifUrl": "",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "weekVariations": {
+            "5": { "workingSets": 3, "notes": "Increase to 3 sets in Phase 3" },
+            "9": { "workingSets": 0, "notes": "Skip during deload" }
+          }
+        },
+
+        {
+          "exerciseId": "plank",
+          "exerciseDbId": "ex029",
+          "name": "Plank Hold",
+          "slug": "planks",
+          "category": "core",
+          "muscleGroups": {
+            "primary": ["core", "abs"],
+            "secondary": ["shoulders", "glutes"]
+          },
+          "equipment": ["bodyweight"],
+          "difficulty": "beginner",
+          
+          "warmupSets": 0,
+          "workingSets": 3,
+          "repsMin": null,
+          "repsMax": null,
+          "durationSeconds": 45,
+          "tempo": "hold",
+          "restSeconds": 45,
+          "rpe": 7,
+          "rir": null,
+          
+          "progressionRule": {
+            "type": "time-increase",
+            "increment": 5,
+            "condition": "complete-all-sets",
+            "description": "Add 5 seconds when you can hold all 3 sets"
+          },
+          
+          "formCues": [
+            "Body in straight line",
+            "Don't let hips sag or pike up",
+            "Breathe normally",
+            "Squeeze glutes and core"
+          ],
+          
+          "substitutions": [],
+          
+          "media": {
+            "gifUrl": "",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "weekVariations": {
+            "5": { "notes": "Weighted plank - add plate on back" },
+            "9": { "workingSets": 0, "notes": "Skip during deload" },
+            "10": { "notes": "Plank to push-up variation" }
+          }
+        }
+      ],
+
+      "cooldown": {
+        "duration": 5,
+        "exercises": [
+          {
+            "name": "Chest Doorway Stretch",
+            "duration": 120,
+            "notes": "60 sec each side"
+          },
+          {
+            "name": "Shoulder Stretch",
+            "duration": 120,
+            "notes": "60 sec each side"
+          },
+          {
+            "name": "Tricep Stretch",
+            "duration": 60,
+            "notes": "30 sec each side"
+          },
+          {
+            "name": "Cat-Cow Stretch",
+            "reps": 10
+          }
+        ]
+      },
+
+      "finisher": {
+        "name": "HIIT Circuit",
+        "optional": true,
+        "availableFromWeek": 5,
+        "duration": 6,
+        "protocol": "3 rounds: 30 sec burpees, 30 sec rest, 30 sec mountain climbers, 30 sec rest",
+        "notes": "Skip if fatigued. Only add in Phase 3+"
+      }
+    },
+
+    {
+      "dayId": "day-b",
+      "dayName": "Day B - Legs + Core",
+      "dayType": "legs",
+      "estimatedTime": 42,
+      "focusMuscles": ["quadriceps", "hamstrings", "glutes", "calves"],
+      "secondaryMuscles": ["core", "lower-back"],
+      
+      "warmup": {
+        "duration": 5,
+        "exercises": [
+          {
+            "name": "Light Jog or Bike",
+            "duration": 120
+          },
+          {
+            "name": "Leg Swings",
+            "reps": 20,
+            "notes": "10 forward/back, 10 side-to-side each leg"
+          },
+          {
+            "name": "Bodyweight Squats",
+            "reps": 15
+          },
+          {
+            "name": "Glute Bridges",
+            "reps": 15
+          },
+          {
+            "name": "Walking Lunges",
+            "reps": 20,
+            "notes": "10 each leg"
+          },
+          {
+            "name": "Hip Circles",
+            "reps": 20,
+            "notes": "10 each direction"
+          }
+        ]
+      },
+
+      "exercises": [
+        {
+          "exerciseId": "ex001",
+          "exerciseDbId": "ex001",
+          "name": "Barbell Back Squat",
+          "slug": "barbell-back-squat",
+          "category": "compound",
+          "muscleGroups": {
+            "primary": ["quadriceps", "glutes"],
+            "secondary": ["hamstrings", "core", "lower-back"]
+          },
+          "equipment": ["barbell", "squat-rack"],
+          "difficulty": "intermediate",
+          
+          "warmupSets": 3,
+          "warmupProtocol": [
+            { "setNumber": 1, "weight": "empty-bar", "reps": 10 },
+            { "setNumber": 2, "weightPercent": 50, "reps": 5 },
+            { "setNumber": 3, "weightPercent": 70, "reps": 3 }
+          ],
+          
+          "workingSets": 4,
+          "repsMin": 8,
+          "repsMax": 10,
+          "tempo": "3-1-1-0",
+          "tempoDescription": "3 sec down, 1 sec pause at bottom, 1 sec up",
+          "restSeconds": 120,
+          "rpe": 8,
+          "rir": 2,
+          
+          "progressionRule": {
+            "type": "linear",
+            "increment": 2.5,
+            "condition": "hit-top-reps",
+            "description": "When you hit 4x10, add 2.5kg"
+          },
+          
+          "formCues": [
+            "Bar on upper traps (high bar) or lower traps (low bar)",
+            "Chest up, core braced",
+            "Knees track over toes",
+            "Hip crease below knee (parallel or deeper)",
+            "Drive through heels"
+          ],
+          
+          "substitutions": [
+            {
+              "exerciseId": "front-squat",
+              "exerciseDbId": "ex051",
+              "reason": "More quad emphasis"
+            },
+            {
+              "exerciseId": "goblet-squat",
+              "exerciseDbId": "ex002",
+              "reason": "Beginner-friendly or back issues"
+            },
+            {
+              "exerciseId": "leg-press",
+              "exerciseDbId": "ex022",
+              "reason": "No squat rack or back issues"
+            }
+          ],
+          
+          "media": {
+            "gifUrl": "https://gymvisual.com/img/p/6/3/4/0/6340.gif",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "weekVariations": {
+            "9": { "workingSets": 4, "weightPercent": 60, "notes": "Deload" }
+          }
+        },
+
+        {
+          "exerciseId": "ex006",
+          "exerciseDbId": "ex006",
+          "name": "Romanian Deadlift",
+          "slug": "romanian-deadlift",
+          "category": "compound",
+          "muscleGroups": {
+            "primary": ["hamstrings", "glutes"],
+            "secondary": ["lower-back", "core"]
+          },
+          "equipment": ["barbell", "dumbbells"],
+          "difficulty": "intermediate",
+          
+          "warmupSets": 1,
+          "warmupProtocol": [
+            { "setNumber": 1, "weightPercent": 50, "reps": 8 }
+          ],
+          
+          "workingSets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "tempo": "3-1-2-0",
+          "tempoDescription": "3 sec down, 1 sec stretch, 2 sec up",
+          "restSeconds": 90,
+          "rpe": 7,
+          "rir": 3,
+          
+          "progressionRule": {
+            "type": "linear",
+            "increment": 2.5,
+            "condition": "hit-top-reps",
+            "description": "When you hit 3x12, add 2.5kg"
+          },
+          
+          "formCues": [
+            "Slight knee bend (don't change knee angle)",
+            "Hinge at hips, push hips back",
+            "Bar stays close to legs",
+            "Feel stretch in hamstrings, NOT lower back",
+            "Drive hips forward to return"
+          ],
+          
+          "substitutions": [
+            {
+              "exerciseId": "dumbbell-rdl",
+              "reason": "No barbell"
+            },
+            {
+              "exerciseId": "single-leg-deadlift",
+              "exerciseDbId": "ex067",
+              "reason": "Balance and unilateral work"
+            }
+          ],
+          
+          "media": {
+            "gifUrl": "https://gymvisual.com/img/p/2/1/1/5/7/21157.gif",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "weekVariations": {
+            "9": { "workingSets": 3, "weightPercent": 60 }
+          }
+        },
+
+        {
+          "exerciseId": "ex013",
+          "exerciseDbId": "ex013",
+          "name": "Bulgarian Split Squats",
+          "slug": "bulgarian-split-squat",
+          "category": "compound",
+          "muscleGroups": {
+            "primary": ["quadriceps", "glutes"],
+            "secondary": ["hamstrings", "core"]
+          },
+          "equipment": ["dumbbells", "bench"],
+          "difficulty": "intermediate",
+          
+          "warmupSets": 0,
+          "workingSets": 2,
+          "repsMin": 10,
+          "repsMax": 10,
+          "repsPer": "leg",
+          "tempo": "2-0-2-0",
+          "restSeconds": 60,
+          "rpe": 7,
+          "rir": 3,
+          
+          "progressionRule": {
+            "type": "reps-then-weight",
+            "increment": 2.5,
+            "condition": "hit-top-reps-both-legs",
+            "description": "When you hit 2x10 cleanly both legs, add weight"
+          },
+          
+          "formCues": [
+            "Most weight on front leg",
+            "Front knee doesn't pass toes",
+            "Torso upright",
+            "Lower until front thigh parallel"
+          ],
+          
+          "substitutions": [
+            {
+              "exerciseId": "reverse-lunges",
+              "exerciseDbId": "ex064",
+              "reason": "Easier balance"
+            },
+            {
+              "exerciseId": "step-ups",
+              "reason": "Less quad dominant"
+            }
+          ],
+          
+          "media": {
+            "gifUrl": "https://gymvisual.com/img/p/2/0/6/4/1/20641.gif",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "weekVariations": {
+            "5": { "workingSets": 3, "notes": "Increase to 3 sets" },
+            "9": { "workingSets": 0, "notes": "Skip during deload" }
+          }
+        },
+
+        {
+          "exerciseId": "ex027",
+          "exerciseDbId": "ex027",
+          "name": "Leg Curls",
+          "slug": "leg-curls",
+          "category": "accessory",
+          "muscleGroups": {
+            "primary": ["hamstrings"],
+            "secondary": []
+          },
+          "equipment": ["leg-curl-machine"],
+          "difficulty": "beginner",
+          
+          "warmupSets": 0,
+          "workingSets": 2,
+          "repsMin": 12,
+          "repsMax": 15,
+          "tempo": "2-1-2-0",
+          "restSeconds": 60,
+          "rpe": 7,
+          "rir": 3,
+          
+          "progressionRule": {
+            "type": "reps-first",
+            "increment": 2.5,
+            "condition": "hit-top-reps"
+          },
+          
+          "formCues": [
+            "Hips stay pressed to pad",
+            "Full curl at top",
+            "Control the negative",
+            "Don't arch lower back"
+          ],
+          
+          "substitutions": [
+            {
+              "exerciseId": "nordic-curls",
+              "exerciseDbId": "ex066",
+              "reason": "No machine, advanced"
+            },
+            {
+              "exerciseId": "swiss-ball-curls",
+              "reason": "No machine, home workout"
+            },
+            {
+              "exerciseId": "glute-ham-raise",
+              "exerciseDbId": "ex065",
+              "reason": "GHD available"
+            }
+          ],
+          
+          "media": {
+            "gifUrl": "",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "weekVariations": {
+            "5": { "workingSets": 3 },
+            "9": { "workingSets": 0 }
+          }
+        },
+
+        {
+          "exerciseId": "ex028",
+          "exerciseDbId": "ex028",
+          "name": "Standing Calf Raises",
+          "slug": "calf-raises",
+          "category": "accessory",
+          "muscleGroups": {
+            "primary": ["calves"],
+            "secondary": []
+          },
+          "equipment": ["bodyweight", "dumbbells", "calf-raise-machine"],
+          "difficulty": "beginner",
+          
+          "warmupSets": 0,
+          "workingSets": 3,
+          "repsMin": 15,
+          "repsMax": 20,
+          "tempo": "2-1-2-1",
+          "tempoDescription": "2 sec up, 1 sec squeeze, 2 sec down, 1 sec stretch",
+          "restSeconds": 45,
+          "rpe": 7,
+          "rir": 3,
+          
+          "progressionRule": {
+            "type": "reps-first",
+            "increment": 2.5,
+            "condition": "hit-top-reps",
+            "description": "Full ROM more important than weight"
+          },
+          
+          "formCues": [
+            "Full stretch at bottom",
+            "Rise as high as possible",
+            "Control the movement",
+            "Pause at both ends"
+          ],
+          
+          "substitutions": [
+            {
+              "exerciseId": "seated-calf-raise",
+              "reason": "Targets soleus more"
+            }
+          ],
+          
+          "media": {
+            "gifUrl": "",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "weekVariations": {
+            "9": { "workingSets": 0 }
+          }
+        },
+
+        {
+          "exerciseId": "leg-raises",
+          "exerciseDbId": "ex031",
+          "name": "Leg Raises",
+          "slug": "leg-raises",
+          "category": "core",
+          "muscleGroups": {
+            "primary": ["lower-abs", "hip-flexors"],
+            "secondary": ["core"]
+          },
+          "equipment": ["bodyweight"],
+          "difficulty": "intermediate",
+          
+          "warmupSets": 0,
+          "workingSets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "tempo": "1-0-2-0",
+          "restSeconds": 45,
+          "rpe": 7,
+          "rir": 3,
+          
+          "progressionRule": {
+            "type": "reps-first",
+            "increment": null,
+            "condition": "hit-top-reps",
+            "description": "Add ankle weights or hold dumbbell between feet when hitting 3x15"
+          },
+          
+          "formCues": [
+            "Lower back pressed to floor/bench",
+            "Legs straight or slight bend",
+            "Control the descent",
+            "Stop before feet touch floor"
+          ],
+          
+          "substitutions": [
+            {
+              "exerciseId": "knee-raises",
+              "reason": "Easier variation"
+            },
+            {
+              "exerciseId": "hanging-leg-raises",
+              "reason": "Advanced variation"
+            }
+          ],
+          
+          "media": {
+            "gifUrl": "",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "weekVariations": {
+            "9": { "workingSets": 0 }
+          }
+        }
+      ],
+
+      "cooldown": {
+        "duration": 5,
+        "exercises": [
+          {
+            "name": "Quad Stretch",
+            "duration": 120,
+            "notes": "60 sec each leg"
+          },
+          {
+            "name": "Hamstring Stretch",
+            "duration": 120,
+            "notes": "60 sec each leg"
+          },
+          {
+            "name": "Glute Stretch (Figure-4)",
+            "duration": 120,
+            "notes": "60 sec each side"
+          },
+          {
+            "name": "Hip Flexor Stretch",
+            "duration": 90,
+            "notes": "45 sec each side"
+          },
+          {
+            "name": "Foam Rolling",
+            "duration": 120,
+            "notes": "Quads, IT band, glutes - 2 min total"
+          }
+        ]
+      },
+
+      "finisher": {
+        "name": "Leg Burner",
+        "optional": true,
+        "availableFromWeek": null,
+        "duration": 0,
+        "protocol": "Skip in this program - legs get enough volume",
+        "notes": "Skip leg finishers to prioritize recovery"
+      }
+    },
+
+    {
+      "dayId": "day-c",
+      "dayName": "Day C - Pull + Arms",
+      "dayType": "pull",
+      "estimatedTime": 42,
+      "focusMuscles": ["back", "lats", "biceps", "rear-deltoids"],
+      "secondaryMuscles": ["core", "forearms"],
+      
+      "warmup": {
+        "duration": 5,
+        "exercises": [
+          {
+            "name": "Rowing Machine",
+            "duration": 120,
+            "notes": "Light pace"
+          },
+          {
+            "name": "Band Pull-Aparts",
+            "reps": 20
+          },
+          {
+            "name": "Scapular Pull-ups",
+            "reps": 8,
+            "notes": "Just shrug shoulders down, no pull"
+          },
+          {
+            "name": "Dead Hangs",
+            "duration": 40,
+            "sets": 2,
+            "notes": "2 sets x 20 seconds"
+          },
+          {
+            "name": "Cat-Cow Stretch",
+            "reps": 10
+          },
+          {
+            "name": "Light Deadlifts",
+            "reps": 5,
+            "sets": 2,
+            "notes": "2 sets x 5 reps @ 50% working weight"
+          }
+        ]
+      },
+
+      "exercises": [
+        {
+          "exerciseId": "ex005",
+          "exerciseDbId": "ex005",
+          "name": "Conventional Deadlift",
+          "slug": "barbell-deadlift",
+          "category": "compound",
+          "muscleGroups": {
+            "primary": ["hamstrings", "glutes", "lower-back"],
+            "secondary": ["traps", "forearms", "core"]
+          },
+          "equipment": ["barbell"],
+          "difficulty": "advanced",
+          
+          "warmupSets": 3,
+          "warmupProtocol": [
+            { "setNumber": 1, "weightPercent": 40, "reps": 5 },
+            { "setNumber": 2, "weightPercent": 60, "reps": 3 },
+            { "setNumber": 3, "weightPercent": 80, "reps": 1 }
+          ],
+          
+          "workingSets": 4,
+          "repsMin": 6,
+          "repsMax": 8,
+          "tempo": "1-0-2-0",
+          "tempoDescription": "1 sec up, no pause, 2 sec controlled down",
+          "restSeconds": 120,
+          "rpe": 8,
+          "rir": 2,
+          
+          "progressionRule": {
+            "type": "linear",
+            "increment": 2.5,
+            "condition": "hit-top-reps",
+            "description": "When you hit 4x8, add 2.5-5kg"
+          },
+          
+          "formCues": [
+            "Bar over mid-foot",
+            "Hinge at hips, grip outside legs",
+            "Neutral spine (not rounded)",
+            "Chest up, shoulders back",
+            "Drive through floor",
+            "Lock out hips and knees together"
+          ],
+          
+          "substitutions": [
+            {
+              "exerciseId": "trap-bar-deadlift",
+              "exerciseDbId": "ex053",
+              "reason": "More joint-friendly"
+            },
+            {
+              "exerciseId": "sumo-deadlift",
+              "exerciseDbId": "ex052",
+              "reason": "Better for long legs or hip mobility"
+            }
+          ],
+          
+          "media": {
+            "gifUrl": "https://gymvisual.com/img/p/2/0/8/3/1/20831.gif",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "weekVariations": {
+            "9": { "workingSets": 4, "weightPercent": 60 }
+          }
+        },
+
+        {
+          "exerciseId": "ex014",
+          "exerciseDbId": "ex014",
+          "name": "Incline Dumbbell Press",
+          "slug": "incline-dumbbell-press",
+          "category": "compound",
+          "muscleGroups": {
+            "primary": ["upper-chest"],
+            "secondary": ["front-deltoids", "triceps"]
+          },
+          "equipment": ["dumbbells", "incline-bench"],
+          "difficulty": "intermediate",
+          
+          "warmupSets": 1,
+          "warmupProtocol": [
+            { "setNumber": 1, "weightPercent": 60, "reps": 8 }
+          ],
+          
+          "workingSets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "tempo": "2-1-2-0",
+          "restSeconds": 60,
+          "rpe": 7,
+          "rir": 3,
+          
+          "progressionRule": {
+            "type": "linear",
+            "increment": 2.5,
+            "condition": "hit-top-reps",
+            "description": "When you hit 3x12, add 2.5kg per dumbbell"
+          },
+          
+          "formCues": [
+            "Bench at 30-45 degrees",
+            "Shoulder blades retracted",
+            "Press up and slightly together",
+            "Full range of motion"
+          ],
+          
+          "substitutions": [
+            {
+              "exerciseId": "incline-barbell-press",
+              "exerciseDbId": "ex082",
+              "reason": "More weight capacity"
+            },
+            {
+              "exerciseId": "low-to-high-cable-flyes",
+              "reason": "Better upper chest isolation"
+            }
+          ],
+          
+          "media": {
+            "gifUrl": "https://gymvisual.com/img/p/2/0/6/7/4/20674.gif",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "weekVariations": {
+            "9": { "workingSets": 3, "weightPercent": 60 }
+          }
+        },
+
+        {
+          "exerciseId": "ex004",
+          "exerciseDbId": "ex004",
+          "name": "Pull-ups",
+          "slug": "pull-ups",
+          "category": "compound",
+          "muscleGroups": {
+            "primary": ["lats", "upper-back"],
+            "secondary": ["biceps", "rear-deltoids"]
+          },
+          "equipment": ["pull-up-bar"],
+          "difficulty": "intermediate",
+          
+          "warmupSets": 0,
+          "workingSets": 3,
+          "repsMin": 8,
+          "repsMax": 10,
+          "tempo": "1-1-2-0",
+          "tempoDescription": "1 sec up, 1 sec hold, 2 sec down",
+          "restSeconds": 90,
+          "rpe": 8,
+          "rir": 2,
+          
+          "progressionRule": {
+            "type": "bodyweight-progression",
+            "increment": null,
+            "condition": "hit-top-reps",
+            "description": "Can't do 8? Use resistance band. Can do 10 easy? Add weight."
+          },
+          
+          "formCues": [
+            "Full hang at bottom",
+            "Pull elbows down and back",
+            "Chin over bar",
+            "Control descent"
+          ],
+          
+          "substitutions": [
+            {
+              "exerciseId": "lat-pulldown",
+              "exerciseDbId": "ex021",
+              "reason": "Can't do 8 pull-ups yet"
+            },
+            {
+              "exerciseId": "assisted-pull-ups",
+              "reason": "Need assistance"
+            },
+            {
+              "exerciseId": "negative-pull-ups",
+              "exerciseDbId": "ex077",
+              "reason": "Building pull-up strength"
+            }
+          ],
+          
+          "media": {
+            "gifUrl": "https://gymvisual.com/img/p/2/3/7/0/1/23701.gif",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "weekVariations": {
+            "9": { "workingSets": 2, "notes": "Reduce to 2 sets, bodyweight only" }
+          }
+        },
+
+        {
+          "exerciseId": "ex015",
+          "exerciseDbId": "ex015",
+          "name": "Seated Cable Row",
+          "slug": "cable-row",
+          "category": "compound",
+          "muscleGroups": {
+            "primary": ["lats", "middle-back"],
+            "secondary": ["biceps", "rear-deltoids"]
+          },
+          "equipment": ["cable-machine"],
+          "difficulty": "beginner",
+          
+          "warmupSets": 0,
+          "workingSets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "tempo": "2-1-2-0",
+          "restSeconds": 60,
+          "rpe": 7,
+          "rir": 3,
+          
+          "progressionRule": {
+            "type": "linear",
+            "increment": 2.5,
+            "condition": "hit-top-reps"
+          },
+          
+          "formCues": [
+            "Sit upright, chest out",
+            "Pull to lower chest/upper abs",
+            "Squeeze shoulder blades together",
+            "Don't rock back and forth"
+          ],
+          
+          "substitutions": [
+            {
+              "exerciseId": "barbell-row",
+              "exerciseDbId": "ex008",
+              "reason": "No cable machine"
+            },
+            {
+              "exerciseId": "dumbbell-row",
+              "reason": "Home workout"
+            },
+            {
+              "exerciseId": "chest-supported-row",
+              "exerciseDbId": "ex071",
+              "reason": "Lower back fatigue"
+            }
+          ],
+          
+          "media": {
+            "gifUrl": "https://gymvisual.com/img/p/5/4/4/4/5444.gif",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "weekVariations": {
+            "9": { "workingSets": 2, "weightPercent": 60 }
+          }
+        },
+
+        {
+          "exerciseId": "ex010",
+          "exerciseDbId": "ex010",
+          "name": "Face Pulls",
+          "slug": "face-pulls",
+          "category": "accessory",
+          "muscleGroups": {
+            "primary": ["rear-deltoids", "upper-back"],
+            "secondary": ["rotator-cuff", "traps"]
+          },
+          "equipment": ["cable-machine", "rope-attachment"],
+          "difficulty": "beginner",
+          
+          "warmupSets": 0,
+          "workingSets": 3,
+          "repsMin": 15,
+          "repsMax": 20,
+          "tempo": "2-1-2-1",
+          "tempoDescription": "2 sec pull, 1 sec squeeze, 2 sec return, 1 sec stretch",
+          "restSeconds": 45,
+          "rpe": 6,
+          "rir": 4,
+          
+          "progressionRule": {
+            "type": "reps-first",
+            "increment": 2.5,
+            "condition": "hit-top-reps",
+            "description": "Shoulder health exercise - light weight, high reps"
+          },
+          
+          "formCues": [
+            "Rope attachment at face height",
+            "Pull to forehead, separate hands",
+            "Elbows high, squeeze rear delts",
+            "External rotation at end"
+          ],
+          
+          "substitutions": [
+            {
+              "exerciseId": "band-pull-aparts",
+              "exerciseDbId": "ex092",
+              "reason": "No cable machine"
+            },
+            {
+              "exerciseId": "reverse-cable-flyes",
+              "reason": "Similar movement"
+            },
+            {
+              "exerciseId": "bent-over-reverse-flyes",
+              "exerciseDbId": "ex047",
+              "reason": "Dumbbell alternative"
+            }
+          ],
+          
+          "media": {
+            "gifUrl": "https://gymvisual.com/img/p/2/4/9/7/4/24974.gif",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "weekVariations": {
+            "9": { "workingSets": 0 }
+          }
+        },
+
+        {
+          "exerciseId": "russian-twists",
+          "exerciseDbId": "ex030",
+          "name": "Russian Twists",
+          "slug": "russian-twists",
+          "category": "core",
+          "muscleGroups": {
+            "primary": ["obliques", "core"],
+            "secondary": ["hip-flexors"]
+          },
+          "equipment": ["bodyweight", "dumbbell", "medicine-ball"],
+          "difficulty": "beginner",
+          
+          "warmupSets": 0,
+          "workingSets": 3,
+          "repsMin": 20,
+          "repsMax": 20,
+          "repsCounting": "total (10 each side)",
+          "tempo": "1-1-1-1",
+          "restSeconds": 45,
+          "rpe": 7,
+          "rir": 3,
+          
+          "progressionRule": {
+            "type": "weight-increase",
+            "increment": 2.5,
+            "condition": "complete-all-reps-clean",
+            "description": "Increase weight or reps"
+          },
+          
+          "formCues": [
+            "Sit with knees bent, feet off ground",
+            "Lean back slightly",
+            "Rotate torso, touch weight to ground each side",
+            "Keep core engaged"
+          ],
+          
+          "substitutions": [
+            {
+              "exerciseId": "bicycle-crunches",
+              "reason": "No equipment needed"
+            },
+            {
+              "exerciseId": "cable-woodchops",
+              "reason": "Standing oblique work"
+            }
+          ],
+          
+          "media": {
+            "gifUrl": "",
+            "videoUrl": "",
+            "thumbnailUrl": ""
+          },
+          
+          "supersetWith": null,
+          "weekVariations": {
+            "9": { "workingSets": 0 }
+          }
+        }
+      ],
+
+      "cooldown": {
+        "duration": 5,
+        "exercises": [
+          {
+            "name": "Dead Hang",
+            "duration": 30
+          },
+          {
+            "name": "Lat Stretch",
+            "duration": 120,
+            "notes": "60 sec each side"
+          },
+          {
+            "name": "Upper Back Stretch",
+            "duration": 60
+          },
+          {
+            "name": "Bicep Stretch",
+            "duration": 90,
+            "notes": "45 sec each side"
+          },
+          {
+            "name": "Shoulder Rolls",
+            "reps": 20,
+            "notes": "10 forward, 10 backward"
+          }
+        ]
+      },
+
+      "finisher": {
+        "name": "Core Circuit",
+        "optional": true,
+        "availableFromWeek": 10,
+        "duration": 8,
+        "protocol": "2 rounds: Plank 45sec, Bicycle Crunches 20, Russian Twists 30, Leg Raises 12, Dead Bug 20",
+        "notes": "Only add in Peak phase (Week 10+)"
+      }
+    }
+  ],
+
+  "restDayProtocol": {
+    "cardio": {
+      "type": "LISS",
+      "duration": 30,
+      "frequency": "2-3x/week",
+      "optional": true,
+      "options": ["walking", "cycling", "swimming", "rowing"],
+      "notes": "Low intensity, conversational pace"
+    },
+    "activeRecovery": {
+      "options": ["yoga", "stretching", "foam-rolling"],
+      "frequency": "daily",
+      "duration": 15
+    },
+    "neat": {
+      "dailySteps": 10000,
+      "tips": [
+        "Take stairs",
+        "Walk after meals",
+        "Park farther away",
+        "Stand while working"
+      ]
+    }
+  },
+
+  "nutritionGuidelines": {
+    "trainingDays": {
+      "calories": 2400,
+      "protein": 180,
+      "carbs": 270,
+      "fats": 70,
+      "notes": "Higher carbs for energy and recovery"
+    },
+    "restDays": {
+      "calories": 2200,
+      "protein": 180,
+      "carbs": 180,
+      "fats": 90,
+      "notes": "Lower carbs, higher fats for satiety"
+    },
+    "mealTiming": {
+      "preWorkout": {
+        "timing": "1-2h before",
+        "composition": "Carbs + Protein",
+        "examples": ["Oatmeal + whey", "Rice + chicken", "Banana + peanut butter + shake"]
+      },
+      "postWorkout": {
+        "timing": "Within 1h",
+        "composition": "Carbs + Protein",
+        "examples": ["Rice + chicken", "Pasta + meat", "Protein shake + fruit"]
+      }
+    },
+    "hydration": {
+      "minimum": 3000,
+      "unit": "ml",
+      "trainingDayBonus": 500,
+      "notes": "Pee should be light yellow"
+    }
+  },
+
+  "progressTracking": {
+    "weeklyCheckins": {
+      "day": "Monday",
+      "timing": "morning-fasted",
+      "metrics": [
+        {
+          "metric": "bodyweight",
+          "unit": "kg",
+          "required": true
+        },
+        {
+          "metric": "waistCircumference",
+          "unit": "cm",
+          "location": "at belly button",
+          "required": true
+        },
+        {
+          "metric": "progressPhotos",
+          "angles": ["front", "side", "back"],
+          "lighting": "same lighting each time",
+          "required": true
+        },
+        {
+          "metric": "energyLevel",
+          "scale": "1-10",
+          "required": false
+        },
+        {
+          "metric": "sleepQuality",
+          "scale": "1-10",
+          "required": false
+        },
+        {
+          "metric": "sorenessLevel",
+          "scale": "1-10",
+          "required": false
+        }
+      ]
+    },
+    "monthlyReview": {
+      "metrics": [
+        "Total weight change",
+        "Total waist change (goal: -2 to -3cm/month)",
+        "Strength gains on main lifts",
+        "Body composition (if InBody/DEXA available)"
+      ],
+      "adjustments": {
+        "notLosingFat": "Reduce calories by 200",
+        "losingStrength": "Increase calories by 200",
+        "progressGood": "Keep same"
+      }
+    }
+  },
+
+  "supplements": {
+    "essential": [
+      {
+        "name": "Whey Protein",
+        "dose": "As needed to hit 180g protein/day",
+        "timing": "Post-workout or between meals",
+        "priority": "high"
+      },
+      {
+        "name": "Creatine Monohydrate",
+        "dose": "5g/day",
+        "timing": "Any time (daily)",
+        "priority": "high"
+      },
+      {
+        "name": "Omega-3 Fish Oil",
+        "dose": "2-3g EPA+DHA/day",
+        "timing": "With meals",
+        "priority": "medium"
+      }
+    ],
+    "optional": [
+      {
+        "name": "Vitamin D3",
+        "dose": "2000-4000 IU/day",
+        "timing": "With fat-containing meal"
+      },
+      {
+        "name": "Multivitamin",
+        "dose": "1/day",
+        "timing": "With breakfast"
+      },
+      {
+        "name": "Caffeine",
+        "dose": "200mg (1-2 cups coffee)",
+        "timing": "30-45min pre-workout, not after 2pm"
+      }
+    ],
+    "avoid": [
+      "Fat burners",
+      "BCAAs (if eating enough protein)",
+      "Mass gainers",
+      "Testosterone boosters"
+    ]
+  },
+
+  "redFlags": {
+    "stopTrainingIf": [
+      {
+        "symptom": "Joint pain lasting >3 days",
+        "action": "Take 3-5 days off, see doctor if persists"
+      },
+      {
+        "symptom": "Extreme fatigue (overtraining)",
+        "action": "1 week deload or full rest"
+      },
+      {
+        "symptom": "Sleep issues",
+        "action": "Reduce training volume, manage stress"
+      },
+      {
+        "symptom": "Loss of appetite",
+        "action": "Sign of overtraining, take rest"
+      },
+      {
+        "symptom": "Strength decrease >2 weeks",
+        "action": "Eat more, sleep more, or deload"
+      },
+      {
+        "symptom": "Illness (fever, cold, flu)",
+        "action": "Rest until fully recovered"
+      }
+    ]
+  },
+
+  "expectedResults": {
+    "duration": "12 weeks",
+    "bodyComposition": {
+      "fatLoss": "6-12kg",
+      "musclGain": "2-4kg",
+      "netWeightChange": "-4 to -8kg",
+      "waistReduction": "-5 to -8cm"
+    },
+    "strengthGains": {
+      "squat": "+15 to +25kg",
+      "bench": "+10 to +15kg",
+      "deadlift": "+20 to +30kg"
+    },
+    "visualChanges": [
+      "More defined arms",
+      "Visible chest/shoulder separation",
+      "Less belly fat",
+      "Better posture",
+      "More muscular legs"
+    ]
+  },
+
+  "recommendedApps": {
+    "workoutTracking": ["Strong (iOS/Android)", "Google Sheets"],
+    "nutritionTracking": ["MyFitnessPal", "Cronometer", "LoseIt"],
+    "progressTracking": ["Happy Scale (iOS)", "Libra (Android)", "Progress Photos"],
+    "formCheck": ["Record yourself", "AthleanX (YouTube)", "Jeff Nippard (YouTube)"]
+  }
+}

@@ -89,15 +89,15 @@ export const useProgramsStore = defineStore('programs', {
       const programData = {
         ...program,
         programId: program.programId || `program-${Date.now()}`,
-        createdAt: new Date().toISOString()
+        createdAt: program.createdAt || new Date().toISOString()
       }
       
-      // Add dayId to each day if missing
+      // Add dayId to each day if missing (support both v1 and v2 schema)
       if (programData.workoutDays) {
         programData.workoutDays = programData.workoutDays.map((day, idx) => ({
           ...day,
           dayId: day.dayId || `day-${idx + 1}`,
-          exercises: day.exercises.map((ex, exIdx) => ({
+          exercises: (day.exercises || []).map((ex, exIdx) => ({
             ...ex,
             exerciseId: ex.exerciseId || `ex-${idx}-${exIdx}`
           }))
