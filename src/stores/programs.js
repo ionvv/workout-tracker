@@ -81,6 +81,7 @@ export const useProgramsStore = defineStore('programs', {
         if (error) throw error
       } catch (error) {
         console.error('Sync to cloud failed:', error)
+        throw error // Re-throw so the UI can handle it
       }
     },
 

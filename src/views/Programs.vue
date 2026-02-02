@@ -148,10 +148,16 @@
     <div
       v-if="showImportModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50"
-      @click.self="showImportModal = false"
+      @click.self="closeImportModal"
     >
-      <div class="bg-white rounded-t-2xl w-full max-w-lg p-6">
+      <div class="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
         <h2 class="text-xl font-bold mb-4">Import Program</h2>
+
+        <!-- Error Message -->
+        <div v-if="importError" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <p class="text-sm text-red-600 font-semibold mb-1">Import Failed</p>
+          <p class="text-sm text-red-600">{{ importError }}</p>
+        </div>
 
         <div class="space-y-3 mb-4">
           <button
@@ -180,11 +186,11 @@
         ></textarea>
 
         <div class="flex gap-2 mt-4">
-          <button @click="showImportModal = false" class="btn-secondary flex-1">
+          <button @click="closeImportModal" class="btn-secondary flex-1" :disabled="importLoading">
             Cancel
           </button>
-          <button @click="handleImport" class="btn-primary flex-1">
-            Import
+          <button @click="handleImport" class="btn-primary flex-1" :disabled="importLoading || !importData">
+            {{ importLoading ? 'Importing...' : 'Import' }}
           </button>
         </div>
       </div>
@@ -209,6 +215,8 @@ const showImportModal = ref(false)
 const importType = ref('markdown')
 const importData = ref('')
 const expandedDays = ref(new Set())
+const importError = ref(null)
+const importLoading = ref(false)
 
 const markdownExample = `# Program Name: My Program
 
@@ -267,17 +275,46 @@ function startWorkout(day) {
   })
 }
 
+function closeImportModal() {
+  showImportModal.value = false
+  importData.value = ''
+  importError.value = null
+}
+
 async function handleImport() {
+  importError.value = null
+  importLoading.value = true
+  
   try {
+    if (!importData.value.trim()) {
+      throw new Error('Please enter program data to import')
+    }
+
     if (importType.value === 'markdown') {
       await programsStore.importFromMarkdown(importData.value)
     } else {
       await programsStore.importFromJSON(importData.value)
     }
-    showImportModal.value = false
-    importData.value = ''
+    
+    // Success!
+    closeImportModal()
   } catch (error) {
-    alert('Import failed: ' + error.message)
+    console.error('Import error:', error)
+    
+    // Parse error message for user-friendly display
+    let errorMsg = error.message
+    
+    if (errorMsg.includes('duplicate key') || errorMsg.includes('unique constraint')) {
+      errorMsg = 'A program with this ID already exists. Please delete the existing program first or use a different program ID.'
+    } else if (errorMsg.includes('JSON')) {
+      errorMsg = 'Invalid JSON format. Please check your JSON syntax.'
+    } else if (errorMsg.includes('markdown')) {
+      errorMsg = 'Invalid markdown format. Please check the format.'
+    }
+    
+    importError.value = errorMsg
+  } finally {
+    importLoading.value = false
   }
 }
 </script>
