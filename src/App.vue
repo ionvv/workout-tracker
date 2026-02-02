@@ -49,13 +49,17 @@
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from './stores/auth'
+import { useExercisesStore } from './stores/exercises'
 
 const route = useRoute()
 const authStore = useAuthStore()
+const exercisesStore = useExercisesStore()
 
 const showNav = computed(() => route.path !== '/login')
 
 onMounted(async () => {
   await authStore.init()
+  // Load exercise database in background
+  exercisesStore.loadExercises()
 })
 </script>

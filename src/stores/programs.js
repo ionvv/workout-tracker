@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { db } from '../utils/db'
 import { supabase } from '../utils/supabase'
 import { useAuthStore } from './auth'
+import { useExercisesStore } from './exercises'
 
 export const useProgramsStore = defineStore('programs', {
   state: () => ({
@@ -15,7 +16,15 @@ export const useProgramsStore = defineStore('programs', {
       this.loading = true
       try {
         // Load from IndexedDB first (offline-first)
-        this.programs = await db.programs.toArray()
+        let programs = await db.programs.toArray()
+        
+        // Enrich programs with exercise database data
+        const exercisesStore = useExercisesStore()
+        if (exercisesStore.loaded) {
+          programs = programs.map(program => exercisesStore.enrichProgramExercises(program))
+        }
+        
+        this.programs = programs
         
         // Then sync from Supabase if authenticated
         const authStore = useAuthStore()
