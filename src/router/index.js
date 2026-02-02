@@ -18,6 +18,11 @@ const router = createRouter({
       component: () => import('../views/Programs.vue')
     },
     {
+      path: '/builder',
+      name: 'builder',
+      component: () => import('../views/WorkoutBuilder.vue')
+    },
+    {
       path: '/workout/:programId/:dayId',
       name: 'workout',
       component: () => import('../views/ActiveWorkout.vue')

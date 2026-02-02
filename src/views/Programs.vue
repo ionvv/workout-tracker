@@ -24,10 +24,12 @@
       </div>
     </div>
 
-    <div class="flex items-center justify-between mb-6">
-      <div></div>
-      <button @click="showImportModal = true" class="btn-primary">
-        + New Program
+    <div class="flex gap-2 mb-6">
+      <router-link to="/builder" class="btn-primary flex-1 text-center">
+        🏗️ Build Workout
+      </router-link>
+      <button @click="showImportModal = true" class="btn-secondary flex-1">
+        📄 Import
       </button>
     </div>
 
