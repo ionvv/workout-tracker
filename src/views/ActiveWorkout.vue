@@ -93,7 +93,27 @@
                   <span v-if="getExerciseData(index)?.restSeconds">
                     · {{ getExerciseData(index).restSeconds }}s rest
                   </span>
+                  <span v-if="getExerciseData(index)?.tempo" class="ml-2">
+                    · Tempo: {{ getExerciseData(index).tempo }}
+                  </span>
                 </p>
+                
+                <!-- Form Cues (collapsible) -->
+                <div v-if="getExerciseData(index)?.formCues && getExerciseData(index).formCues.length > 0" class="mt-2">
+                  <button
+                    @click="toggleFormCues(index)"
+                    class="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  >
+                    <span>{{ showFormCues.has(index) ? '▼' : '▶' }}</span>
+                    <span>Form Cues</span>
+                  </button>
+                  <ul v-if="showFormCues.has(index)" class="mt-2 text-xs text-gray-600 space-y-1 pl-4">
+                    <li v-for="(cue, idx) in getExerciseData(index).formCues" :key="idx" class="flex items-start gap-2">
+                      <span>•</span>
+                      <span>{{ cue }}</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
               
               <button
@@ -321,6 +341,7 @@ const showEndModal = ref(false)
 const sessionNotes = ref('')
 const currentProgram = ref(null)
 const currentDay = ref(null)
+const showFormCues = ref(new Set())
 
 // Rest timer
 const restTimer = ref({
@@ -405,6 +426,16 @@ function handleImageError(event) {
   if (parent) {
     parent.classList.add('hidden')
   }
+}
+
+function toggleFormCues(index) {
+  if (showFormCues.value.has(index)) {
+    showFormCues.value.delete(index)
+  } else {
+    showFormCues.value.add(index)
+  }
+  // Trigger reactivity
+  showFormCues.value = new Set(showFormCues.value)
 }
 
 function getExerciseData(index) {
