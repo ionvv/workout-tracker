@@ -92,12 +92,15 @@ export const useExercisesStore = defineStore('exercises', {
           const flatVideoUrl = exercise.videoUrl || exercise.media?.videoUrl
           const flatThumbnailUrl = exercise.thumbnailUrl || exercise.media?.thumbnailUrl
           
+          // Build base enriched exercise (without nested media)
+          const { media, ...exerciseWithoutMedia } = exercise
+          
           // If exercise has exerciseDbId, merge with database info
           if (exercise.exerciseDbId) {
             const dbExercise = this.getExerciseById(exercise.exerciseDbId)
             if (dbExercise) {
               return {
-                ...exercise,
+                ...exerciseWithoutMedia,
                 // Add database fields if not already present (flattened)
                 gifUrl: flatGifUrl || dbExercise.media?.gifUrl,
                 videoUrl: flatVideoUrl || dbExercise.media?.videoUrl,
@@ -111,9 +114,9 @@ export const useExercisesStore = defineStore('exercises', {
               }
             }
           }
-          // If no exerciseDbId, still flatten media URLs
+          // If no exerciseDbId, still flatten media URLs (remove nested media object)
           return {
-            ...exercise,
+            ...exerciseWithoutMedia,
             gifUrl: flatGifUrl,
             videoUrl: flatVideoUrl,
             thumbnailUrl: flatThumbnailUrl
