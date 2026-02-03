@@ -18,11 +18,9 @@ export const useProgramsStore = defineStore('programs', {
         // Load from IndexedDB first (offline-first)
         let programs = await db.programs.toArray()
         
-        // Enrich programs with exercise database data
+        // Always enrich programs (flattens media URLs and optionally adds database data)
         const exercisesStore = useExercisesStore()
-        if (exercisesStore.loaded) {
-          programs = programs.map(program => exercisesStore.enrichProgramExercises(program))
-        }
+        programs = programs.map(program => exercisesStore.enrichProgramExercises(program))
         
         this.programs = programs
         
