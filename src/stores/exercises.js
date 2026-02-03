@@ -87,16 +87,21 @@ export const useExercisesStore = defineStore('exercises', {
       enrichedProgram.workoutDays = program.workoutDays.map(day => {
         const enrichedDay = { ...day }
         enrichedDay.exercises = day.exercises?.map(exercise => {
+          // Flatten media URLs if nested
+          const flatGifUrl = exercise.gifUrl || exercise.media?.gifUrl
+          const flatVideoUrl = exercise.videoUrl || exercise.media?.videoUrl
+          const flatThumbnailUrl = exercise.thumbnailUrl || exercise.media?.thumbnailUrl
+          
           // If exercise has exerciseDbId, merge with database info
           if (exercise.exerciseDbId) {
             const dbExercise = this.getExerciseById(exercise.exerciseDbId)
             if (dbExercise) {
               return {
                 ...exercise,
-                // Add database fields if not already present
-                gifUrl: exercise.gifUrl || dbExercise.media?.gifUrl,
-                videoUrl: exercise.videoUrl || dbExercise.media?.videoUrl,
-                thumbnailUrl: exercise.thumbnailUrl || dbExercise.media?.thumbnailUrl,
+                // Add database fields if not already present (flattened)
+                gifUrl: flatGifUrl || dbExercise.media?.gifUrl,
+                videoUrl: flatVideoUrl || dbExercise.media?.videoUrl,
+                thumbnailUrl: flatThumbnailUrl || dbExercise.media?.thumbnailUrl,
                 demoUrl: exercise.demoUrl || dbExercise.demoUrl,
                 instructions: exercise.instructions || dbExercise.instructions,
                 formCues: exercise.formCues || dbExercise.formCues,
@@ -106,7 +111,13 @@ export const useExercisesStore = defineStore('exercises', {
               }
             }
           }
-          return exercise
+          // If no exerciseDbId, still flatten media URLs
+          return {
+            ...exercise,
+            gifUrl: flatGifUrl,
+            videoUrl: flatVideoUrl,
+            thumbnailUrl: flatThumbnailUrl
+          }
         })
         return enrichedDay
       })
