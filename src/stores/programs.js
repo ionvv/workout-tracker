@@ -15,14 +15,27 @@ export const useProgramsStore = defineStore('programs', {
     async loadPrograms() {
       this.loading = true
       try {
+        // Ensure exercises are loaded first (for database enrichment)
+        const exercisesStore = useExercisesStore()
+        if (!exercisesStore.loaded) {
+          console.log('[Programs] Loading exercises first...')
+          await exercisesStore.loadExercises()
+        }
+        
         // Load from IndexedDB first (offline-first)
         let programs = await db.programs.toArray()
+        console.log('[Programs] Loaded from IndexedDB:', programs.length)
         
-        // Always enrich programs (flattens media URLs and optionally adds database data)
-        const exercisesStore = useExercisesStore()
-        programs = programs.map(program => exercisesStore.enrichProgramExercises(program))
+        // Always enrich programs (flattens media URLs and adds database data)
+        programs = programs.map(program => {
+          const enriched = exercisesStore.enrichProgramExercises(program)
+          console.log('[Programs] Enriched program:', enriched.programName, 
+            'First exercise gifUrl:', enriched.workoutDays?.[0]?.exercises?.[0]?.gifUrl)
+          return enriched
+        })
         
         this.programs = programs
+        console.log('[Programs] Set reactive programs, count:', this.programs.length)
         
         // Then sync from Supabase if authenticated
         const authStore = useAuthStore()
