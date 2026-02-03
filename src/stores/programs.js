@@ -74,7 +74,12 @@ export const useProgramsStore = defineStore('programs', {
             })
           }
           
-          this.programs = await db.programs.toArray()
+          // Re-load and enrich programs after sync
+          let programs = await db.programs.toArray()
+          const exercisesStore = useExercisesStore()
+          programs = programs.map(program => exercisesStore.enrichProgramExercises(program))
+          this.programs = programs
+          console.log('[Programs] Synced from cloud and enriched:', programs.length)
         }
       } catch (error) {
         console.error('Sync from cloud failed:', error)
