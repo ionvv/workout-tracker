@@ -98,7 +98,30 @@
               {{ selectedProgram.description }}
             </div>
           </div>
-          <button @click="selectedProgram = null" class="text-gray-600 text-2xl">✕</button>
+          <div class="flex items-center gap-2">
+            <button
+              v-if="!editMode"
+              @click="enterEditMode"
+              class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              ✏️ Edit
+            </button>
+            <button
+              v-if="editMode"
+              @click="saveEdits"
+              class="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+            >
+              ✓ Save
+            </button>
+            <button
+              v-if="editMode"
+              @click="cancelEdit"
+              class="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600"
+            >
+              ✕ Cancel
+            </button>
+            <button v-if="!editMode" @click="selectedProgram = null" class="text-gray-600 text-2xl">✕</button>
+          </div>
         </div>
 
         <!-- Program Metadata -->
@@ -142,7 +165,7 @@
         <h3 class="text-sm font-semibold text-gray-700 mb-3">💪 Workout Days</h3>
         <div class="space-y-3">
           <div
-            v-for="day in selectedProgram.workoutDays"
+            v-for="day in activeProgram.workoutDays"
             :key="day.dayId"
             class="border border-gray-200 rounded-lg overflow-hidden"
           >
@@ -207,12 +230,53 @@
                             </svg>
                           </a>
                         </div>
-                        <div class="text-xs text-gray-600 mt-0.5">
+                        <!-- View Mode -->
+                        <div v-if="!editMode" class="text-xs text-gray-600 mt-0.5">
                           {{ exercise.prescribedSets }}×{{ exercise.prescribedReps }}
                           <span v-if="exercise.restSeconds" class="ml-2">• Rest: {{ formatRestTime(exercise.restSeconds) }}</span>
                         </div>
-                        <div v-if="exercise.notes" class="text-xs text-gray-500 italic mt-1">
+                        <div v-if="!editMode && exercise.notes" class="text-xs text-gray-500 italic mt-1">
                           {{ exercise.notes }}
+                        </div>
+
+                        <!-- Edit Mode -->
+                        <div v-if="editMode" class="space-y-2 mt-2">
+                          <div class="flex gap-2 text-xs">
+                            <div>
+                              <label class="block text-gray-500 mb-1">Sets</label>
+                              <input
+                                v-model="exercise.prescribedSets"
+                                type="number"
+                                class="w-16 px-2 py-1 border border-gray-300 rounded"
+                              />
+                            </div>
+                            <div>
+                              <label class="block text-gray-500 mb-1">Reps</label>
+                              <input
+                                v-model="exercise.prescribedReps"
+                                type="text"
+                                class="w-20 px-2 py-1 border border-gray-300 rounded"
+                                placeholder="8-10"
+                              />
+                            </div>
+                            <div>
+                              <label class="block text-gray-500 mb-1">Rest (sec)</label>
+                              <input
+                                v-model="exercise.restSeconds"
+                                type="number"
+                                class="w-20 px-2 py-1 border border-gray-300 rounded"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label class="block text-gray-500 text-xs mb-1">Notes</label>
+                            <textarea
+                              v-model="exercise.notes"
+                              class="w-full px-2 py-1 text-xs border border-gray-300 rounded resize-none"
+                              rows="2"
+                              placeholder="Exercise notes..."
+                            ></textarea>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -306,7 +370,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProgramsStore } from '../stores/programs'
 import { useAuthStore } from '../stores/auth'
@@ -324,6 +388,11 @@ const importData = ref('')
 const expandedDays = ref(new Set())
 const importError = ref(null)
 const importLoading = ref(false)
+const editMode = ref(false)
+const editedProgram = ref(null)
+
+// Use edited program when in edit mode, otherwise use selected program
+const activeProgram = computed(() => editMode.value && editedProgram.value ? editedProgram.value : selectedProgram.value)
 
 const markdownExample = `# Program Name: My Program
 
@@ -380,6 +449,44 @@ function startWorkout(day) {
       dayId: day.dayId
     }
   })
+}
+
+function enterEditMode() {
+  // Create a deep copy of the selected program for editing
+  editedProgram.value = JSON.parse(JSON.stringify(selectedProgram.value))
+  editMode.value = true
+}
+
+function cancelEdit() {
+  editMode.value = false
+  editedProgram.value = null
+}
+
+async function saveEdits() {
+  if (!editedProgram.value) return
+  
+  try {
+    // Update the program in IndexedDB
+    await programsStore.updateProgram(selectedProgram.value.id, {
+      workoutDays: editedProgram.value.workoutDays
+    })
+    
+    // Reload programs to reflect changes
+    await programsStore.loadPrograms()
+    
+    // Update selected program with edited version
+    const updatedProgram = programs.value.find(p => p.id === selectedProgram.value.id)
+    if (updatedProgram) {
+      selectedProgram.value = updatedProgram
+    }
+    
+    // Exit edit mode
+    editMode.value = false
+    editedProgram.value = null
+  } catch (error) {
+    console.error('Failed to save edits:', error)
+    alert('Failed to save changes. Please try again.')
+  }
 }
 
 function closeImportModal() {
