@@ -116,13 +116,21 @@
                 </div>
               </div>
               
-              <button
-                v-if="exercise.sets.length === 0 && !exercise.skipped"
-                @click="skipExercise(index)"
-                class="text-sm text-gray-500 hover:text-gray-700"
-              >
-                Skip
-              </button>
+              <div v-if="exercise.sets.length === 0 && !exercise.skipped" class="flex gap-2">
+                <button
+                  v-if="hasSubstitutions(index)"
+                  @click="openSubstitutionModal(index)"
+                  class="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                >
+                  🔄 Substitute
+                </button>
+                <button
+                  @click="skipExercise(index)"
+                  class="text-sm text-gray-500 hover:text-gray-700"
+                >
+                  Skip
+                </button>
+              </div>
             </div>
 
           <!-- Rest Timer -->
@@ -316,6 +324,41 @@
         </div>
       </div>
     </div>
+
+    <!-- Substitution Modal -->
+    <div
+      v-if="substitutionModalOpen"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50"
+      @click.self="closeSubstitutionModal"
+    >
+      <div class="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[80vh] overflow-y-auto">
+        <h2 class="text-xl font-bold mb-2">Substitute Exercise</h2>
+        <p class="text-sm text-gray-600 mb-4">
+          Can't do {{ session?.exercises[substitutionExerciseIndex]?.name }}? Choose an alternative:
+        </p>
+
+        <div class="space-y-3 mb-4">
+          <div
+            v-for="(sub, idx) in substitutionOptions"
+            :key="idx"
+            class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer"
+            @click="performSubstitution(sub)"
+          >
+            <h3 class="font-semibold text-gray-900">{{ sub.exerciseId }}</h3>
+            <p class="text-sm text-gray-600 mt-1">
+              <span class="font-medium">Reason:</span> {{ sub.reason }}
+            </p>
+            <p v-if="sub.notes" class="text-sm text-gray-600 mt-1">
+              <span class="font-medium">Note:</span> {{ sub.notes }}
+            </p>
+          </div>
+        </div>
+
+        <button @click="closeSubstitutionModal" class="btn-secondary w-full">
+          Keep Original Exercise
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -324,6 +367,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useSessionsStore } from '../stores/sessions'
 import { useProgramsStore } from '../stores/programs'
+import { useExercisesStore } from '../stores/exercises'
 import { storeToRefs } from 'pinia'
 
 const router = useRouter()
@@ -342,6 +386,11 @@ const sessionNotes = ref('')
 const currentProgram = ref(null)
 const currentDay = ref(null)
 const showFormCues = ref(new Set())
+
+// Substitution modal
+const substitutionModalOpen = ref(false)
+const substitutionExerciseIndex = ref(null)
+const substitutionOptions = ref([])
 
 // Rest timer
 const restTimer = ref({
@@ -534,5 +583,69 @@ function decrementReps() {
   if (current > 0) {
     setReps.value = Math.max(0, current - 1)
   }
+}
+
+// Substitution functions
+function hasSubstitutions(index) {
+  const exerciseData = getExerciseData(index)
+  return exerciseData?.substitutions && exerciseData.substitutions.length > 0
+}
+
+function openSubstitutionModal(index) {
+  const exerciseData = getExerciseData(index)
+  if (!exerciseData?.substitutions || exerciseData.substitutions.length === 0) {
+    alert('No substitutions available for this exercise')
+    return
+  }
+  
+  substitutionExerciseIndex.value = index
+  substitutionOptions.value = exerciseData.substitutions
+  substitutionModalOpen.value = true
+}
+
+function performSubstitution(substitution) {
+  if (!session.value || substitutionExerciseIndex.value === null) return
+  
+  const index = substitutionExerciseIndex.value
+  const exercisesStore = useExercisesStore()
+  
+  // Get substitute exercise from database
+  let substituteExercise = null
+  if (substitution.exerciseDbId) {
+    substituteExercise = exercisesStore.getExerciseById(substitution.exerciseDbId)
+  }
+  
+  // Create new exercise object (keep program prescription, add substitute details)
+  const originalExercise = session.value.exercises[index]
+  const newExercise = {
+    ...originalExercise,
+    // Mark as substitution
+    isSubstitution: true,
+    originalExerciseId: originalExercise.exerciseId,
+    originalName: originalExercise.name,
+    // Update with substitute details
+    exerciseId: substitution.exerciseId,
+    name: substituteExercise?.name || substitution.exerciseId,
+    gifUrl: substituteExercise?.media?.gifUrl || substituteExercise?.gifUrl,
+    demoUrl: substituteExercise?.demoUrl,
+    instructions: substituteExercise?.instructions,
+    formCues: substituteExercise?.formCues,
+    substitutionReason: substitution.reason,
+    substitutionNotes: substitution.notes
+  }
+  
+  // Update session
+  sessionsStore.substituteExercise(index, newExercise)
+  
+  // Close modal
+  substitutionModalOpen.value = false
+  substitutionExerciseIndex.value = null
+  substitutionOptions.value = []
+}
+
+function closeSubstitutionModal() {
+  substitutionModalOpen.value = false
+  substitutionExerciseIndex.value = null
+  substitutionOptions.value = []
 }
 </script>

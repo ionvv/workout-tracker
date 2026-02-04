@@ -163,6 +163,12 @@ export const useSessionsStore = defineStore('sessions', {
       this.activeSession.exercises[exerciseIndex].skipped = true
     },
 
+    substituteExercise(exerciseIndex, newExercise) {
+      if (!this.activeSession) return
+      // Replace the exercise at the given index
+      this.activeSession.exercises[exerciseIndex] = newExercise
+    },
+
     async endSession(notes = '') {
       if (!this.activeSession) return
 
