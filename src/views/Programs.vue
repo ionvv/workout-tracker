@@ -214,6 +214,40 @@
                   <div class="p-2">
                     <div class="flex items-start gap-2">
                       <span v-if="!exercise.gifUrl" class="text-xs font-semibold text-gray-400 mt-0.5">{{ idx + 1 }}</span>
+                      
+                      <!-- Edit Mode Controls (Left Side) -->
+                      <div v-if="editMode" class="flex flex-col gap-1">
+                        <button
+                          @click="moveExerciseUp(day.dayId, idx)"
+                          :disabled="idx === 0"
+                          class="p-1 text-gray-500 hover:text-blue-600 disabled:opacity-30"
+                          title="Move up"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                          </svg>
+                        </button>
+                        <button
+                          @click="moveExerciseDown(day.dayId, idx)"
+                          :disabled="idx === day.exercises.length - 1"
+                          class="p-1 text-gray-500 hover:text-blue-600 disabled:opacity-30"
+                          title="Move down"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                          </svg>
+                        </button>
+                        <button
+                          @click="removeExercise(day.dayId, idx)"
+                          class="p-1 text-red-500 hover:text-red-700"
+                          title="Remove exercise"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                          </svg>
+                        </button>
+                      </div>
+                      
                       <div class="flex-1">
                         <div class="flex items-center gap-2">
                           <span class="font-medium text-sm">{{ exercise.name }}</span>
@@ -284,8 +318,18 @@
                 </div>
               </div>
 
+              <!-- Add Exercise Button (Edit Mode) -->
+              <div v-if="editMode" class="p-3 pt-0">
+                <button
+                  @click="openExercisePicker(day.dayId)"
+                  class="w-full px-4 py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded hover:border-blue-500 hover:text-blue-600 transition"
+                >
+                  + Add Exercise
+                </button>
+              </div>
+
               <!-- Start Workout Button -->
-              <div class="p-3 pt-0">
+              <div v-if="!editMode" class="p-3 pt-0">
                 <button
                   @click.stop="startWorkout(day)"
                   class="btn-primary w-full"
@@ -366,6 +410,57 @@
         </div>
       </div>
     </div>
+
+    <!-- Exercise Picker Modal -->
+    <div
+      v-if="showExercisePicker"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50"
+      @click.self="closeExercisePicker"
+    >
+      <div class="bg-white rounded-t-2xl w-full max-w-lg p-6 max-h-[80vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold">Add Exercise</h2>
+          <button @click="closeExercisePicker" class="text-gray-600 text-2xl">✕</button>
+        </div>
+
+        <!-- Search -->
+        <input
+          type="text"
+          placeholder="Search exercises..."
+          class="input w-full mb-4"
+          @input="e => exerciseSearchQuery = e.target.value"
+        />
+
+        <!-- Exercise List -->
+        <div class="space-y-2">
+          <div
+            v-for="exercise in filteredExercises"
+            :key="exercise.id"
+            @click="addExercise(exercise)"
+            class="p-3 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition"
+          >
+            <div class="flex items-center gap-3">
+              <img
+                v-if="exercise.media?.gifUrl || exercise.gifUrl"
+                :src="exercise.media?.gifUrl || exercise.gifUrl"
+                :alt="exercise.name"
+                class="w-16 h-16 object-cover rounded"
+                @error="handleImageError"
+              />
+              <div class="flex-1">
+                <h3 class="font-semibold text-sm">{{ exercise.name }}</h3>
+                <p class="text-xs text-gray-600" v-if="exercise.muscleGroups?.primary">
+                  {{ exercise.muscleGroups.primary.join(', ') }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div v-if="filteredExercises.length === 0" class="text-center py-8 text-gray-500">
+            No exercises found
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -374,12 +469,15 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProgramsStore } from '../stores/programs'
 import { useAuthStore } from '../stores/auth'
+import { useExercisesStore } from '../stores/exercises'
 import { storeToRefs } from 'pinia'
 
 const router = useRouter()
 const programsStore = useProgramsStore()
 const authStore = useAuthStore()
+const exercisesStore = useExercisesStore()
 const { programs } = storeToRefs(programsStore)
+const { exercises } = storeToRefs(exercisesStore)
 
 const selectedProgram = ref(null)
 const showImportModal = ref(false)
@@ -390,9 +488,26 @@ const importError = ref(null)
 const importLoading = ref(false)
 const editMode = ref(false)
 const editedProgram = ref(null)
+const showExercisePicker = ref(false)
+const currentDayId = ref(null)
+const exerciseSearchQuery = ref('')
 
 // Use edited program when in edit mode, otherwise use selected program
 const activeProgram = computed(() => editMode.value && editedProgram.value ? editedProgram.value : selectedProgram.value)
+
+// Filtered exercises for picker
+const filteredExercises = computed(() => {
+  if (!exerciseSearchQuery.value) {
+    return exercises.value.slice(0, 50) // Limit to first 50 if no search
+  }
+  
+  const query = exerciseSearchQuery.value.toLowerCase()
+  return exercises.value.filter(ex => {
+    const nameMatch = ex.name?.toLowerCase().includes(query)
+    const muscleMatch = ex.muscleGroups?.primary?.some(m => m.toLowerCase().includes(query))
+    return nameMatch || muscleMatch
+  }).slice(0, 50)
+})
 
 const markdownExample = `# Program Name: My Program
 
@@ -487,6 +602,75 @@ async function saveEdits() {
     console.error('Failed to save edits:', error)
     alert('Failed to save changes. Please try again.')
   }
+}
+
+// Exercise management functions
+function removeExercise(dayId, exerciseIndex) {
+  if (!editedProgram.value) return
+  if (!confirm('Remove this exercise?')) return
+  
+  const day = editedProgram.value.workoutDays.find(d => d.dayId === dayId)
+  if (day) {
+    day.exercises.splice(exerciseIndex, 1)
+  }
+}
+
+function moveExerciseUp(dayId, exerciseIndex) {
+  if (!editedProgram.value || exerciseIndex === 0) return
+  
+  const day = editedProgram.value.workoutDays.find(d => d.dayId === dayId)
+  if (day) {
+    const temp = day.exercises[exerciseIndex]
+    day.exercises[exerciseIndex] = day.exercises[exerciseIndex - 1]
+    day.exercises[exerciseIndex - 1] = temp
+  }
+}
+
+function moveExerciseDown(dayId, exerciseIndex) {
+  if (!editedProgram.value) return
+  
+  const day = editedProgram.value.workoutDays.find(d => d.dayId === dayId)
+  if (!day || exerciseIndex === day.exercises.length - 1) return
+  
+  const temp = day.exercises[exerciseIndex]
+  day.exercises[exerciseIndex] = day.exercises[exerciseIndex + 1]
+  day.exercises[exerciseIndex + 1] = temp
+}
+
+function openExercisePicker(dayId) {
+  currentDayId.value = dayId
+  showExercisePicker.value = true
+}
+
+function closeExercisePicker() {
+  showExercisePicker.value = false
+  currentDayId.value = null
+}
+
+function addExercise(exercise) {
+  if (!editedProgram.value || !currentDayId.value) return
+  
+  const day = editedProgram.value.workoutDays.find(d => d.dayId === currentDayId.value)
+  if (day) {
+    // Create new exercise object with default values
+    const newExercise = {
+      exerciseId: exercise.id,
+      exerciseDbId: exercise.id,
+      name: exercise.name,
+      prescribedSets: 3,
+      prescribedReps: '8-10',
+      restSeconds: 90,
+      notes: '',
+      gifUrl: exercise.media?.gifUrl || exercise.gifUrl,
+      demoUrl: exercise.demoUrl,
+      formCues: exercise.formCues,
+      instructions: exercise.instructions
+    }
+    
+    day.exercises.push(newExercise)
+  }
+  
+  closeExercisePicker()
 }
 
 function closeImportModal() {
