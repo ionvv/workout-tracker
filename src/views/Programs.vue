@@ -187,7 +187,36 @@
 
             <!-- Exercise List - Expanded -->
             <div v-if="expandedDays.has(day.dayId)" class="border-t border-gray-200 bg-gray-50">
+              
+              <!-- Warm-up Section -->
+              <div v-if="day.warmup && day.warmup.exercises?.length > 0" class="p-3 pb-0">
+                <div class="mb-2 flex items-center gap-2">
+                  <span class="text-sm font-semibold text-orange-600">🔥 Warm-up</span>
+                  <span class="text-xs text-gray-500">({{ day.warmup.duration }} min)</span>
+                </div>
+                <div class="space-y-1 mb-3">
+                  <div
+                    v-for="(ex, idx) in day.warmup.exercises"
+                    :key="'warmup-' + idx"
+                    class="bg-orange-50 rounded border border-orange-200 p-2"
+                  >
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm font-medium text-gray-800">{{ ex.name }}</span>
+                      <span class="text-xs text-gray-600">
+                        <template v-if="ex.duration">{{ ex.duration }}s</template>
+                        <template v-else-if="ex.reps">{{ ex.sets || 1 }}×{{ ex.reps }}</template>
+                      </span>
+                    </div>
+                    <div v-if="ex.notes" class="text-xs text-gray-500 mt-1">{{ ex.notes }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Main Exercises -->
               <div class="p-3 space-y-2">
+                <div v-if="day.warmup && day.warmup.exercises?.length > 0" class="mb-2">
+                  <span class="text-sm font-semibold text-gray-700">💪 Main Exercises</span>
+                </div>
                 <div
                   v-for="(exercise, idx) in day.exercises"
                   :key="exercise.exerciseId"
@@ -314,6 +343,30 @@
                         </div>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cool-down Section -->
+              <div v-if="day.cooldown && day.cooldown.exercises?.length > 0" class="p-3 pt-0">
+                <div class="mb-2 flex items-center gap-2">
+                  <span class="text-sm font-semibold text-blue-600">🧘 Cool-down</span>
+                  <span class="text-xs text-gray-500">({{ day.cooldown.duration }} min)</span>
+                </div>
+                <div class="space-y-1">
+                  <div
+                    v-for="(ex, idx) in day.cooldown.exercises"
+                    :key="'cooldown-' + idx"
+                    class="bg-blue-50 rounded border border-blue-200 p-2"
+                  >
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm font-medium text-gray-800">{{ ex.name }}</span>
+                      <span class="text-xs text-gray-600">
+                        <template v-if="ex.duration">{{ ex.duration }}s</template>
+                        <template v-else-if="ex.reps">{{ ex.reps }} reps</template>
+                      </span>
+                    </div>
+                    <div v-if="ex.notes" class="text-xs text-gray-500 mt-1">{{ ex.notes }}</div>
                   </div>
                 </div>
               </div>
