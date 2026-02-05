@@ -90,22 +90,29 @@ export const useProgramsStore = defineStore('programs', {
 
     async syncToCloud(program) {
       const authStore = useAuthStore()
-      if (!authStore.isAuthenticated) return
+      if (!authStore.isAuthenticated) {
+        console.log('[Programs] syncToCloud skipped - not authenticated')
+        return
+      }
       
       try {
+        const payload = {
+          user_id: authStore.user.id,
+          program_id: program.programId,
+          program_name: program.programName,
+          workout_days: program.workoutDays,
+          created_at: program.createdAt
+        }
+        console.log('[Programs] Syncing to cloud:', payload.program_name)
+        
         const { error } = await supabase
           .from('programs')
-          .upsert({
-            user_id: authStore.user.id,
-            program_id: program.programId,
-            program_name: program.programName,
-            workout_days: program.workoutDays,
-            created_at: program.createdAt
-          })
+          .upsert(payload)
         
         if (error) throw error
+        console.log('[Programs] Synced successfully:', payload.program_name)
       } catch (error) {
-        console.error('Sync to cloud failed:', error)
+        console.error('[Programs] Sync to cloud failed:', error)
         throw error // Re-throw so the UI can handle it
       }
     },
