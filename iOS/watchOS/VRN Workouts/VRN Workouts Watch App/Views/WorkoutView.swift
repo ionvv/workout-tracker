@@ -9,6 +9,7 @@ struct WorkoutView: View {
     @State private var showingSetLogger = false
     @State private var showingSummary = false
     @State private var currentTime = Date()
+    @State private var showingCancelAlert = false
     
     var body: some View {
         Group {
@@ -172,13 +173,21 @@ struct WorkoutView: View {
             if viewModel.activeSession != nil {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
-                        viewModel.cancelWorkout()
-                        dismiss()
+                        showingCancelAlert = true
                     } label: {
                         Image(systemName: "xmark")
                     }
                 }
             }
+        }
+        .alert("End Workout?", isPresented: $showingCancelAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("End", role: .destructive) {
+                viewModel.cancelWorkout()
+                dismiss()
+            }
+        } message: {
+            Text("Your workout progress will be lost.")
         }
         .sheet(isPresented: $showingSetLogger) {
             if let currentEx = viewModel.activeSession?.currentExercise {
