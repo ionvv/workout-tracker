@@ -4,7 +4,7 @@ import Combine
 import HealthKit
 
 @MainActor
-class WorkoutViewModel: ObservableObject {
+class WorkoutViewModel: NSObject, ObservableObject {
     @Published var activeSession: ActiveWorkoutSession?
     @Published var isSaving = false
     @Published var errorMessage: String?
@@ -17,6 +17,10 @@ class WorkoutViewModel: ObservableObject {
     
     // HealthKit
     private let healthStore = HKHealthStore()
+    
+    override init() {
+        super.init()
+    }
     private var hkWorkoutSession: HKWorkoutSession?
     private var hkWorkoutBuilder: HKLiveWorkoutBuilder?
     
