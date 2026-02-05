@@ -20,10 +20,21 @@ struct WorkoutView: View {
                             .font(.headline)
                             .lineLimit(1)
                         
-                        TimelineView(.periodic(from: .now, by: 1)) { context in
-                            Text(workoutDuration(from: session.startTime, to: context.date))
+                        HStack(spacing: 8) {
+                            TimelineView(.periodic(from: .now, by: 1)) { context in
+                                Text(workoutDuration(from: session.startTime, to: context.date))
+                                    .font(.caption2)
+                                    .foregroundColor(.gray)
+                            }
+                            
+                            if viewModel.heartRate > 0 {
+                                HStack(spacing: 2) {
+                                    Image(systemName: "heart.fill")
+                                        .foregroundColor(.red)
+                                    Text("\(Int(viewModel.heartRate))")
+                                }
                                 .font(.caption2)
-                                .foregroundColor(.gray)
+                            }
                         }
                     }
                     .padding(.top, 8)
