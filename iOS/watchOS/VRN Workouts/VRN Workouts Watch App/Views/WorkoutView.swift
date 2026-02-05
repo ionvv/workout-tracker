@@ -181,13 +181,19 @@ struct WorkoutView: View {
             }
         }
         .alert("End Workout?", isPresented: $showingCancelAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("End", role: .destructive) {
+            Button("Continue", role: .cancel) { }
+            Button("Save & End") {
+                Task {
+                    await viewModel.endWorkout()
+                    dismiss()
+                }
+            }
+            Button("Discard", role: .destructive) {
                 viewModel.cancelWorkout()
                 dismiss()
             }
         } message: {
-            Text("Your workout progress will be lost.")
+            Text("Save your progress or discard?")
         }
         .sheet(isPresented: $showingSetLogger) {
             if let currentEx = viewModel.activeSession?.currentExercise {
