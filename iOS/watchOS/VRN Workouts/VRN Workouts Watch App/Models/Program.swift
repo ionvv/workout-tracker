@@ -1,16 +1,22 @@
 import Foundation
 
 struct Program: Codable, Identifiable {
-    let id: UUID
-    let userId: UUID
+    let dbId: UUID?
+    let userId: UUID?
     let programId: String
     let programName: String
-    let workoutDays: [WorkoutDay]
-    let createdAt: Date
-    let updatedAt: Date
+    let workoutDays: [WorkoutDay]?
+    let createdAt: String?
+    let updatedAt: String?
+    
+    // Identifiable conformance - use programId as stable identifier
+    var id: String { programId }
+    
+    // Helper to get workout days safely
+    var days: [WorkoutDay] { workoutDays ?? [] }
     
     enum CodingKeys: String, CodingKey {
-        case id
+        case dbId = "id"
         case userId = "user_id"
         case programId = "program_id"
         case programName = "program_name"
@@ -23,39 +29,111 @@ struct Program: Codable, Identifiable {
 struct WorkoutDay: Codable, Identifiable {
     let dayId: String
     let dayName: String
-    let exercises: [Exercise]
+    let exercises: [Exercise]?
+    let dayType: String?
+    let estimatedTime: Int?
+    let warmup: WarmupCooldown?
+    let cooldown: WarmupCooldown?
+    let finisher: WarmupCooldown?
+    let focusMuscles: [String]?
+    let secondaryMuscles: [String]?
     
     var id: String { dayId }
+    var exerciseList: [Exercise] { exercises ?? [] }
     
     enum CodingKeys: String, CodingKey {
-        case dayId = "dayId"
-        case dayName = "dayName"
+        case dayId
+        case dayName
         case exercises
+        case dayType
+        case estimatedTime
+        case warmup
+        case cooldown
+        case finisher
+        case focusMuscles
+        case secondaryMuscles
     }
 }
 
-struct Exercise: Codable, Identifiable {
-    let exerciseId: String
+struct WarmupCooldown: Codable {
+    let duration: Int?
+    let exercises: [WarmupExercise]?
+}
+
+struct WarmupExercise: Codable {
     let name: String
-    let prescribedSets: Int
-    let prescribedReps: String
+    let duration: Int?
+    let reps: Int?
+    let sets: Int?
     let notes: String?
-    let restSeconds: Int
+}
+
+struct Exercise: Codable, Identifiable {
+    let exerciseId: String?
+    let exerciseDbId: String?
+    let name: String
+    let slug: String?
+    
+    // Core workout fields (new format)
+    let workingSets: Int?
+    let repsMin: Int?
+    let repsMax: Int?
+    let restSeconds: Int?
+    let category: String?
+    let difficulty: String?
+    
+    // Intensity fields
+    let rpe: Int?
+    let rir: Int?
+    let tempo: String?
+    let tempoDescription: String?
+    
+    // Media
+    let media: ExerciseMedia?
+    
+    // Warmup info
+    let warmupSets: Int?
+    
+    // Form guidance
+    let formCues: [String]?
+    
+    // Equipment & muscles
+    let equipment: [String]?
+    let muscleGroups: MuscleGroups?
+    
+    // Superset info
+    let supersetWith: String?
+    let supersetType: String?
+    
+    // Legacy format fields (for backwards compatibility)
+    let prescribedSets: Int?
+    let prescribedReps: String?
+    let notes: String?
     let demoUrl: String?
     let gifUrl: String?
-    let type: String
+    let type: String?
     
-    var id: String { exerciseId }
+    var id: String { exerciseId ?? UUID().uuidString }
     
-    enum CodingKeys: String, CodingKey {
-        case exerciseId = "exerciseId"
-        case name
-        case prescribedSets = "prescribedSets"
-        case prescribedReps = "prescribedReps"
-        case notes
-        case restSeconds = "restSeconds"
-        case demoUrl = "demoUrl"
-        case gifUrl = "gifUrl"
-        case type
+    // Computed properties for unified access
+    var sets: Int { workingSets ?? prescribedSets ?? 3 }
+    var reps: String { 
+        if let min = repsMin, let max = repsMax {
+            return min == max ? "\(min)" : "\(min)-\(max)"
+        }
+        return prescribedReps ?? "8-10"
     }
+    var rest: Int { restSeconds ?? 90 }
+    var imageUrl: String? { media?.gifUrl ?? gifUrl ?? demoUrl }
+}
+
+struct MuscleGroups: Codable {
+    let primary: [String]?
+    let secondary: [String]?
+}
+
+struct ExerciseMedia: Codable {
+    let gifUrl: String?
+    let videoUrl: String?
+    let thumbnailUrl: String?
 }

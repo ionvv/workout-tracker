@@ -27,7 +27,7 @@ struct ProgramsView: View {
                                     .font(.headline)
                                     .lineLimit(2)
                                 
-                                Text("\(program.workoutDays.count) days")
+                                Text("\(program.days.count) days")
                                     .font(.caption2)
                                     .foregroundColor(.gray)
                             }
@@ -61,7 +61,7 @@ struct ProgramDetailView: View {
     let program: Program
     
     var body: some View {
-        List(program.workoutDays) { day in
+        List(program.days) { day in
             NavigationLink {
                 WorkoutView(program: program, day: day)
             } label: {
@@ -70,7 +70,7 @@ struct ProgramDetailView: View {
                         .font(.headline)
                         .lineLimit(2)
                     
-                    Text("\(day.exercises.count) exercises")
+                    Text("\(day.exerciseList.count) exercises")
                         .font(.caption2)
                         .foregroundColor(.gray)
                 }
