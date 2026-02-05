@@ -203,18 +203,25 @@ struct WorkoutView: View {
 #Preview {
     WorkoutView(
         program: Program(
-            id: UUID(),
+            dbId: UUID(),
             userId: UUID(),
             programId: "test",
             programName: "Test Program",
             workoutDays: [],
-            createdAt: Date(),
-            updatedAt: Date()
+            createdAt: nil,
+            updatedAt: nil
         ),
         day: WorkoutDay(
             dayId: "day-a",
             dayName: "Day A",
-            exercises: []
+            exercises: [],
+            dayType: nil,
+            estimatedTime: nil,
+            warmup: nil,
+            cooldown: nil,
+            finisher: nil,
+            focusMuscles: nil,
+            secondaryMuscles: nil
         )
     )
 }
