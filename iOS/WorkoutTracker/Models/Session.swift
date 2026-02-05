@@ -1,5 +1,4 @@
 import Foundation
-import Combine
 
 struct WorkoutSession: Codable, Identifiable {
     let id: UUID
@@ -91,12 +90,12 @@ class ActiveWorkoutSession: ObservableObject {
         self.dayId = day.dayId
         self.dayName = day.dayName
         self.startTime = Date()
-        self.exercises = day.exercises.map { ex in
+        self.exercises = day.exerciseList.map { ex in
             SessionExercise(
-                exerciseId: ex.exerciseId,
+                exerciseId: ex.exerciseId ?? UUID().uuidString,
                 exerciseName: ex.name,
-                prescribedSets: ex.prescribedSets,
-                prescribedReps: ex.prescribedReps,
+                prescribedSets: ex.sets,  // Uses computed property
+                prescribedReps: ex.reps,   // Uses computed property
                 sets: [],
                 skipped: false
             )

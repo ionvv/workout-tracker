@@ -24,7 +24,7 @@ struct LoginView: View {
                     if let error = viewModel.errorMessage {
                         Text(error)
                             .font(.caption2)
-                            .foregroundColor(.red)
+                            .foreground Color(.red)
                             .multilineTextAlignment(.center)
                     }
                     

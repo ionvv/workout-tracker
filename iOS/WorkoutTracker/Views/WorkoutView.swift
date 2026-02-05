@@ -40,7 +40,7 @@ struct WorkoutView: View {
                                         .fontWeight(.semibold)
                                         .multilineTextAlignment(.center)
                                     
-                                    Text("\(currentEx.prescribedSets)×\(currentEx.prescribedReps)")
+                                    Text("\(currentEx.sets)×\(currentEx.reps)")
                                         .font(.caption)
                                         .foregroundColor(.gray)
                                 }
