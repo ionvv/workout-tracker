@@ -8,6 +8,7 @@ struct WorkoutView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showingSetLogger = false
     @State private var showingSummary = false
+    @State private var currentTime = Date()
     
     var body: some View {
         Group {
@@ -19,9 +20,11 @@ struct WorkoutView: View {
                             .font(.headline)
                             .lineLimit(1)
                         
-                        Text(workoutDuration(from: session.startTime))
-                            .font(.caption2)
-                            .foregroundColor(.gray)
+                        TimelineView(.periodic(from: .now, by: 1)) { context in
+                            Text(workoutDuration(from: session.startTime, to: context.date))
+                                .font(.caption2)
+                                .foregroundColor(.gray)
+                        }
                     }
                     .padding(.top, 8)
                     
@@ -183,8 +186,8 @@ struct WorkoutView: View {
         }
     }
     
-    private func workoutDuration(from start: Date) -> String {
-        let elapsed = Int(Date().timeIntervalSince(start))
+    private func workoutDuration(from start: Date, to end: Date = Date()) -> String {
+        let elapsed = Int(end.timeIntervalSince(start))
         let minutes = elapsed / 60
         let seconds = elapsed % 60
         return String(format: "%d:%02d", minutes, seconds)
