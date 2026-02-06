@@ -40,12 +40,18 @@
 /* Begin PBXFileReference section */
 		5251C8402F2FA6BF006E7F16 /* VRN Workouts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "VRN Workouts.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5251C8462F2FA6BF006E7F16 /* VRN Workouts Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "VRN Workouts Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		52A5CEA42F369BFE00BCDE26 /* VRN Workouts iOS App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "VRN Workouts iOS App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		5251C84A2F2FA6BF006E7F16 /* VRN Workouts Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "VRN Workouts Watch App";
+			sourceTree = "<group>";
+		};
+		52A5CEA52F369BFE00BCDE26 /* VRN Workouts iOS App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "VRN Workouts iOS App";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -61,6 +67,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		52A5CEA12F369BFE00BCDE26 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -68,6 +81,7 @@
 			isa = PBXGroup;
 			children = (
 				5251C84A2F2FA6BF006E7F16 /* VRN Workouts Watch App */,
+				52A5CEA52F369BFE00BCDE26 /* VRN Workouts iOS App */,
 				5251C85F2F2FA83E006E7F16 /* Frameworks */,
 				5251C8412F2FA6BF006E7F16 /* Products */,
 			);
@@ -78,6 +92,7 @@
 			children = (
 				5251C8402F2FA6BF006E7F16 /* VRN Workouts.app */,
 				5251C8462F2FA6BF006E7F16 /* VRN Workouts Watch App.app */,
+				52A5CEA42F369BFE00BCDE26 /* VRN Workouts iOS App.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -136,6 +151,28 @@
 			productReference = 5251C8462F2FA6BF006E7F16 /* VRN Workouts Watch App.app */;
 			productType = "com.apple.product-type.application";
 		};
+		52A5CEA32F369BFE00BCDE26 /* VRN Workouts iOS App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 52A5CEAE2F369C0000BCDE26 /* Build configuration list for PBXNativeTarget "VRN Workouts iOS App" */;
+			buildPhases = (
+				52A5CEA02F369BFE00BCDE26 /* Sources */,
+				52A5CEA12F369BFE00BCDE26 /* Frameworks */,
+				52A5CEA22F369BFE00BCDE26 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				52A5CEA52F369BFE00BCDE26 /* VRN Workouts iOS App */,
+			);
+			name = "VRN Workouts iOS App";
+			packageProductDependencies = (
+			);
+			productName = "VRN Workouts iOS App";
+			productReference = 52A5CEA42F369BFE00BCDE26 /* VRN Workouts iOS App.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -143,7 +180,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2610;
+				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
 					5251C83F2F2FA6BF006E7F16 = {
@@ -151,6 +188,9 @@
 					};
 					5251C8452F2FA6BF006E7F16 = {
 						CreatedOnToolsVersion = 26.1.1;
+					};
+					52A5CEA32F369BFE00BCDE26 = {
+						CreatedOnToolsVersion = 26.2;
 					};
 				};
 			};
@@ -173,6 +213,7 @@
 			targets = (
 				5251C83F2F2FA6BF006E7F16 /* VRN Workouts */,
 				5251C8452F2FA6BF006E7F16 /* VRN Workouts Watch App */,
+				52A5CEA32F369BFE00BCDE26 /* VRN Workouts iOS App */,
 			);
 		};
 /* End PBXProject section */
@@ -192,10 +233,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		52A5CEA22F369BFE00BCDE26 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		5251C8422F2FA6BF006E7F16 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		52A5CEA02F369BFE00BCDE26 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -437,6 +492,75 @@
 			};
 			name = Release;
 		};
+		52A5CEAC2F369C0000BCDE26 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = KU98G3WTWD;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "net.vrinceanu.VRN-Workouts-iOS-App";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		52A5CEAD2F369C0000BCDE26 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = KU98G3WTWD;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "net.vrinceanu.VRN-Workouts-iOS-App";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -463,6 +587,15 @@
 			buildConfigurations = (
 				5251C8582F2FA6C1006E7F16 /* Debug */,
 				5251C8592F2FA6C1006E7F16 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		52A5CEAE2F369C0000BCDE26 /* Build configuration list for PBXNativeTarget "VRN Workouts iOS App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				52A5CEAC2F369C0000BCDE26 /* Debug */,
+				52A5CEAD2F369C0000BCDE26 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
