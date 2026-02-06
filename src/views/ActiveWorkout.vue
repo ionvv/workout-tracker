@@ -392,14 +392,17 @@ const substitutionModalOpen = ref(false)
 const substitutionExerciseIndex = ref(null)
 const substitutionOptions = ref([])
 
-// Rest timer
+// Rest timer - uses timestamps to survive phone lock
 const restTimer = ref({
   exerciseIndex: null,
+  startTime: null,
+  duration: 0,
   secondsLeft: 0,
   interval: null
 })
 
-// Workout duration
+// Workout duration - uses timestamps to survive phone lock
+const workoutStartTime = ref(null)
 const workoutElapsed = ref(0)
 const workoutDurationInterval = ref(null)
 
@@ -432,13 +435,33 @@ onMounted(async () => {
     currentDay.value = day
     sessionsStore.startSession(program, day)
     
-    // Start workout duration timer
+    // Start workout duration timer using timestamps
+    workoutStartTime.value = Date.now()
     workoutDurationInterval.value = setInterval(() => {
-      workoutElapsed.value++
+      workoutElapsed.value = Math.floor((Date.now() - workoutStartTime.value) / 1000)
     }, 1000)
   } else {
     router.push('/programs')
   }
+})
+
+// Update timers immediately when page becomes visible (phone unlocked)
+function handleVisibilityChange() {
+  if (document.visibilityState === 'visible') {
+    // Update workout elapsed time
+    if (workoutStartTime.value) {
+      workoutElapsed.value = Math.floor((Date.now() - workoutStartTime.value) / 1000)
+    }
+    // Update rest timer
+    if (restTimer.value.startTime && restTimer.value.secondsLeft > 0) {
+      const elapsed = Math.floor((Date.now() - restTimer.value.startTime) / 1000)
+      restTimer.value.secondsLeft = Math.max(0, restTimer.value.duration - elapsed)
+    }
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
 onUnmounted(() => {
@@ -449,6 +472,7 @@ onUnmounted(() => {
   if (restTimer.value.interval) {
     clearInterval(restTimer.value.interval)
   }
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 
 function formatTime(isoString) {
@@ -506,11 +530,16 @@ function startRestTimer(exerciseIndex) {
   const exerciseData = getExerciseData(exerciseIndex)
   const restSeconds = exerciseData?.restSeconds || 90
   
+  // Store start time and duration for timestamp-based calculation
   restTimer.value.exerciseIndex = exerciseIndex
+  restTimer.value.startTime = Date.now()
+  restTimer.value.duration = restSeconds
   restTimer.value.secondsLeft = restSeconds
   
   restTimer.value.interval = setInterval(() => {
-    restTimer.value.secondsLeft--
+    // Calculate remaining time based on timestamps (survives phone lock)
+    const elapsed = Math.floor((Date.now() - restTimer.value.startTime) / 1000)
+    restTimer.value.secondsLeft = Math.max(0, restTimer.value.duration - elapsed)
     
     if (restTimer.value.secondsLeft <= 0) {
       clearInterval(restTimer.value.interval)
