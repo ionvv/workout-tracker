@@ -3,10 +3,30 @@ import { db } from '../utils/db'
 import { supabase } from '../utils/supabase'
 import { useAuthStore } from './auth'
 
+// Persist active session to survive page refreshes/tab kills
+const ACTIVE_SESSION_KEY = 'activeWorkoutSession'
+
+function saveActiveSessionToStorage(session) {
+  if (session) {
+    localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify(session))
+  } else {
+    localStorage.removeItem(ACTIVE_SESSION_KEY)
+  }
+}
+
+function loadActiveSessionFromStorage() {
+  try {
+    const stored = localStorage.getItem(ACTIVE_SESSION_KEY)
+    return stored ? JSON.parse(stored) : null
+  } catch {
+    return null
+  }
+}
+
 export const useSessionsStore = defineStore('sessions', {
   state: () => ({
     sessions: [],
-    activeSession: null,
+    activeSession: loadActiveSessionFromStorage(), // Restore on init
     loading: false,
     syncing: false
   }),
@@ -143,6 +163,9 @@ export const useSessionsStore = defineStore('sessions', {
         })),
         notes: ''
       }
+      
+      // Persist to localStorage
+      saveActiveSessionToStorage(this.activeSession)
     },
 
     addSet(exerciseIndex, weight, reps, rpe = null) {
@@ -156,17 +179,27 @@ export const useSessionsStore = defineStore('sessions', {
         timestamp: new Date().toISOString(),
         rpe
       })
+      
+      // Persist to localStorage
+      saveActiveSessionToStorage(this.activeSession)
     },
 
     skipExercise(exerciseIndex) {
       if (!this.activeSession) return
       this.activeSession.exercises[exerciseIndex].skipped = true
+      saveActiveSessionToStorage(this.activeSession)
     },
 
     substituteExercise(exerciseIndex, newExercise) {
       if (!this.activeSession) return
       // Replace the exercise at the given index
       this.activeSession.exercises[exerciseIndex] = newExercise
+      saveActiveSessionToStorage(this.activeSession)
+    },
+    
+    cancelSession() {
+      this.activeSession = null
+      saveActiveSessionToStorage(null)
     },
 
     async endSession(notes = '') {
@@ -197,6 +230,7 @@ export const useSessionsStore = defineStore('sessions', {
       await this.loadSessions()
 
       this.activeSession = null
+      saveActiveSessionToStorage(null) // Clear from localStorage
     },
 
     async deleteSession(sessionId) {
