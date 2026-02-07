@@ -78,6 +78,20 @@ struct ActiveWorkoutView: View {
                             .fontWeight(.semibold)
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    if viewModel.restTimeRemaining > 0 {
+                        HStack(spacing: 4) {
+                            Image(systemName: "timer")
+                            Text(formatRestTime(viewModel.restTimeRemaining))
+                                .fontWeight(.bold)
+                        }
+                        .foregroundStyle(.orange)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Color.orange.opacity(0.2))
+                        .cornerRadius(8)
+                    }
+                }
             }
             .sheet(isPresented: $showingSetLogger) {
                 if currentExerciseIndex < day.exerciseList.count {
@@ -126,6 +140,15 @@ struct ActiveWorkoutView: View {
             }
         }
     }
+    
+    private func formatRestTime(_ seconds: Int) -> String {
+        let mins = seconds / 60
+        let secs = seconds % 60
+        if mins > 0 {
+            return String(format: "%d:%02d", mins, secs)
+        }
+        return "\(secs)s"
+    }
 }
 
 // MARK: - Workout Header
@@ -136,70 +159,36 @@ struct WorkoutHeaderView: View {
     
     var body: some View {
         VStack(spacing: 4) {
-            HStack {
-                Spacer()
-                
-                VStack(spacing: 4) {
-                    Text(dayName)
-                        .font(.headline)
-                    
-                    HStack(spacing: 16) {
-                        // Timer
-                        TimelineView(.periodic(from: .now, by: 1)) { context in
-                            if let startTime = viewModel.activeSession?.startTime {
-                                Label(formatDuration(from: startTime, to: context.date), systemImage: "timer")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                        
-                        // Heart rate
-                        if viewModel.heartRate > 0 {
-                            Label("\(Int(viewModel.heartRate)) BPM", systemImage: "heart.fill")
-                                .font(.subheadline)
-                                .foregroundStyle(.red)
-                        }
-                        
-                        // Calories
-                        if viewModel.activeCalories > 0 {
-                            Label("\(Int(viewModel.activeCalories)) cal", systemImage: "flame.fill")
-                                .font(.subheadline)
-                                .foregroundStyle(.orange)
-                        }
+            Text(dayName)
+                .font(.headline)
+            
+            HStack(spacing: 16) {
+                // Timer
+                TimelineView(.periodic(from: .now, by: 1)) { context in
+                    if let startTime = viewModel.activeSession?.startTime {
+                        Label(formatDuration(from: startTime, to: context.date), systemImage: "timer")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                     }
                 }
                 
-                Spacer()
+                // Heart rate
+                if viewModel.heartRate > 0 {
+                    Label("\(Int(viewModel.heartRate)) BPM", systemImage: "heart.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(.red)
+                }
                 
-                // Rest timer in top right
-                if viewModel.restTimeRemaining > 0 {
-                    VStack(spacing: 2) {
-                        Text("REST")
-                            .font(.caption2)
-                            .foregroundStyle(.orange)
-                        Text(formatRestTime(viewModel.restTimeRemaining))
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundStyle(.orange)
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.orange.opacity(0.2))
-                    .cornerRadius(10)
+                // Calories
+                if viewModel.activeCalories > 0 {
+                    Label("\(Int(viewModel.activeCalories)) cal", systemImage: "flame.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(.orange)
                 }
             }
         }
         .padding()
         .background(Color(.systemBackground))
-    }
-    
-    private func formatRestTime(_ seconds: Int) -> String {
-        let mins = seconds / 60
-        let secs = seconds % 60
-        if mins > 0 {
-            return String(format: "%d:%02d", mins, secs)
-        }
-        return "\(secs)s"
     }
     
     private func formatDuration(from start: Date, to end: Date) -> String {
