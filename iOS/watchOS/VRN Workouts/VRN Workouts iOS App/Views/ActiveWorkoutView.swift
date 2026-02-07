@@ -188,8 +188,8 @@ struct WorkoutHeaderView: View {
                 }
             }
         }
-        .padding()
-        .background(Color(.systemBackground))
+        .padding(.vertical, 8)
+        .padding(.horizontal)
     }
     
     private func formatDuration(from start: Date, to end: Date) -> String {
