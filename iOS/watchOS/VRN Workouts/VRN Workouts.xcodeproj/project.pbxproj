@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		522527272F3747AE008C77F9 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 522527262F3747AE008C77F9 /* Supabase */; };
 		5251C8472F2FA6BF006E7F16 /* VRN Workouts Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 5251C8462F2FA6BF006E7F16 /* VRN Workouts Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5251C85C2F2FA814006E7F16 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 5251C85B2F2FA814006E7F16 /* Auth */; };
 		5251C85E2F2FA814006E7F16 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = 5251C85D2F2FA814006E7F16 /* PostgREST */; };
@@ -71,6 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				522527272F3747AE008C77F9 /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -168,6 +170,7 @@
 			);
 			name = "VRN Workouts iOS App";
 			packageProductDependencies = (
+				522527262F3747AE008C77F9 /* Supabase */,
 			);
 			productName = "VRN Workouts iOS App";
 			productReference = 52A5CEA42F369BFE00BCDE26 /* VRN Workouts iOS App.app */;
@@ -502,6 +505,8 @@
 				DEVELOPMENT_TEAM = KU98G3WTWD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "VRN Workouts reads your heart rate during workouts to display real-time metrics.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "VRN Workouts saves your strength training workouts to the Health app to track your fitness progress.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -536,6 +541,8 @@
 				DEVELOPMENT_TEAM = KU98G3WTWD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "VRN Workouts reads your heart rate during workouts to display real-time metrics.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "VRN Workouts saves your strength training workouts to the Health app to track your fitness progress.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -614,6 +621,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		522527262F3747AE008C77F9 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5251C85A2F2FA814006E7F16 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
 		5251C85B2F2FA814006E7F16 /* Auth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 5251C85A2F2FA814006E7F16 /* XCRemoteSwiftPackageReference "supabase-swift" */;
