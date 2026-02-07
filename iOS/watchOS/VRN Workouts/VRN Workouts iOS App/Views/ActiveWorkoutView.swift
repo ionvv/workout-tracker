@@ -220,21 +220,21 @@ struct ExerciseCardView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                // Exercise image
+                // Exercise image - full width
                 if let gifUrl = exercise.imageUrl, let url = URL(string: gifUrl) {
                     AsyncImage(url: url) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                     } placeholder: {
-                        RoundedRectangle(cornerRadius: 12)
+                        Rectangle()
                             .fill(Color(.systemGray5))
                             .overlay {
                                 ProgressView()
                             }
                     }
-                    .frame(height: 200)
-                    .cornerRadius(12)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 250)
                 }
                 
                 // Exercise info
@@ -310,7 +310,7 @@ struct ExerciseCardView: View {
                     .cornerRadius(12)
                 }
             }
-            .padding()
+            .padding(.horizontal)
         }
         .safeAreaInset(edge: .bottom) {
             // Fixed action buttons at bottom
