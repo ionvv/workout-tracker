@@ -173,15 +173,29 @@ struct ExercisePage: View {
                     .cornerRadius(8)
                 }
                 
-                // Exercise image placeholder (if available in future)
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.gray.opacity(0.15))
-                    .frame(height: 60)
-                    .overlay(
-                        Image(systemName: "figure.strengthtraining.traditional")
-                            .font(.title2)
-                            .foregroundColor(.gray)
-                    )
+                // Exercise image
+                if let imageUrl = exercise.imageUrl, let url = URL(string: imageUrl) {
+                    AsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                    } placeholder: {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.gray.opacity(0.15))
+                            .overlay(ProgressView())
+                    }
+                    .frame(height: 70)
+                    .cornerRadius(12)
+                } else {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.gray.opacity(0.15))
+                        .frame(height: 60)
+                        .overlay(
+                            Image(systemName: "figure.strengthtraining.traditional")
+                                .font(.title2)
+                                .foregroundColor(.gray)
+                        )
+                }
             }
             .padding(.horizontal, 4)
         }

@@ -42,6 +42,7 @@ struct SessionExercise: Codable, Identifiable {
     let exerciseName: String
     let prescribedSets: Int?
     let prescribedReps: String?
+    let imageUrl: String?
     var sets: [SetLog]
     var skipped: Bool
     
@@ -52,6 +53,7 @@ struct SessionExercise: Codable, Identifiable {
         case exerciseName = "exerciseName"
         case prescribedSets = "prescribedSets"
         case prescribedReps = "prescribedReps"
+        case imageUrl = "imageUrl"
         case sets
         case skipped
     }
@@ -95,8 +97,9 @@ class ActiveWorkoutSession: ObservableObject {
             SessionExercise(
                 exerciseId: ex.exerciseId ?? UUID().uuidString,
                 exerciseName: ex.name,
-                prescribedSets: ex.sets,  // Uses computed property
-                prescribedReps: ex.reps,   // Uses computed property
+                prescribedSets: ex.sets,
+                prescribedReps: ex.reps,
+                imageUrl: ex.imageUrl,
                 sets: [],
                 skipped: false
             )
