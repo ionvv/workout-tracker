@@ -153,6 +153,7 @@ struct SquareButton: View {
             exerciseName: "Back Squat",
             prescribedSets: 4,
             prescribedReps: "6-8",
+            imageUrl: nil,
             sets: [],
             skipped: false
         ),
