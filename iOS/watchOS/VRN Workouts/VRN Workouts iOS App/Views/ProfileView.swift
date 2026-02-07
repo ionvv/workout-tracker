@@ -48,12 +48,22 @@ struct ProfileView: View {
                     }
                 }
                 
-                // Health
-                Section("Health") {
+                // Health & Devices
+                Section("Health & Devices") {
                     NavigationLink {
                         Text("HealthKit settings coming soon")
                     } label: {
                         Label("Apple Health", systemImage: "heart.fill")
+                    }
+                    
+                    NavigationLink {
+                        WatchPairingView()
+                    } label: {
+                        HStack {
+                            Label("Apple Watch", systemImage: "applewatch")
+                            Spacer()
+                            WatchStatusIndicator()
+                        }
                     }
                 }
                 
@@ -91,6 +101,43 @@ struct ProfileView: View {
             } message: {
                 Text("You'll need to sign in again to access your workouts.")
             }
+        }
+    }
+}
+
+// MARK: - Watch Status Indicator
+
+struct WatchStatusIndicator: View {
+    @StateObject private var watchService = WatchConnectivityService.shared
+    
+    var body: some View {
+        HStack(spacing: 4) {
+            Circle()
+                .fill(statusColor)
+                .frame(width: 8, height: 8)
+            Text(statusText)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+    
+    private var statusText: String {
+        if watchService.isReachable {
+            return "Connected"
+        } else if watchService.isPaired {
+            return "Paired"
+        } else {
+            return "Not paired"
+        }
+    }
+    
+    private var statusColor: Color {
+        if watchService.isReachable {
+            return .green
+        } else if watchService.isPaired {
+            return .orange
+        } else {
+            return .gray
         }
     }
 }
