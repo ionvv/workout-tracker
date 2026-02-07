@@ -14,13 +14,8 @@ struct ActiveWorkoutView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Header with timer and heart rate
+                // Header with timer, heart rate, and rest timer
                 WorkoutHeaderView(viewModel: viewModel, dayName: day.dayName)
-                
-                // Rest timer (at top, below header)
-                if viewModel.restTimeRemaining > 0 {
-                    RestTimerView(secondsLeft: viewModel.restTimeRemaining)
-                }
                 
                 if day.exerciseList.isEmpty {
                     // Empty state
@@ -141,36 +136,70 @@ struct WorkoutHeaderView: View {
     
     var body: some View {
         VStack(spacing: 4) {
-            Text(dayName)
-                .font(.headline)
-            
-            HStack(spacing: 16) {
-                // Timer
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    if let startTime = viewModel.activeSession?.startTime {
-                        Label(formatDuration(from: startTime, to: context.date), systemImage: "timer")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+            HStack {
+                Spacer()
+                
+                VStack(spacing: 4) {
+                    Text(dayName)
+                        .font(.headline)
+                    
+                    HStack(spacing: 16) {
+                        // Timer
+                        TimelineView(.periodic(from: .now, by: 1)) { context in
+                            if let startTime = viewModel.activeSession?.startTime {
+                                Label(formatDuration(from: startTime, to: context.date), systemImage: "timer")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        
+                        // Heart rate
+                        if viewModel.heartRate > 0 {
+                            Label("\(Int(viewModel.heartRate)) BPM", systemImage: "heart.fill")
+                                .font(.subheadline)
+                                .foregroundStyle(.red)
+                        }
+                        
+                        // Calories
+                        if viewModel.activeCalories > 0 {
+                            Label("\(Int(viewModel.activeCalories)) cal", systemImage: "flame.fill")
+                                .font(.subheadline)
+                                .foregroundStyle(.orange)
+                        }
                     }
                 }
                 
-                // Heart rate
-                if viewModel.heartRate > 0 {
-                    Label("\(Int(viewModel.heartRate)) BPM", systemImage: "heart.fill")
-                        .font(.subheadline)
-                        .foregroundStyle(.red)
-                }
+                Spacer()
                 
-                // Calories
-                if viewModel.activeCalories > 0 {
-                    Label("\(Int(viewModel.activeCalories)) cal", systemImage: "flame.fill")
-                        .font(.subheadline)
-                        .foregroundStyle(.orange)
+                // Rest timer in top right
+                if viewModel.restTimeRemaining > 0 {
+                    VStack(spacing: 2) {
+                        Text("REST")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                        Text(formatRestTime(viewModel.restTimeRemaining))
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.orange)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.orange.opacity(0.2))
+                    .cornerRadius(10)
                 }
             }
         }
         .padding()
         .background(Color(.systemBackground))
+    }
+    
+    private func formatRestTime(_ seconds: Int) -> String {
+        let mins = seconds / 60
+        let secs = seconds % 60
+        if mins > 0 {
+            return String(format: "%d:%02d", mins, secs)
+        }
+        return "\(secs)s"
     }
     
     private func formatDuration(from start: Date, to end: Date) -> String {
