@@ -36,6 +36,14 @@ struct ProgramDetailView: View {
         .fullScreenCover(isPresented: $showingWorkout) {
             if let day = selectedDay {
                 ActiveWorkoutView(program: program, day: day)
+                    .onAppear {
+                        print("ActiveWorkoutView appeared!")
+                    }
+            } else {
+                Text("Error: No day selected")
+                    .onAppear {
+                        print("fullScreenCover: selectedDay is nil!")
+                    }
             }
         }
     }
