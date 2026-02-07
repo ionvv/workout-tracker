@@ -16,6 +16,9 @@ class WorkoutViewModel: NSObject, ObservableObject {
     private var restStartTime: Date?
     private var restDuration: Int = 0
     
+    // Store exercise rest times for rest timer
+    private var exerciseRestTimes: [Int] = []
+    
     // HealthKit
     private let healthStore = HKHealthStore()
     private var hkWorkoutSession: HKWorkoutSession?
@@ -27,21 +30,29 @@ class WorkoutViewModel: NSObject, ObservableObject {
     
     func startWorkout(program: Program, day: WorkoutDay) {
         activeSession = ActiveWorkoutSession(program: program, day: day)
+        // Store rest times for each exercise
+        exerciseRestTimes = day.exerciseList.map { $0.rest }
         startHealthKitWorkout()
     }
     
     func logSet(at index: Int, weight: Double, reps: Int, rpe: Int?) {
-        activeSession?.addSet(at: index, weight: weight, reps: reps, rpe: rpe)
+        guard let session = activeSession else { return }
         
-        // Get rest time from exercise
-        if let exercises = activeSession?.program.days.first(where: { $0.dayId == activeSession?.dayId })?.exerciseList {
-            let restSeconds = exercises[index].rest
+        session.addSet(at: index, weight: weight, reps: reps, rpe: rpe)
+        
+        // Start rest timer
+        if index < exerciseRestTimes.count {
+            let restSeconds = exerciseRestTimes[index]
             startRestTimer(seconds: restSeconds)
         }
     }
     
     func skipExercise(at index: Int) {
-        activeSession?.exercises[index].skipped = true
+        activeSession?.skipExercise(at: index)
+    }
+    
+    func nextExercise() {
+        activeSession?.moveToNextExercise()
     }
     
     func endWorkout() async {
@@ -80,8 +91,10 @@ class WorkoutViewModel: NSObject, ObservableObject {
         restTimeRemaining = seconds
         
         restTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            
             Task { @MainActor in
-                guard let self = self, let startTime = self.restStartTime else { return }
+                guard let startTime = self.restStartTime else { return }
                 
                 let elapsed = Int(Date().timeIntervalSince(startTime))
                 self.restTimeRemaining = max(0, self.restDuration - elapsed)

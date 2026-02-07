@@ -108,10 +108,10 @@ class ActiveWorkoutSession: ObservableObject {
         return exercises[currentExerciseIndex]
     }
     
-    func addSet(weight: Double, reps: Int, rpe: Int? = nil) {
-        guard currentExerciseIndex < exercises.count else { return }
+    func addSet(at index: Int, weight: Double, reps: Int, rpe: Int? = nil) {
+        guard index < exercises.count else { return }
         
-        let setNumber = exercises[currentExerciseIndex].sets.count + 1
+        let setNumber = exercises[index].sets.count + 1
         let newSet = SetLog(
             setNumber: setNumber,
             weight: weight,
@@ -120,13 +120,12 @@ class ActiveWorkoutSession: ObservableObject {
             rpe: rpe
         )
         
-        exercises[currentExerciseIndex].sets.append(newSet)
+        exercises[index].sets.append(newSet)
     }
     
-    func skipExercise() {
-        guard currentExerciseIndex < exercises.count else { return }
-        exercises[currentExerciseIndex].skipped = true
-        moveToNextExercise()
+    func skipExercise(at index: Int) {
+        guard index < exercises.count else { return }
+        exercises[index].skipped = true
     }
     
     func moveToNextExercise() {
