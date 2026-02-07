@@ -24,18 +24,45 @@ class WorkoutViewModel: NSObject, ObservableObject {
     private var hkWorkoutSession: HKWorkoutSession?
     private var hkWorkoutBuilder: HKLiveWorkoutBuilder?
     
+    private var backgroundTimer: Timer?
+    
     override init() {
         super.init()
         
-        // Listen for app termination to end HealthKit session
+        // Listen for app entering background - start timer to end HealthKit
         NotificationCenter.default.addObserver(
-            forName: .appWillTerminate,
+            forName: .appDidEnterBackground,
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            print("🛑 WorkoutViewModel: Ending HealthKit session on app terminate")
-            self?.hkWorkoutSession?.end()
+            print("🛑 WorkoutViewModel: App in background, starting 30s timer")
+            self?.startBackgroundTimer()
         }
+        
+        // Listen for app returning - cancel timer
+        NotificationCenter.default.addObserver(
+            forName: .appWillEnterForeground,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            print("✅ WorkoutViewModel: App returned, canceling background timer")
+            self?.cancelBackgroundTimer()
+        }
+    }
+    
+    private func startBackgroundTimer() {
+        cancelBackgroundTimer()
+        backgroundTimer = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: false) { [weak self] _ in
+            print("🛑 WorkoutViewModel: 30s elapsed, ending HealthKit session")
+            self?.hkWorkoutSession?.end()
+            self?.hkWorkoutSession = nil
+            self?.hkWorkoutBuilder = nil
+        }
+    }
+    
+    private func cancelBackgroundTimer() {
+        backgroundTimer?.invalidate()
+        backgroundTimer = nil
     }
     
     func startWorkout(program: Program, day: WorkoutDay) {
