@@ -9,7 +9,7 @@ class AuthService: ObservableObject {
     private let client: SupabaseClient
     
     @Published var isAuthenticated = false
-    @Published var isLoading = true
+    @Published var isLoading = false  // Start false - show login immediately
     @Published var userEmail: String?
     @Published var userId: String?
     
@@ -25,37 +25,17 @@ class AuthService: ObservableObject {
     }
     
     func checkSession() async {
-        isLoading = true
-        
-        // Race between session check and timeout
-        await withTaskGroup(of: Bool.self) { group in
-            group.addTask {
-                try? await Task.sleep(nanoseconds: 3_000_000_000) // 3 second timeout
-                return false // timeout reached
-            }
-            
-            group.addTask { @MainActor in
-                do {
-                    let session = try await self.client.auth.session
-                    self.isAuthenticated = true
-                    self.userEmail = session.user.email
-                    self.userId = session.user.id.uuidString
-                    return true
-                } catch {
-                    self.isAuthenticated = false
-                    self.userEmail = nil
-                    self.userId = nil
-                    return true // completed (even if failed)
-                }
-            }
-            
-            // Wait for first to complete
-            if let _ = await group.next() {
-                group.cancelAll()
-            }
+        // Quick check - don't block UI
+        do {
+            let session = try await client.auth.session
+            isAuthenticated = true
+            userEmail = session.user.email
+            userId = session.user.id.uuidString
+        } catch {
+            isAuthenticated = false
+            userEmail = nil
+            userId = nil
         }
-        
-        isLoading = false
     }
     
     func signIn(email: String, password: String) async throws {
