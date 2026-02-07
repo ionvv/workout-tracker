@@ -3,7 +3,6 @@ import SwiftUI
 struct ProgramDetailView: View {
     let program: Program
     @State private var selectedDay: WorkoutDay?
-    @State private var showingWorkout = false
     
     var body: some View {
         List {
@@ -15,7 +14,6 @@ struct ProgramDetailView: View {
                             print("ProgramDetailView: Tapped day \(day.dayName)")
                             print("ProgramDetailView: exerciseList count = \(day.exerciseList.count)")
                             selectedDay = day
-                            showingWorkout = true
                         }
                     
                     // Exercise preview
@@ -33,18 +31,8 @@ struct ProgramDetailView: View {
         }
         .listStyle(.insetGrouped)
         .navigationTitle(program.programName)
-        .fullScreenCover(isPresented: $showingWorkout) {
-            if let day = selectedDay {
-                ActiveWorkoutView(program: program, day: day)
-                    .onAppear {
-                        print("ActiveWorkoutView appeared!")
-                    }
-            } else {
-                Text("Error: No day selected")
-                    .onAppear {
-                        print("fullScreenCover: selectedDay is nil!")
-                    }
-            }
+        .fullScreenCover(item: $selectedDay) { day in
+            ActiveWorkoutView(program: program, day: day)
         }
     }
 }
