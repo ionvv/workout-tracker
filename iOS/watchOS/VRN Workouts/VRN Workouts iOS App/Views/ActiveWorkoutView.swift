@@ -232,6 +232,7 @@ struct ExerciseCardView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 250)
+                    .padding(.horizontal)
                 }
                 
                 // Exercise info
@@ -258,6 +259,7 @@ struct ExerciseCardView: View {
                             .cornerRadius(8)
                     }
                 }
+                .padding(.horizontal)
                 
                 // Logged sets
                 if !loggedSets.isEmpty {
@@ -283,8 +285,10 @@ struct ExerciseCardView: View {
                         }
                     }
                     .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(.systemGray5).opacity(0.5))
                     .cornerRadius(12)
+                    .padding(.horizontal)
                 }
                 
                 // Form cues
@@ -303,11 +307,12 @@ struct ExerciseCardView: View {
                         }
                     }
                     .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(.systemGray5).opacity(0.5))
                     .cornerRadius(12)
+                    .padding(.horizontal)
                 }
             }
-            .padding(.horizontal)
         }
         .safeAreaInset(edge: .bottom) {
             // Fixed action buttons at bottom
