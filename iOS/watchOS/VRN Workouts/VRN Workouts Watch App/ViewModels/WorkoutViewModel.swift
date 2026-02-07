@@ -11,6 +11,7 @@ class WorkoutViewModel: NSObject, ObservableObject {
     @Published var restTimeRemaining: Int = 0
     @Published var heartRate: Double = 0
     @Published var activeCalories: Double = 0
+    @Published var isPaused = false
     
     private let sessionService = SessionService.shared
     private var restTimer: Timer?
@@ -96,13 +97,41 @@ class WorkoutViewModel: NSObject, ObservableObject {
         startRestTimer(seconds: 120) // Default 2 min rest
     }
     
+    func logSet(at index: Int, weight: Double, reps: Int, rpe: Int? = nil) {
+        activeSession?.addSet(at: index, weight: weight, reps: reps, rpe: rpe)
+        
+        // Start rest timer
+        startRestTimer(seconds: 120) // Default 2 min rest
+    }
+    
     func skipCurrentExercise() {
         activeSession?.skipExercise()
+    }
+    
+    func skipExercise(at index: Int) {
+        activeSession?.skipExercise(at: index)
     }
     
     func moveToNextExercise() {
         activeSession?.moveToNextExercise()
         stopRestTimer()
+    }
+    
+    func setCurrentExercise(index: Int) {
+        activeSession?.currentExerciseIndex = index
+    }
+    
+    func togglePause() {
+        isPaused.toggle()
+        
+        if isPaused {
+            hkWorkoutSession?.pause()
+            stopRestTimer()
+        } else {
+            hkWorkoutSession?.resume()
+        }
+        
+        WKInterfaceDevice.current().play(.click)
     }
     
     func endWorkout(notes: String = "") async {

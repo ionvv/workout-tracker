@@ -40,8 +40,8 @@ struct WorkoutSession: Codable, Identifiable {
 struct SessionExercise: Codable, Identifiable {
     let exerciseId: String
     let exerciseName: String
-    let prescribedSets: Int
-    let prescribedReps: String
+    let prescribedSets: Int?
+    let prescribedReps: String?
     var sets: [SetLog]
     var skipped: Bool
     
@@ -123,10 +123,30 @@ class ActiveWorkoutSession: ObservableObject {
         exercises[currentExerciseIndex].sets.append(newSet)
     }
     
+    func addSet(at index: Int, weight: Double, reps: Int, rpe: Int? = nil) {
+        guard index < exercises.count else { return }
+        
+        let setNumber = exercises[index].sets.count + 1
+        let newSet = SetLog(
+            setNumber: setNumber,
+            weight: weight,
+            reps: reps,
+            timestamp: Date(),
+            rpe: rpe
+        )
+        
+        exercises[index].sets.append(newSet)
+    }
+    
     func skipExercise() {
         guard currentExerciseIndex < exercises.count else { return }
         exercises[currentExerciseIndex].skipped = true
         moveToNextExercise()
+    }
+    
+    func skipExercise(at index: Int) {
+        guard index < exercises.count else { return }
+        exercises[index].skipped = true
     }
     
     func moveToNextExercise() {
@@ -137,7 +157,7 @@ class ActiveWorkoutSession: ObservableObject {
     
     var isComplete: Bool {
         currentExerciseIndex >= exercises.count - 1 &&
-        (currentExercise?.sets.count ?? 0) >= (currentExercise?.prescribedSets ?? 0)
+        (currentExercise?.sets.count ?? 0) >= (currentExercise?.prescribedSets ?? 1)
     }
     
     func calculateStats() -> (volume: Int, sets: Int, duration: Int) {
