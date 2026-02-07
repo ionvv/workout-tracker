@@ -14,46 +14,40 @@ struct WorkoutView: View {
     var body: some View {
         Group {
             if let session = viewModel.activeSession {
-                VStack(spacing: 0) {
-                    // Compact header
-                    WorkoutHeader(session: session, heartRate: viewModel.heartRate)
-                    
-                    if session.currentExercise != nil {
-                        // Exercise slides
-                        TabView(selection: $currentExerciseIndex) {
-                            ForEach(Array(session.exercises.enumerated()), id: \.element.id) { index, exercise in
-                                ExerciseSlide(
-                                    exercise: exercise,
-                                    index: index,
-                                    total: session.exercises.count,
-                                    restTime: viewModel.restTimeRemaining
-                                )
-                                .tag(index)
+                if session.currentExercise != nil {
+                    // Active workout - swipeable exercise pages
+                    TabView(selection: $currentExerciseIndex) {
+                        ForEach(Array(session.exercises.enumerated()), id: \.element.id) { index, exercise in
+                            ExercisePage(
+                                exercise: exercise,
+                                index: index,
+                                total: session.exercises.count,
+                                heartRate: viewModel.heartRate,
+                                calories: viewModel.activeCalories,
+                                startTime: session.startTime,
+                                restTime: viewModel.restTimeRemaining,
+                                isPaused: viewModel.isPaused,
+                                onAddSet: { showingSetLogger = true },
+                                onSkip: { skipAndNext() },
+                                onPause: { viewModel.togglePause() },
+                                onStop: { showingEndOptions = true }
+                            )
+                            .tag(index)
+                        }
+                    }
+                    .tabViewStyle(.verticalPage)
+                } else {
+                    // Workout complete
+                    WorkoutCompleteView(
+                        session: session,
+                        isSaving: viewModel.isSaving,
+                        onSave: {
+                            Task {
+                                await viewModel.endWorkout()
+                                dismiss()
                             }
                         }
-                        .tabViewStyle(.verticalPage)
-                        
-                        // Action buttons - 2x2 grid
-                        ActionButtonGrid(
-                            onAddSet: { showingSetLogger = true },
-                            onSkip: { skipAndNext() },
-                            onPause: { viewModel.togglePause() },
-                            onStop: { showingEndOptions = true },
-                            isPaused: viewModel.isPaused
-                        )
-                    } else {
-                        // Workout complete
-                        WorkoutCompleteView(
-                            session: session,
-                            isSaving: viewModel.isSaving,
-                            onSave: {
-                                Task {
-                                    await viewModel.endWorkout()
-                                    dismiss()
-                                }
-                            }
-                        )
-                    }
+                    )
                 }
             } else {
                 ProgressView("Starting...")
@@ -104,37 +98,149 @@ struct WorkoutView: View {
     }
 }
 
-// MARK: - Workout Header
+// MARK: - Exercise Page (Full screen for each exercise)
 
-struct WorkoutHeader: View {
-    let session: ActiveWorkoutSession
+struct ExercisePage: View {
+    let exercise: SessionExercise
+    let index: Int
+    let total: Int
     let heartRate: Double
+    let calories: Double
+    let startTime: Date
+    let restTime: Int
+    let isPaused: Bool
+    let onAddSet: () -> Void
+    let onSkip: () -> Void
+    let onPause: () -> Void
+    let onStop: () -> Void
     
     var body: some View {
-        HStack {
-            // Timer
-            TimelineView(.periodic(from: .now, by: 1)) { context in
-                Text(formatDuration(from: session.startTime, to: context.date))
-                    .font(.system(.body, design: .monospaced))
-                    .fontWeight(.medium)
+        ScrollView {
+            VStack(spacing: 8) {
+                // Stats header
+                StatsHeader(
+                    heartRate: heartRate,
+                    calories: calories,
+                    startTime: startTime,
+                    restTime: restTime
+                )
+                
+                // 2x2 Action buttons
+                ActionButtonGrid(
+                    onAddSet: onAddSet,
+                    onSkip: onSkip,
+                    onPause: onPause,
+                    onStop: onStop,
+                    isPaused: isPaused
+                )
+                
+                // Exercise name & progress
+                VStack(spacing: 4) {
+                    Text("\(index + 1)/\(total)")
+                        .font(.caption2)
+                        .foregroundColor(.gray)
+                    
+                    Text(exercise.exerciseName)
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                    
+                    if let sets = exercise.prescribedSets, let reps = exercise.prescribedReps {
+                        Text("\(sets) × \(reps)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .padding(.vertical, 4)
+                
+                // Logged sets
+                if !exercise.sets.isEmpty {
+                    VStack(spacing: 4) {
+                        ForEach(exercise.sets) { set in
+                            HStack {
+                                Text("Set \(set.setNumber)")
+                                    .font(.caption2)
+                                Spacer()
+                                Text("\(Int(set.weight))kg × \(set.reps)")
+                                    .font(.caption2)
+                                    .fontWeight(.medium)
+                            }
+                        }
+                    }
+                    .padding(8)
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(8)
+                }
+                
+                // Exercise image placeholder (if available in future)
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.gray.opacity(0.15))
+                    .frame(height: 60)
+                    .overlay(
+                        Image(systemName: "figure.strengthtraining.traditional")
+                            .font(.title2)
+                            .foregroundColor(.gray)
+                    )
             }
-            
-            Spacer()
-            
+            .padding(.horizontal, 4)
+        }
+    }
+}
+
+// MARK: - Stats Header
+
+struct StatsHeader: View {
+    let heartRate: Double
+    let calories: Double
+    let startTime: Date
+    let restTime: Int
+    
+    var body: some View {
+        HStack(spacing: 8) {
             // Heart rate
             if heartRate > 0 {
                 HStack(spacing: 2) {
                     Image(systemName: "heart.fill")
                         .foregroundColor(.red)
-                        .font(.caption2)
                     Text("\(Int(heartRate))")
-                        .font(.caption)
+                }
+                .font(.caption2)
+            }
+            
+            // Calories
+            if calories > 0 {
+                HStack(spacing: 2) {
+                    Image(systemName: "flame.fill")
+                        .foregroundColor(.orange)
+                    Text("\(Int(calories))")
+                }
+                .font(.caption2)
+            }
+            
+            Spacer()
+            
+            // Timer or Rest
+            if restTime > 0 {
+                HStack(spacing: 2) {
+                    Image(systemName: "timer")
+                    Text(formatRest(restTime))
+                }
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.orange)
+            } else {
+                TimelineView(.periodic(from: .now, by: 1)) { context in
+                    Text(formatDuration(from: startTime, to: context.date))
+                        .font(.system(.caption, design: .monospaced))
+                        .fontWeight(.medium)
                 }
             }
         }
         .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(Color.black.opacity(0.3))
+        .padding(.vertical, 6)
+        .background(Color.blue.opacity(0.3))
+        .cornerRadius(10)
     }
     
     private func formatDuration(from start: Date, to end: Date) -> String {
@@ -142,73 +248,6 @@ struct WorkoutHeader: View {
         let minutes = elapsed / 60
         let seconds = elapsed % 60
         return String(format: "%02d:%02d", minutes, seconds)
-    }
-}
-
-// MARK: - Exercise Slide
-
-struct ExerciseSlide: View {
-    let exercise: SessionExercise
-    let index: Int
-    let total: Int
-    let restTime: Int
-    
-    var body: some View {
-        VStack(spacing: 6) {
-            // Progress indicator
-            Text("\(index + 1)/\(total)")
-                .font(.caption2)
-                .foregroundColor(.gray)
-            
-            // Exercise name
-            Text(exercise.exerciseName)
-                .font(.headline)
-                .fontWeight(.bold)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-            
-            // Prescription
-            if let sets = exercise.prescribedSets, let reps = exercise.prescribedReps {
-                Text("\(sets) × \(reps)")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-            
-            // Rest timer (if active)
-            if restTime > 0 {
-                HStack(spacing: 4) {
-                    Image(systemName: "timer")
-                    Text(formatRest(restTime))
-                }
-                .font(.title3)
-                .fontWeight(.semibold)
-                .foregroundColor(.orange)
-                .padding(.vertical, 4)
-            }
-            
-            // Logged sets
-            if !exercise.sets.isEmpty {
-                VStack(spacing: 2) {
-                    ForEach(exercise.sets.suffix(3)) { set in
-                        HStack {
-                            Text("Set \(set.setNumber)")
-                                .font(.caption2)
-                            Spacer()
-                            Text("\(Int(set.weight))kg × \(set.reps)")
-                                .font(.caption2)
-                                .fontWeight(.medium)
-                        }
-                    }
-                }
-                .padding(6)
-                .background(Color.gray.opacity(0.15))
-                .cornerRadius(6)
-            }
-            
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, 4)
-        .padding(.top, 4)
     }
     
     private func formatRest(_ seconds: Int) -> String {
@@ -232,62 +271,64 @@ struct ActionButtonGrid: View {
     
     var body: some View {
         VStack(spacing: 6) {
-            // Row 1: Add Set | Skip
+            // Row 1: Add | Skip
             HStack(spacing: 6) {
-                Button(action: onAddSet) {
-                    VStack(spacing: 2) {
-                        Image(systemName: "plus")
-                            .font(.title3)
-                        Text("Set")
-                            .font(.caption2)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.green)
+                ActionButton(
+                    title: "Add",
+                    icon: "plus",
+                    color: .green,
+                    action: onAddSet
+                )
                 
-                Button(action: onSkip) {
-                    VStack(spacing: 2) {
-                        Image(systemName: "forward.fill")
-                            .font(.title3)
-                        Text("Skip")
-                            .font(.caption2)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
-                .buttonStyle(.bordered)
+                ActionButton(
+                    title: "Skip",
+                    icon: "forward.fill",
+                    color: .gray,
+                    action: onSkip
+                )
             }
             
             // Row 2: Pause | Stop
             HStack(spacing: 6) {
-                Button(action: onPause) {
-                    VStack(spacing: 2) {
-                        Image(systemName: isPaused ? "play.fill" : "pause.fill")
-                            .font(.title3)
-                        Text(isPaused ? "Resume" : "Pause")
-                            .font(.caption2)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
-                .buttonStyle(.bordered)
-                .tint(.yellow)
+                ActionButton(
+                    title: isPaused ? "Resume" : "Pause",
+                    icon: isPaused ? "play.fill" : "pause.fill",
+                    color: .yellow,
+                    action: onPause
+                )
                 
-                Button(action: onStop) {
-                    VStack(spacing: 2) {
-                        Image(systemName: "stop.fill")
-                            .font(.title3)
-                        Text("End")
-                            .font(.caption2)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
-                .buttonStyle(.bordered)
-                .tint(.red)
+                ActionButton(
+                    title: "Stop",
+                    icon: "stop.fill",
+                    color: .red,
+                    action: onStop
+                )
             }
         }
-        .frame(height: 80)
-        .padding(.horizontal, 4)
-        .padding(.bottom, 4)
+    }
+}
+
+struct ActionButton: View {
+    let title: String
+    let icon: String
+    let color: Color
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 2) {
+                Image(systemName: icon)
+                    .font(.title3)
+                Text(title)
+                    .font(.system(size: 10))
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 50)
+            .background(color.opacity(0.3))
+            .foregroundColor(color == .yellow ? .primary : color)
+            .cornerRadius(10)
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -303,16 +344,21 @@ struct WorkoutCompleteView: View {
             Spacer()
             
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 40))
+                .font(.system(size: 44))
                 .foregroundColor(.green)
             
             Text("Complete!")
-                .font(.headline)
+                .font(.title3)
+                .fontWeight(.bold)
             
             let stats = session.calculateStats()
             VStack(spacing: 4) {
                 Text("\(stats.sets) sets")
+                    .font(.headline)
                 Text("\(stats.volume) kg total")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text("\(stats.duration) min")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -323,12 +369,13 @@ struct WorkoutCompleteView: View {
                 if isSaving {
                     ProgressView()
                 } else {
-                    Text("Save")
+                    Text("Save Workout")
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                 }
             }
             .buttonStyle(.borderedProminent)
+            .tint(.green)
             .disabled(isSaving)
             .padding(.horizontal)
             .padding(.bottom, 8)
