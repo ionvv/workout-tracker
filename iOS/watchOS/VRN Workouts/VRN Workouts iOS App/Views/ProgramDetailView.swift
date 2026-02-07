@@ -12,6 +12,8 @@ struct ProgramDetailView: View {
                     DayRow(day: day)
                         .contentShape(Rectangle())
                         .onTapGesture {
+                            print("ProgramDetailView: Tapped day \(day.dayName)")
+                            print("ProgramDetailView: exerciseList count = \(day.exerciseList.count)")
                             selectedDay = day
                             showingWorkout = true
                         }

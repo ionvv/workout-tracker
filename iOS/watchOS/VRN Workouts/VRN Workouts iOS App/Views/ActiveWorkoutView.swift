@@ -121,6 +121,12 @@ struct ActiveWorkoutView: View {
                 Text("Save your progress or discard?")
             }
             .task {
+                print("ActiveWorkoutView: Starting workout")
+                print("ActiveWorkoutView: Day = \(day.dayName)")
+                print("ActiveWorkoutView: Exercises count = \(day.exerciseList.count)")
+                for (i, ex) in day.exerciseList.enumerated() {
+                    print("  Exercise \(i): \(ex.name)")
+                }
                 viewModel.startWorkout(program: program, day: day)
             }
         }
