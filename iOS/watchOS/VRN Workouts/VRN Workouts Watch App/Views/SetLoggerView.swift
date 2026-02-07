@@ -22,15 +22,15 @@ struct SetLoggerView: View {
                     WKInterfaceDevice.current().play(.click)
                 }
                 
-                HStack(spacing: 2) {
+                HStack(spacing: 3) {
                     Text(weight.truncatingRemainder(dividingBy: 1) == 0 ? "\(Int(weight))" : String(format: "%.1f", weight))
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
                     Text("kg")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.gray)
                 }
                 .frame(maxWidth: .infinity)
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(0.6)
                     .focusable()
                     .digitalCrownRotation(
                         $weight,
@@ -54,15 +54,15 @@ struct SetLoggerView: View {
                     WKInterfaceDevice.current().play(.click)
                 }
                 
-                HStack(spacing: 4) {
+                HStack(spacing: 3) {
                     Text("×")
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.gray)
                     Text("\(Int(reps))")
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
                 }
                 .frame(maxWidth: .infinity)
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(0.6)
                     .focusable()
                     .digitalCrownRotation(
                         $reps,
