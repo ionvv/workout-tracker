@@ -9,6 +9,7 @@ class AuthService: ObservableObject {
     private let client: SupabaseClient
     
     @Published var isAuthenticated = false
+    @Published var isLoading = true
     @Published var userEmail: String?
     @Published var userId: String?
     
@@ -24,6 +25,7 @@ class AuthService: ObservableObject {
     }
     
     func checkSession() async {
+        isLoading = true
         do {
             let session = try await client.auth.session
             isAuthenticated = true
@@ -34,6 +36,7 @@ class AuthService: ObservableObject {
             userEmail = nil
             userId = nil
         }
+        isLoading = false
     }
     
     func signIn(email: String, password: String) async throws {
