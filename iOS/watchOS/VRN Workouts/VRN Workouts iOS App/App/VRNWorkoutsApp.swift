@@ -15,8 +15,13 @@ struct VRNWorkoutsApp: App {
                 }
             }
             .task {
+                print("🚀 App: task started at \(Date())")
                 // Check session in background - UI shows immediately
                 await authService.checkSession()
+                print("🚀 App: task completed at \(Date())")
+            }
+            .onAppear {
+                print("🚀 App: onAppear at \(Date())")
             }
             .onChange(of: scenePhase) { oldPhase, newPhase in
                 if newPhase == .background {
