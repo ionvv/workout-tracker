@@ -80,12 +80,13 @@ struct ActiveWorkoutView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     if viewModel.restTimeRemaining > 0 {
-                        HStack(spacing: 4) {
+                        HStack(spacing: 6) {
                             Image(systemName: "timer")
                             Text(formatRestTime(viewModel.restTimeRemaining))
                                 .fontWeight(.bold)
                         }
                         .foregroundStyle(.orange)
+                        .padding(.horizontal, 8)
                     }
                 }
             }

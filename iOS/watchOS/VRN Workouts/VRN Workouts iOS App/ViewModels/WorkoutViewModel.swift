@@ -26,24 +26,6 @@ class WorkoutViewModel: NSObject, ObservableObject {
     
     override init() {
         super.init()
-        
-        // Listen for app going to background to end HealthKit session
-        NotificationCenter.default.addObserver(
-            forName: .appWillResignActive,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor in
-                self?.endHealthKitSessionOnly()
-            }
-        }
-    }
-    
-    /// End only the HealthKit session (when app closes but workout data should persist)
-    private func endHealthKitSessionOnly() {
-        hkWorkoutSession?.end()
-        hkWorkoutSession = nil
-        hkWorkoutBuilder = nil
     }
     
     func startWorkout(program: Program, day: WorkoutDay) {
