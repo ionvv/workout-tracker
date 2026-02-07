@@ -17,7 +17,12 @@ class AuthService: ObservableObject {
         print("🔐 AuthService: init started at \(Date())")
         self.client = SupabaseClient(
             supabaseURL: URL(string: Config.supabaseURL)!,
-            supabaseKey: Config.supabaseAnonKey
+            supabaseKey: Config.supabaseAnonKey,
+            options: SupabaseClientOptions(
+                auth: SupabaseClientOptions.AuthOptions(
+                    autoRefreshToken: true
+                )
+            )
         )
         print("🔐 AuthService: SupabaseClient created at \(Date())")
         
@@ -31,25 +36,32 @@ class AuthService: ObservableObject {
     func checkSession() async {
         print("🔐 checkSession: Started at \(Date())")
         
-        // Try to get session with 2 second timeout
+        // First try cached session (instant)
+        print("🔐 checkSession: Checking currentSession...")
+        if let session = client.auth.currentSession {
+            print("🔐 checkSession: Got cached session! user=\(session.user.email ?? "no email") at \(Date())")
+            isAuthenticated = true
+            userEmail = session.user.email
+            userId = session.user.id.uuidString
+            print("🔐 checkSession: Finished (cached) at \(Date())")
+            return
+        }
+        
+        print("🔐 checkSession: No cached session, trying network...")
+        
+        // No cached session - try network with timeout
         var didComplete = false
         
         Task {
-            print("🔐 checkSession: Timeout task started")
             try? await Task.sleep(for: .seconds(2))
-            print("🔐 checkSession: Timeout reached, didComplete=\(didComplete)")
             if !didComplete {
-                await MainActor.run {
-                    print("🔐 checkSession: TIMEOUT - showing login")
-                    self.isAuthenticated = false
-                }
+                print("🔐 checkSession: TIMEOUT - showing login")
             }
         }
         
-        print("🔐 checkSession: Calling client.auth.session...")
         do {
             let session = try await client.auth.session
-            print("🔐 checkSession: Got session! user=\(session.user.email ?? "no email") at \(Date())")
+            print("🔐 checkSession: Got session from network! user=\(session.user.email ?? "no email") at \(Date())")
             didComplete = true
             isAuthenticated = true
             userEmail = session.user.email
