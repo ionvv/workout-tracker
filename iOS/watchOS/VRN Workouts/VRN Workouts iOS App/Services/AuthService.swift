@@ -26,11 +26,14 @@ class AuthService: ObservableObject {
         )
         print("🔐 AuthService: SupabaseClient created at \(Date())")
         
-        Task {
-            print("🔐 AuthService: Starting checkSession task at \(Date())")
-            await checkSession()
-            print("🔐 AuthService: checkSession completed at \(Date())")
+        // Check cached session synchronously in init
+        if let session = client.auth.currentSession {
+            print("🔐 AuthService: Found cached session in init for \(session.user.email ?? "unknown")")
+            self.isAuthenticated = true
+            self.userEmail = session.user.email
+            self.userId = session.user.id.uuidString
         }
+        print("🔐 AuthService: init complete, isAuthenticated=\(isAuthenticated)")
     }
     
     func checkSession() async {

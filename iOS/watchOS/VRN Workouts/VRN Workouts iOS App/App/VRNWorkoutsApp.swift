@@ -23,14 +23,8 @@ struct VRNWorkoutsApp: App {
             .onChange(of: authService.isAuthenticated) { oldValue, newValue in
                 print("📱 isAuthenticated changed: \(oldValue) -> \(newValue) at \(Date())")
             }
-            .task {
-                print("🚀 App: task started at \(Date())")
-                // Check session in background - UI shows immediately
-                await authService.checkSession()
-                print("🚀 App: task completed at \(Date())")
-            }
             .onAppear {
-                print("🚀 App: onAppear at \(Date())")
+                print("🚀 App: onAppear at \(Date()), isAuthenticated=\(authService.isAuthenticated)")
             }
             .onChange(of: scenePhase) { oldPhase, newPhase in
                 if newPhase == .background {
