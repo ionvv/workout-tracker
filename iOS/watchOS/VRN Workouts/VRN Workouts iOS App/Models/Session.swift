@@ -2,11 +2,12 @@ import Foundation
 import Combine
 
 struct WorkoutSession: Codable, Identifiable {
-    let id: UUID
-    let userId: UUID
+    let dbId: UUID?
+    let odid: Int?  // Some DBs use integer IDs
+    let userId: UUID?
     let sessionId: String
-    let programId: String
-    let dayId: String
+    let programId: String?
+    let dayId: String?
     let dayName: String
     let startTime: Date
     var endTime: Date?
@@ -15,11 +16,15 @@ struct WorkoutSession: Codable, Identifiable {
     var totalVolume: Int?
     var totalSets: Int?
     var duration: Int?
-    let createdAt: Date
-    var updatedAt: Date
+    var createdAt: Date?
+    var updatedAt: Date?
+    
+    // Identifiable - use sessionId as the identifier
+    var id: String { sessionId }
     
     enum CodingKeys: String, CodingKey {
-        case id
+        case dbId = "id"
+        case odid
         case userId = "user_id"
         case sessionId = "session_id"
         case programId = "program_id"

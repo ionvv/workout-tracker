@@ -32,12 +32,26 @@ class SessionService {
         
         guard let httpResponse = response as? HTTPURLResponse,
               (200...299).contains(httpResponse.statusCode) else {
+            print("SessionService: HTTP error \((response as? HTTPURLResponse)?.statusCode ?? 0)")
             throw NSError(domain: "SessionService", code: 500, userInfo: [NSLocalizedDescriptionKey: "Failed to fetch sessions"])
+        }
+        
+        // Debug: print raw JSON
+        if let jsonString = String(data: data, encoding: .utf8) {
+            print("SessionService: Raw JSON: \(jsonString.prefix(500))...")
         }
         
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode([WorkoutSession].self, from: data)
+        
+        do {
+            let sessions = try decoder.decode([WorkoutSession].self, from: data)
+            print("SessionService: Decoded \(sessions.count) sessions")
+            return sessions
+        } catch {
+            print("SessionService: Decode error: \(error)")
+            throw error
+        }
     }
     
     func saveSession(_ session: ActiveWorkoutSession) async throws {
