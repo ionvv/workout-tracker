@@ -45,8 +45,8 @@ struct WorkoutSession: Codable, Identifiable {
 struct SessionExercise: Codable, Identifiable {
     let exerciseId: String
     let exerciseName: String
-    let prescribedSets: Int
-    let prescribedReps: String
+    let prescribedSets: Int?
+    let prescribedReps: String?
     var sets: [SetLog]
     var skipped: Bool
     
