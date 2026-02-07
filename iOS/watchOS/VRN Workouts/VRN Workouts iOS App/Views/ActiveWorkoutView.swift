@@ -51,7 +51,7 @@ struct ActiveWorkoutView: View {
                             .tag(index)
                         }
                     }
-                    .tabViewStyle(.page(indexDisplayMode: .automatic))
+                    .tabViewStyle(.page(indexDisplayMode: .never))
                     
                     // Bottom action bar
                     WorkoutActionBar(
