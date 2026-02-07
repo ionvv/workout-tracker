@@ -14,17 +14,18 @@ struct SetLoggerView: View {
     }
     
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 8) {
             // Weight row: [-] 20 kg [+]
-            HStack(spacing: 12) {
+            HStack(spacing: 8) {
                 SquareButton(icon: "minus") {
                     weight = max(0, weight - 2.5)
                     WKInterfaceDevice.current().play(.click)
                 }
                 
                 Text("\(Int(weight)) kg")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
                     .frame(maxWidth: .infinity)
+                    .minimumScaleFactor(0.7)
                     .focusable()
                     .digitalCrownRotation(
                         $weight,
@@ -42,15 +43,16 @@ struct SetLoggerView: View {
             }
             
             // Reps row: [-] x12 [+]
-            HStack(spacing: 12) {
+            HStack(spacing: 8) {
                 SquareButton(icon: "minus") {
                     reps = max(0, reps - 1)
                     WKInterfaceDevice.current().play(.click)
                 }
                 
                 Text("×\(Int(reps))")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
                     .frame(maxWidth: .infinity)
+                    .minimumScaleFactor(0.7)
                     .focusable()
                     .digitalCrownRotation(
                         $reps,
@@ -72,9 +74,10 @@ struct SetLoggerView: View {
                 onSave(weight, Int(reps), nil)
             } label: {
                 Text("Save")
-                    .font(.headline)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 44)
+                    .frame(height: 36)
             }
             .buttonStyle(.borderedProminent)
             .tint(.green)
@@ -85,9 +88,9 @@ struct SetLoggerView: View {
                 dismiss()
             } label: {
                 Text("Cancel")
-                    .font(.headline)
+                    .font(.subheadline)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 44)
+                    .frame(height: 36)
             }
             .buttonStyle(.bordered)
             
@@ -98,8 +101,8 @@ struct SetLoggerView: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
         }
-        .padding(.horizontal, 8)
-        .padding(.top, 12)
+        .padding(.horizontal, 4)
+        .padding(.top, 32)
         .onAppear {
             if let lastSet = exercise.sets.last {
                 weight = lastSet.weight
@@ -121,11 +124,11 @@ struct SquareButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(.title3)
+                .font(.body)
                 .fontWeight(.semibold)
-                .frame(width: 44, height: 44)
+                .frame(width: 36, height: 36)
                 .background(Color.gray.opacity(0.3))
-                .cornerRadius(10)
+                .cornerRadius(8)
         }
         .buttonStyle(.plain)
     }
