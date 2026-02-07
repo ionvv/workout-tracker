@@ -108,7 +108,8 @@ struct ExerciseSessionRow: View {
 #Preview {
     NavigationStack {
         SessionDetailView(session: WorkoutSession(
-            id: UUID(),
+            dbId: UUID(),
+            odid: nil,
             userId: UUID(),
             sessionId: "test",
             programId: "prog1",
