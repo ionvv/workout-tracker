@@ -13,12 +13,9 @@ struct SetLoggerSheet: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 24) {
-                Text(exercise.name)
-                    .font(.headline)
-                    .foregroundStyle(.secondary)
-                
-                // Weight input
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Weight input
                 VStack(spacing: 8) {
                     Text("Weight (kg)")
                         .font(.subheadline)
@@ -100,9 +97,11 @@ struct SetLoggerSheet: View {
                 .background(Color(.systemGray6))
                 .cornerRadius(12)
                 
-                Spacer()
-                
-                // Save button
+                }
+                .padding()
+            }
+            .safeAreaInset(edge: .bottom) {
+                // Save button fixed at bottom
                 Button {
                     onSave(weight, reps, showRPE ? rpe : nil)
                 } label: {
@@ -113,9 +112,9 @@ struct SetLoggerSheet: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(weight <= 0 || reps <= 0)
+                .padding()
             }
-            .padding()
-            .navigationTitle("Log Set")
+            .navigationTitle(exercise.name)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
