@@ -290,28 +290,30 @@ struct ExerciseCardView: View {
                     .background(Color(.systemGray5).opacity(0.5))
                     .cornerRadius(12)
                 }
-                
-                // Actions
-                HStack(spacing: 16) {
-                    Button {
-                        onSkip()
-                    } label: {
-                        Text("Skip")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.bordered)
-                    
-                    Button {
-                        onLogSet()
-                    } label: {
-                        Label("Log Set", systemImage: "plus.circle.fill")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-                .padding(.top)
             }
             .padding()
+        }
+        .safeAreaInset(edge: .bottom) {
+            // Fixed action buttons at bottom
+            HStack(spacing: 16) {
+                Button {
+                    onSkip()
+                } label: {
+                    Text("Skip")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                
+                Button {
+                    onLogSet()
+                } label: {
+                    Label("Log Set", systemImage: "plus.circle.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            .padding()
+            .background(.ultraThinMaterial)
         }
     }
 }
