@@ -17,52 +17,61 @@ struct ActiveWorkoutView: View {
                 // Header with timer and heart rate
                 WorkoutHeaderView(viewModel: viewModel, dayName: day.dayName)
                 
-                // Exercise cards
-                TabView(selection: $currentExerciseIndex) {
-                    ForEach(Array(day.exerciseList.enumerated()), id: \.element.id) { index, exercise in
-                        ExerciseCardView(
-                            exercise: exercise,
-                            exerciseIndex: index,
-                            session: viewModel.activeSession,
-                            onLogSet: {
-                                currentExerciseIndex = index
-                                showingSetLogger = true
-                            },
-                            onSkip: {
-                                viewModel.skipExercise(at: index)
-                                if index < day.exerciseList.count - 1 {
-                                    currentExerciseIndex = index + 1
+                if day.exerciseList.isEmpty {
+                    // Empty state
+                    ContentUnavailableView(
+                        "No Exercises",
+                        systemImage: "figure.strengthtraining.traditional",
+                        description: Text("This workout day has no exercises.")
+                    )
+                } else {
+                    // Exercise cards
+                    TabView(selection: $currentExerciseIndex) {
+                        ForEach(Array(day.exerciseList.enumerated()), id: \.element.id) { index, exercise in
+                            ExerciseCardView(
+                                exercise: exercise,
+                                exerciseIndex: index,
+                                session: viewModel.activeSession,
+                                onLogSet: {
+                                    currentExerciseIndex = index
+                                    showingSetLogger = true
+                                },
+                                onSkip: {
+                                    viewModel.skipExercise(at: index)
+                                    if index < day.exerciseList.count - 1 {
+                                        currentExerciseIndex = index + 1
+                                    }
                                 }
+                            )
+                            .tag(index)
+                        }
+                    }
+                    .tabViewStyle(.page(indexDisplayMode: .automatic))
+                    
+                    // Rest timer
+                    if viewModel.restTimeRemaining > 0 {
+                        RestTimerView(secondsLeft: viewModel.restTimeRemaining)
+                    }
+                    
+                    // Bottom action bar
+                    WorkoutActionBar(
+                        currentIndex: currentExerciseIndex,
+                        totalExercises: day.exerciseList.count,
+                        onPrevious: {
+                            if currentExerciseIndex > 0 {
+                                currentExerciseIndex -= 1
                             }
-                        )
-                        .tag(index)
-                    }
-                }
-                .tabViewStyle(.page(indexDisplayMode: .automatic))
-                
-                // Rest timer
-                if viewModel.restTimeRemaining > 0 {
-                    RestTimerView(secondsLeft: viewModel.restTimeRemaining)
-                }
-                
-                // Bottom action bar
-                WorkoutActionBar(
-                    currentIndex: currentExerciseIndex,
-                    totalExercises: day.exerciseList.count,
-                    onPrevious: {
-                        if currentExerciseIndex > 0 {
-                            currentExerciseIndex -= 1
+                        },
+                        onNext: {
+                            if currentExerciseIndex < day.exerciseList.count - 1 {
+                                currentExerciseIndex += 1
+                            }
+                        },
+                        onFinish: {
+                            showingEndAlert = true
                         }
-                    },
-                    onNext: {
-                        if currentExerciseIndex < day.exerciseList.count - 1 {
-                            currentExerciseIndex += 1
-                        }
-                    },
-                    onFinish: {
-                        showingEndAlert = true
-                    }
-                )
+                    )
+                }
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -76,15 +85,25 @@ struct ActiveWorkoutView: View {
                 }
             }
             .sheet(isPresented: $showingSetLogger) {
-                SetLoggerSheet(
-                    exercise: day.exerciseList[currentExerciseIndex],
-                    lastSet: viewModel.activeSession?.exercises[currentExerciseIndex].sets.last,
-                    onSave: { weight, reps, rpe in
-                        viewModel.logSet(at: currentExerciseIndex, weight: weight, reps: reps, rpe: rpe)
-                        showingSetLogger = false
-                    }
-                )
-                .presentationDetents([.medium])
+                if currentExerciseIndex < day.exerciseList.count {
+                    let lastSet: SetLog? = {
+                        guard let session = viewModel.activeSession,
+                              currentExerciseIndex < session.exercises.count else {
+                            return nil
+                        }
+                        return session.exercises[currentExerciseIndex].sets.last
+                    }()
+                    
+                    SetLoggerSheet(
+                        exercise: day.exerciseList[currentExerciseIndex],
+                        lastSet: lastSet,
+                        onSave: { weight, reps, rpe in
+                            viewModel.logSet(at: currentExerciseIndex, weight: weight, reps: reps, rpe: rpe)
+                            showingSetLogger = false
+                        }
+                    )
+                    .presentationDetents([.medium])
+                }
             }
             .alert("End Workout?", isPresented: $showingEndAlert) {
                 Button("Continue", role: .cancel) { }
@@ -166,7 +185,11 @@ struct ExerciseCardView: View {
     let onSkip: () -> Void
     
     private var loggedSets: [SetLog] {
-        session?.exercises[exerciseIndex].sets ?? []
+        guard let session = session,
+              exerciseIndex < session.exercises.count else {
+            return []
+        }
+        return session.exercises[exerciseIndex].sets
     }
     
     var body: some View {
