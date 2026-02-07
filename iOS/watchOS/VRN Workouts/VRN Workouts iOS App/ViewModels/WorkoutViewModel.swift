@@ -33,6 +33,10 @@ class WorkoutViewModel: NSObject, ObservableObject {
         // Store rest times for each exercise
         exerciseRestTimes = day.exerciseList.map { $0.rest }
         startHealthKitWorkout()
+        
+        // Persist and notify
+        saveSessionToDevice()
+        WorkoutStateManager.shared.sessionStarted(dayName: day.dayName, exerciseCount: day.exerciseList.count)
     }
     
     func logSet(at index: Int, weight: Double, reps: Int, rpe: Int?) {
@@ -45,10 +49,21 @@ class WorkoutViewModel: NSObject, ObservableObject {
             let restSeconds = exerciseRestTimes[index]
             startRestTimer(seconds: restSeconds)
         }
+        
+        // Persist after each set
+        saveSessionToDevice()
+        let totalSets = session.exercises.reduce(0) { $0 + $1.sets.count }
+        WorkoutStateManager.shared.updateSets(count: totalSets)
     }
     
     func skipExercise(at index: Int) {
         activeSession?.skipExercise(at: index)
+        saveSessionToDevice()
+    }
+    
+    private func saveSessionToDevice() {
+        guard let session = activeSession else { return }
+        WorkoutPersistence.shared.saveSession(session)
     }
     
     func nextExercise() {
@@ -66,6 +81,7 @@ class WorkoutViewModel: NSObject, ObservableObject {
         do {
             try await SessionService.shared.saveSession(session)
             activeSession = nil
+            WorkoutStateManager.shared.sessionEnded()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -80,9 +96,15 @@ class WorkoutViewModel: NSObject, ObservableObject {
         hkWorkoutBuilder = nil
         activeSession = nil
         stopRestTimer()
+        WorkoutStateManager.shared.sessionEnded()
     }
     
     // MARK: - Rest Timer
+    
+    /// Public method to start rest timer (for resume view)
+    func startRestTimerPublic(seconds: Int) {
+        startRestTimer(seconds: seconds)
+    }
     
     private func startRestTimer(seconds: Int) {
         stopRestTimer()
