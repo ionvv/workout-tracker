@@ -111,7 +111,8 @@ struct ActiveWorkoutView: View {
                             showingSetLogger = false
                         }
                     )
-                    .presentationDetents([.medium])
+                    .presentationDetents([.large, .medium])
+                    .presentationDragIndicator(.visible)
                 }
             }
             .alert("End Workout?", isPresented: $showingEndAlert) {
