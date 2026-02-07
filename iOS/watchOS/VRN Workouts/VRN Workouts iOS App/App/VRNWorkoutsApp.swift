@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct VRNWorkoutsApp: App {
     @StateObject private var authService = AuthService.shared
+    @Environment(\.scenePhase) private var scenePhase
     
     var body: some Scene {
         WindowGroup {
@@ -21,6 +22,16 @@ struct VRNWorkoutsApp: App {
                     LoginView()
                 }
             }
+            .onChange(of: scenePhase) { oldPhase, newPhase in
+                if newPhase == .background {
+                    // App going to background - end any active HealthKit session
+                    NotificationCenter.default.post(name: .appWillResignActive, object: nil)
+                }
+            }
         }
     }
+}
+
+extension Notification.Name {
+    static let appWillResignActive = Notification.Name("appWillResignActive")
 }
