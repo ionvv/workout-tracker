@@ -86,10 +86,6 @@ struct ActiveWorkoutView: View {
                                 .fontWeight(.bold)
                         }
                         .foregroundStyle(.orange)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(Color.orange.opacity(0.2))
-                        .cornerRadius(8)
                     }
                 }
             }
