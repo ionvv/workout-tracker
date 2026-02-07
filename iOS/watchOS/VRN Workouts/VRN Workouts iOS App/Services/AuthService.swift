@@ -25,13 +25,27 @@ class AuthService: ObservableObject {
     }
     
     func checkSession() async {
-        // Quick check - don't block UI
+        // Try to get session with 2 second timeout
+        var didComplete = false
+        
+        Task {
+            try? await Task.sleep(for: .seconds(2))
+            if !didComplete {
+                await MainActor.run {
+                    // Timeout - just show login
+                    self.isAuthenticated = false
+                }
+            }
+        }
+        
         do {
             let session = try await client.auth.session
+            didComplete = true
             isAuthenticated = true
             userEmail = session.user.email
             userId = session.user.id.uuidString
         } catch {
+            didComplete = true
             isAuthenticated = false
             userEmail = nil
             userId = nil
