@@ -173,22 +173,25 @@ struct ExercisePage: View {
                     .cornerRadius(8)
                 }
                 
-                // Exercise image
+                // Exercise image - full width
                 if let imageUrl = exercise.imageUrl, let url = URL(string: imageUrl) {
                     AsyncImage(url: url) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                     } placeholder: {
-                        RoundedRectangle(cornerRadius: 12)
+                        RoundedRectangle(cornerRadius: 8)
                             .fill(Color.gray.opacity(0.15))
+                            .frame(height: 80)
                             .overlay(ProgressView())
                     }
-                    .frame(height: 70)
-                    .cornerRadius(12)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 80)
+                    .cornerRadius(8)
                 } else {
-                    RoundedRectangle(cornerRadius: 12)
+                    RoundedRectangle(cornerRadius: 8)
                         .fill(Color.gray.opacity(0.15))
+                        .frame(maxWidth: .infinity)
                         .frame(height: 60)
                         .overlay(
                             Image(systemName: "figure.strengthtraining.traditional")
