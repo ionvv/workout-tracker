@@ -15,7 +15,7 @@ struct WorkoutView: View {
         Group {
             if let session = viewModel.activeSession {
                 if session.currentExercise != nil {
-                    // Active workout - swipeable exercise pages
+                    // Active workout - horizontal swipeable exercise pages with dots
                     TabView(selection: $currentExerciseIndex) {
                         ForEach(Array(session.exercises.enumerated()), id: \.element.id) { index, exercise in
                             ExercisePage(
@@ -35,7 +35,7 @@ struct WorkoutView: View {
                             .tag(index)
                         }
                     }
-                    .tabViewStyle(.verticalPage)
+                    .tabViewStyle(.page(indexDisplayMode: .always))
                 } else {
                     // Workout complete
                     WorkoutCompleteView(
