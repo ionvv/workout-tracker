@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 import SwiftUI
 
 /// Global manager for active workout state - observable from any view
