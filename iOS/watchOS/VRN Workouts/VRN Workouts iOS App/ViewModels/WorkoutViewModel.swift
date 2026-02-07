@@ -26,6 +26,16 @@ class WorkoutViewModel: NSObject, ObservableObject {
     
     override init() {
         super.init()
+        
+        // Listen for app termination to end HealthKit session
+        NotificationCenter.default.addObserver(
+            forName: .appWillTerminate,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            print("🛑 WorkoutViewModel: Ending HealthKit session on app terminate")
+            self?.hkWorkoutSession?.end()
+        }
     }
     
     func startWorkout(program: Program, day: WorkoutDay) {

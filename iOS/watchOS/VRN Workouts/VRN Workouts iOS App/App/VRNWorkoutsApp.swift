@@ -1,7 +1,19 @@
 import SwiftUI
 
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func applicationWillTerminate(_ application: UIApplication) {
+        print("🛑 App will terminate - ending HealthKit session")
+        NotificationCenter.default.post(name: .appWillTerminate, object: nil)
+    }
+}
+
+extension Notification.Name {
+    static let appWillTerminate = Notification.Name("appWillTerminate")
+}
+
 @main
 struct VRNWorkoutsApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var authService = AuthService.shared
     
     var body: some Scene {
