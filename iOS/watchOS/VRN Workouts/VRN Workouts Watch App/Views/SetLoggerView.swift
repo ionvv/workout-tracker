@@ -15,182 +15,154 @@ struct SetLoggerView: View {
     }
     
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 16) {
-                    // Exercise name
-                    Text(exercise.exerciseName)
-                        .font(.headline)
-                        .multilineTextAlignment(.center)
-                    
-                    // Set number
-                    Text("Set \(exercise.sets.count + 1)")
+        VStack(spacing: 6) {
+            // Weight input - compact
+            HStack {
+                Text("KG")
+                    .font(.caption2)
+                    .foregroundColor(.gray)
+                    .frame(width: 24)
+                
+                Button {
+                    weight = max(0, weight - 2.5)
+                    WKInterfaceDevice.current().play(.click)
+                } label: {
+                    Image(systemName: "minus")
                         .font(.caption)
-                        .foregroundColor(.gray)
-                    
-                    // Last set reference
-                    if let lastSet = exercise.sets.last {
-                        Text("Last: \(Int(lastSet.weight))kg × \(lastSet.reps)")
-                            .font(.caption2)
-                            .foregroundColor(.blue)
-                            .padding(6)
-                            .background(Color.blue.opacity(0.1))
-                            .cornerRadius(6)
-                    }
-                    
-                    Divider()
-                    
-                    // Weight input (Digital Crown optimized)
-                    VStack(spacing: 8) {
-                        Text("Weight (kg)")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                        
-                        HStack {
-                            Button {
-                                weight = max(0, weight - 2.5)
-                                WKInterfaceDevice.current().play(.click)
-                            } label: {
-                                Image(systemName: "minus.circle.fill")
-                                    .font(.title2)
-                            }
-                            .buttonStyle(.plain)
-                            
-                            Text("\(weight, specifier: "%.1f")")
-                                .font(.system(size: 32, weight: .bold, design: .rounded))
-                                .frame(minWidth: 80)
-                                .focusable()
-                                .digitalCrownRotation(
-                                    $weight,
-                                    from: 0,
-                                    through: 300,
-                                    by: 2.5,
-                                    sensitivity: .medium
-                                )
-                                .focused($focusedField, equals: .weight)
-                            
-                            Button {
-                                weight += 2.5
-                                WKInterfaceDevice.current().play(.click)
-                            } label: {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.title2)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    
-                    Divider()
-                    
-                    // Reps input
-                    VStack(spacing: 8) {
-                        Text("Reps")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                        
-                        HStack {
-                            Button {
-                                reps = max(0, reps - 1)
-                                WKInterfaceDevice.current().play(.click)
-                            } label: {
-                                Image(systemName: "minus.circle.fill")
-                                    .font(.title2)
-                            }
-                            .buttonStyle(.plain)
-                            
-                            Text("\(Int(reps))")
-                                .font(.system(size: 32, weight: .bold, design: .rounded))
-                                .frame(minWidth: 60)
-                                .focusable()
-                                .digitalCrownRotation(
-                                    $reps,
-                                    from: 0,
-                                    through: 50,
-                                    by: 1.0,
-                                    sensitivity: .low
-                                )
-                                .focused($focusedField, equals: .reps)
-                            
-                            Button {
-                                reps += 1
-                                WKInterfaceDevice.current().play(.click)
-                            } label: {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.title2)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    
-                    // Optional RPE
-                    if let rpeValue = rpe {
-                        Divider()
-                        
-                        VStack(spacing: 8) {
-                            Text("RPE (optional)")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                            
-                            HStack {
-                                Button {
-                                    if rpeValue > 1 {
-                                        rpe = rpeValue - 1
-                                    }
-                                } label: {
-                                    Image(systemName: "minus.circle")
-                                }
-                                .buttonStyle(.plain)
-                                
-                                Text("\(rpeValue)")
-                                    .font(.title3)
-                                    .fontWeight(.semibold)
-                                
-                                Button {
-                                    if rpeValue < 10 {
-                                        rpe = rpeValue + 1
-                                    }
-                                } label: {
-                                    Image(systemName: "plus.circle")
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                    }
-                    
-                    // Buttons
-                    VStack(spacing: 8) {
-                        if let lastSet = exercise.sets.last {
-                            Button {
-                                weight = lastSet.weight
-                                reps = Double(lastSet.reps)
-                                rpe = lastSet.rpe
-                                WKInterfaceDevice.current().play(.click)
-                            } label: {
-                                Text("Same as Last")
-                                    .font(.caption)
-                            }
-                            .buttonStyle(.bordered)
-                        }
-                        
-                        Button {
-                            onSave(weight, Int(reps), rpe)
-                        } label: {
-                            Label("Save Set", systemImage: "checkmark")
-                                .fontWeight(.semibold)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(weight <= 0 || reps <= 0)
-                    }
+                        .frame(width: 28, height: 28)
+                        .background(Color.gray.opacity(0.3))
+                        .cornerRadius(6)
                 }
-                .padding()
+                .buttonStyle(.plain)
+                
+                Text("\(weight, specifier: "%.1f")")
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .frame(minWidth: 60)
+                    .focusable()
+                    .digitalCrownRotation(
+                        $weight,
+                        from: 0,
+                        through: 300,
+                        by: 2.5,
+                        sensitivity: .medium
+                    )
+                    .focused($focusedField, equals: .weight)
+                
+                Button {
+                    weight += 2.5
+                    WKInterfaceDevice.current().play(.click)
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.caption)
+                        .frame(width: 28, height: 28)
+                        .background(Color.gray.opacity(0.3))
+                        .cornerRadius(6)
+                }
+                .buttonStyle(.plain)
             }
-            .navigationTitle("Log Set")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
+            
+            // Reps input - compact
+            HStack {
+                Text("REP")
+                    .font(.caption2)
+                    .foregroundColor(.gray)
+                    .frame(width: 24)
+                
+                Button {
+                    reps = max(0, reps - 1)
+                    WKInterfaceDevice.current().play(.click)
+                } label: {
+                    Image(systemName: "minus")
+                        .font(.caption)
+                        .frame(width: 28, height: 28)
+                        .background(Color.gray.opacity(0.3))
+                        .cornerRadius(6)
+                }
+                .buttonStyle(.plain)
+                
+                Text("\(Int(reps))")
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .frame(minWidth: 60)
+                    .focusable()
+                    .digitalCrownRotation(
+                        $reps,
+                        from: 0,
+                        through: 50,
+                        by: 1.0,
+                        sensitivity: .low
+                    )
+                    .focused($focusedField, equals: .reps)
+                
+                Button {
+                    reps += 1
+                    WKInterfaceDevice.current().play(.click)
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.caption)
+                        .frame(width: 28, height: 28)
+                        .background(Color.gray.opacity(0.3))
+                        .cornerRadius(6)
+                }
+                .buttonStyle(.plain)
+            }
+            
+            // Action buttons - side by side
+            HStack(spacing: 8) {
+                // Same as last (if available)
+                if let lastSet = exercise.sets.last {
+                    Button {
+                        weight = lastSet.weight
+                        reps = Double(lastSet.reps)
+                        WKInterfaceDevice.current().play(.click)
+                    } label: {
+                        Image(systemName: "arrow.uturn.backward")
+                            .font(.caption)
                     }
+                    .buttonStyle(.bordered)
+                    .frame(width: 44)
+                }
+                
+                // Save button
+                Button {
+                    onSave(weight, Int(reps), rpe)
+                } label: {
+                    Text("Save")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
+                .disabled(weight <= 0 || reps <= 0)
+            }
+            
+            // Exercise info below buttons
+            VStack(spacing: 2) {
+                Text(exercise.exerciseName)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                
+                Text("Set \(exercise.sets.count + 1)")
+                    .font(.caption2)
+                    .foregroundColor(.gray)
+                
+                if let lastSet = exercise.sets.last {
+                    Text("Last: \(Int(lastSet.weight))kg × \(lastSet.reps)")
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                }
+            }
+            .padding(.top, 4)
+        }
+        .padding(.horizontal, 8)
+        .padding(.top, 8)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark")
                 }
             }
         }
@@ -200,12 +172,9 @@ struct SetLoggerView: View {
                 weight = lastSet.weight
                 reps = Double(lastSet.reps)
             } else {
-                // Default starting values
                 weight = 20
                 reps = 10
             }
-            
-            // Focus weight field by default
             focusedField = .weight
         }
     }
