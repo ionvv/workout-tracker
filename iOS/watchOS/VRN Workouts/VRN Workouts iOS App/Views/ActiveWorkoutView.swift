@@ -17,6 +17,11 @@ struct ActiveWorkoutView: View {
                 // Header with timer and heart rate
                 WorkoutHeaderView(viewModel: viewModel, dayName: day.dayName)
                 
+                // Rest timer (at top, below header)
+                if viewModel.restTimeRemaining > 0 {
+                    RestTimerView(secondsLeft: viewModel.restTimeRemaining)
+                }
+                
                 if day.exerciseList.isEmpty {
                     // Empty state
                     ContentUnavailableView(
@@ -47,11 +52,6 @@ struct ActiveWorkoutView: View {
                         }
                     }
                     .tabViewStyle(.page(indexDisplayMode: .automatic))
-                    
-                    // Rest timer
-                    if viewModel.restTimeRemaining > 0 {
-                        RestTimerView(secondsLeft: viewModel.restTimeRemaining)
-                    }
                     
                     // Bottom action bar
                     WorkoutActionBar(
