@@ -14,7 +14,8 @@ struct SetLoggerView: View {
     }
     
     var body: some View {
-        VStack(spacing: 8) {
+        ScrollView {
+            VStack(spacing: 8) {
             // Weight row: [-] 20 kg [+]
             HStack(spacing: 8) {
                 SquareButton(icon: "minus") {
@@ -110,9 +111,10 @@ struct SetLoggerView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
+            }
+            .padding(.horizontal, 4)
+            .padding(.top, 32)
         }
-        .padding(.horizontal, 4)
-        .padding(.top, 32)
         .onAppear {
             if let lastSet = exercise.sets.last {
                 weight = lastSet.weight
