@@ -26,16 +26,32 @@ class AuthService: ObservableObject {
     
     func checkSession() async {
         isLoading = true
-        do {
-            let session = try await client.auth.session
-            isAuthenticated = true
-            userEmail = session.user.email
-            userId = session.user.id.uuidString
-        } catch {
-            isAuthenticated = false
-            userEmail = nil
-            userId = nil
+        
+        // Add timeout to prevent infinite loading
+        let timeoutTask = Task {
+            try await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
+            return true
         }
+        
+        let sessionTask = Task { @MainActor () -> Bool in
+            do {
+                let session = try await client.auth.session
+                isAuthenticated = true
+                userEmail = session.user.email
+                userId = session.user.id.uuidString
+                return true
+            } catch {
+                isAuthenticated = false
+                userEmail = nil
+                userId = nil
+                return false
+            }
+        }
+        
+        // Wait for whichever finishes first
+        _ = await sessionTask.value
+        timeoutTask.cancel()
+        
         isLoading = false
     }
     
