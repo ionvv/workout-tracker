@@ -38,11 +38,16 @@ class AuthService: ObservableObject {
         
         // First try cached session (instant)
         print("🔐 checkSession: Checking currentSession...")
-        if let session = client.auth.currentSession {
+        let cachedSession = client.auth.currentSession
+        print("🔐 checkSession: currentSession = \(cachedSession != nil ? "exists" : "nil") at \(Date())")
+        
+        if let session = cachedSession {
             print("🔐 checkSession: Got cached session! user=\(session.user.email ?? "no email") at \(Date())")
+            print("🔐 checkSession: Setting isAuthenticated = true")
             isAuthenticated = true
             userEmail = session.user.email
             userId = session.user.id.uuidString
+            print("🔐 checkSession: isAuthenticated is now \(isAuthenticated)")
             print("🔐 checkSession: Finished (cached) at \(Date())")
             return
         }

@@ -10,9 +10,18 @@ struct VRNWorkoutsApp: App {
             Group {
                 if authService.isAuthenticated {
                     MainTabView()
+                        .onAppear {
+                            print("📱 MainTabView appeared at \(Date())")
+                        }
                 } else {
                     LoginView()
+                        .onAppear {
+                            print("📱 LoginView appeared at \(Date())")
+                        }
                 }
+            }
+            .onChange(of: authService.isAuthenticated) { oldValue, newValue in
+                print("📱 isAuthenticated changed: \(oldValue) -> \(newValue) at \(Date())")
             }
             .task {
                 print("🚀 App: task started at \(Date())")
