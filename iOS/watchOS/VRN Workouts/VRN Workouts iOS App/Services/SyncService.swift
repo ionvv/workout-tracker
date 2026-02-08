@@ -1,11 +1,15 @@
 import Foundation
 import Combine
 
-/// Timestamp helper for logging
+/// Timestamp helper for logging (cached formatter)
+private let tsFormatter: DateFormatter = {
+    let f = DateFormatter()
+    f.dateFormat = "HH:mm:ss.SSS"
+    return f
+}()
+
 private func ts() -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "HH:mm:ss.SSS"
-    return "[\(formatter.string(from: Date()))]"
+    return "[\(tsFormatter.string(from: Date()))]"
 }
 
 /// Handles background sync between local storage and server
