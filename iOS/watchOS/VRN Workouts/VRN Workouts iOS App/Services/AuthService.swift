@@ -41,13 +41,14 @@ class AuthService: ObservableObject {
     
     private init() {
         print("🔐 AuthService: init started at \(Date())")
-        // Disable auto refresh to prevent SDK from blocking main thread
+        // Disable auto refresh + emit local session immediately
         self.client = SupabaseClient(
             supabaseURL: URL(string: Config.supabaseURL)!,
             supabaseKey: Config.supabaseAnonKey,
             options: SupabaseClientOptions(
                 auth: SupabaseClientOptions.AuthOptions(
-                    autoRefreshToken: false
+                    autoRefreshToken: false,
+                    emitLocalSessionAsInitialSession: true
                 )
             )
         )
