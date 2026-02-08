@@ -11,11 +11,13 @@ struct ProgramsView: View {
                 if viewModel.isLoading {
                     ProgressView("Loading programs...")
                 } else if viewModel.programs.isEmpty {
-                    ContentUnavailableView(
-                        "No Programs",
-                        systemImage: "list.bullet.clipboard",
-                        description: Text("Create a workout program to get started")
-                    ) {
+                    VStack(spacing: 20) {
+                        ContentUnavailableView(
+                            "No Programs",
+                            systemImage: "list.bullet.clipboard",
+                            description: Text("Create a workout program to get started")
+                        )
+                        
                         Button {
                             showingCreateProgram = true
                         } label: {

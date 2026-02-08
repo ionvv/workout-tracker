@@ -165,7 +165,7 @@ struct ResumeWorkoutView: View {
         guard let session = persistedSession else { return }
         
         // Convert to SessionExercise format and save to server
-        let exercises = session.exercises.map { ex in
+        let _ = session.exercises.map { ex in
             SessionExercise(
                 exerciseId: ex.exerciseId,
                 exerciseName: ex.exerciseName,
