@@ -40,6 +40,74 @@ struct WorkoutSession: Codable, Identifiable {
         case createdAt = "created_at"
         case updatedAt = "updated_at"
     }
+    
+    init(dbId: UUID?, odid: Int? = nil, userId: UUID?, sessionId: String, programId: String?, dayId: String?, dayName: String, startTime: Date, endTime: Date?, exercises: [SessionExercise], notes: String?, totalVolume: Int?, totalSets: Int?, duration: Int?, createdAt: Date?, updatedAt: Date?) {
+        self.dbId = dbId
+        self.odid = odid
+        self.userId = userId
+        self.sessionId = sessionId
+        self.programId = programId
+        self.dayId = dayId
+        self.dayName = dayName
+        self.startTime = startTime
+        self.endTime = endTime
+        self.exercises = exercises
+        self.notes = notes
+        self.totalVolume = totalVolume
+        self.totalSets = totalSets
+        self.duration = duration
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        dbId = try container.decodeIfPresent(UUID.self, forKey: .dbId)
+        odid = try container.decodeIfPresent(Int.self, forKey: .odid)
+        userId = try container.decodeIfPresent(UUID.self, forKey: .userId)
+        sessionId = try container.decode(String.self, forKey: .sessionId)
+        programId = try container.decodeIfPresent(String.self, forKey: .programId)
+        dayId = try container.decodeIfPresent(String.self, forKey: .dayId)
+        dayName = try container.decode(String.self, forKey: .dayName)
+        exercises = try container.decode([SessionExercise].self, forKey: .exercises)
+        notes = try container.decodeIfPresent(String.self, forKey: .notes)
+        totalVolume = try container.decodeIfPresent(Int.self, forKey: .totalVolume)
+        totalSets = try container.decodeIfPresent(Int.self, forKey: .totalSets)
+        duration = try container.decodeIfPresent(Int.self, forKey: .duration)
+        
+        // Flexible date decoding
+        startTime = Self.decodeDate(from: container, forKey: .startTime) ?? Date()
+        endTime = Self.decodeDate(from: container, forKey: .endTime)
+        createdAt = Self.decodeDate(from: container, forKey: .createdAt)
+        updatedAt = Self.decodeDate(from: container, forKey: .updatedAt)
+    }
+    
+    private static func decodeDate(from container: KeyedDecodingContainer<CodingKeys>, forKey key: CodingKeys) -> Date? {
+        // Try ISO8601 string first
+        if let dateString = try? container.decode(String.self, forKey: key) {
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+            formatter.formatOptions = [.withInternetDateTime]
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+            // Try with timezone offset format
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXXXX"
+            if let date = df.date(from: dateString) {
+                return date
+            }
+        }
+        // Try unix timestamp
+        if let timestamp = try? container.decode(Double.self, forKey: key) {
+            return Date(timeIntervalSince1970: timestamp)
+        }
+        return nil
+    }
 }
 
 struct SessionExercise: Codable, Identifiable {
@@ -77,6 +145,39 @@ struct SetLog: Codable, Identifiable {
         case reps
         case timestamp
         case rpe
+    }
+    
+    init(setNumber: Int, weight: Double, reps: Int, timestamp: Date, rpe: Int?) {
+        self.setNumber = setNumber
+        self.weight = weight
+        self.reps = reps
+        self.timestamp = timestamp
+        self.rpe = rpe
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        setNumber = try container.decode(Int.self, forKey: .setNumber)
+        weight = try container.decode(Double.self, forKey: .weight)
+        reps = try container.decode(Int.self, forKey: .reps)
+        rpe = try container.decodeIfPresent(Int.self, forKey: .rpe)
+        
+        // Handle timestamp as either String (ISO8601) or Double (unix timestamp)
+        if let dateString = try? container.decode(String.self, forKey: .timestamp) {
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let date = formatter.date(from: dateString) {
+                timestamp = date
+            } else {
+                // Try without fractional seconds
+                formatter.formatOptions = [.withInternetDateTime]
+                timestamp = formatter.date(from: dateString) ?? Date()
+            }
+        } else if let unixTimestamp = try? container.decode(Double.self, forKey: .timestamp) {
+            timestamp = Date(timeIntervalSince1970: unixTimestamp)
+        } else {
+            timestamp = Date()
+        }
     }
 }
 
