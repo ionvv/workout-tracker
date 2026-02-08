@@ -37,7 +37,12 @@ class SessionService {
     /// Direct server fetch
     func fetchSessionsFromServer() async throws -> [WorkoutSession] {
         // Use cached token first to avoid blocking
-        guard let token = await AuthService.shared.cachedAccessToken ?? AuthService.shared.getAccessToken() else {
+        let token: String
+        if let cached = await AuthService.shared.cachedAccessToken {
+            token = cached
+        } else if let fresh = await AuthService.shared.getAccessToken() {
+            token = fresh
+        } else {
             throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
@@ -107,8 +112,16 @@ class SessionService {
     
     /// Direct server save
     func saveSessionToServer(_ session: ActiveWorkoutSession) async throws {
-        guard let token = await AuthService.shared.cachedAccessToken ?? AuthService.shared.getAccessToken(),
-              let userId = await AuthService.shared.userId else {
+        let token: String
+        if let cached = await AuthService.shared.cachedAccessToken {
+            token = cached
+        } else if let fresh = await AuthService.shared.getAccessToken() {
+            token = fresh
+        } else {
+            throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
+        }
+        
+        guard let userId = await AuthService.shared.userId else {
             throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
@@ -164,8 +177,16 @@ class SessionService {
     
     /// Direct server save from WorkoutSession (for sync)
     func saveSessionToServer(_ session: WorkoutSession) async throws {
-        guard let token = await AuthService.shared.cachedAccessToken ?? AuthService.shared.getAccessToken(),
-              let userId = await AuthService.shared.userId else {
+        let token: String
+        if let cached = await AuthService.shared.cachedAccessToken {
+            token = cached
+        } else if let fresh = await AuthService.shared.getAccessToken() {
+            token = fresh
+        } else {
+            throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
+        }
+        
+        guard let userId = await AuthService.shared.userId else {
             throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         

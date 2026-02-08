@@ -37,7 +37,12 @@ class ProgramService {
     /// Direct server fetch
     func fetchProgramsFromServer() async throws -> [Program] {
         // Use cached token first to avoid blocking
-        guard let token = await AuthService.shared.cachedAccessToken ?? AuthService.shared.getAccessToken() else {
+        let token: String
+        if let cached = await AuthService.shared.cachedAccessToken {
+            token = cached
+        } else if let fresh = await AuthService.shared.getAccessToken() {
+            token = fresh
+        } else {
             throw NSError(domain: "ProgramService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
@@ -71,8 +76,16 @@ class ProgramService {
     
     /// Direct server save
     func saveProgramToServer(_ program: Program) async throws {
-        guard let token = await AuthService.shared.cachedAccessToken ?? AuthService.shared.getAccessToken(),
-              let userId = await AuthService.shared.userId else {
+        let token: String
+        if let cached = await AuthService.shared.cachedAccessToken {
+            token = cached
+        } else if let fresh = await AuthService.shared.getAccessToken() {
+            token = fresh
+        } else {
+            throw NSError(domain: "ProgramService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
+        }
+        
+        guard let userId = await AuthService.shared.userId else {
             throw NSError(domain: "ProgramService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
@@ -139,7 +152,12 @@ class ProgramService {
     
     /// Direct server delete
     func deleteProgramFromServer(_ program: Program) async throws {
-        guard let token = await AuthService.shared.cachedAccessToken ?? AuthService.shared.getAccessToken() else {
+        let token: String
+        if let cached = await AuthService.shared.cachedAccessToken {
+            token = cached
+        } else if let fresh = await AuthService.shared.getAccessToken() {
+            token = fresh
+        } else {
             throw NSError(domain: "ProgramService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
