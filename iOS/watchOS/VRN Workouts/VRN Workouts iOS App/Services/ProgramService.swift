@@ -1,27 +1,34 @@
 import Foundation
-import Supabase
+
+/// Timestamp helper for logging
+private func ts() -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "HH:mm:ss.SSS"
+    return "[\(formatter.string(from: Date()))]"
+}
 
 class ProgramService {
     static let shared = ProgramService()
     
-    private let client: SupabaseClient
-    
     private init() {
-        self.client = SupabaseClient(
-            supabaseURL: URL(string: Config.supabaseURL)!,
-            supabaseKey: Config.supabaseAnonKey
-        )
+        print("\(ts()) 📦 ProgramService: init")
     }
     
     /// Offline-first: load from cache, sync in background
     func fetchPrograms() async throws -> [Program] {
+        print("\(ts()) 📦 fetchPrograms: start")
+        
         // Return cached immediately if available
         let cached = LocalStorageService.shared.loadPrograms()
+        print("\(ts()) 📦 fetchPrograms: cache loaded, count=\(cached.count)")
         
         if !cached.isEmpty {
             // Have cache - sync in truly detached background task
+            print("\(ts()) 📦 fetchPrograms: returning cache, starting background sync")
             Task.detached(priority: .background) {
+                print("\(ts()) 📦 fetchPrograms: background task started")
                 if let fresh = try? await self.fetchProgramsFromServer() {
+                    print("\(ts()) 📦 fetchPrograms: server returned \(fresh.count) programs")
                     LocalStorageService.shared.savePrograms(fresh)
                 }
             }
@@ -29,6 +36,7 @@ class ProgramService {
         }
         
         // No cache - must fetch from server and wait
+        print("\(ts()) 📦 fetchPrograms: no cache, fetching from server")
         let fresh = try await fetchProgramsFromServer()
         LocalStorageService.shared.savePrograms(fresh)
         return fresh
@@ -36,10 +44,14 @@ class ProgramService {
     
     /// Direct server fetch
     func fetchProgramsFromServer() async throws -> [Program] {
+        print("\(ts()) 📦 fetchProgramsFromServer: start")
+        
         // Use thread-safe cache (no main thread hop)
         guard let token = AuthCache.shared.token else {
+            print("\(ts()) 📦 fetchProgramsFromServer: NO TOKEN!")
             throw NSError(domain: "ProgramService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
+        print("\(ts()) 📦 fetchProgramsFromServer: got token")
         
         var request = URLRequest(url: URL(string: "\(Config.supabaseURL)/rest/v1/programs?select=*&order=created_at.desc")!)
         request.httpMethod = "GET"
@@ -47,7 +59,9 @@ class ProgramService {
         request.setValue(Config.supabaseAnonKey, forHTTPHeaderField: "apikey")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
+        print("\(ts()) 📦 fetchProgramsFromServer: making request")
         let (data, response) = try await URLSession.shared.data(for: request)
+        print("\(ts()) 📦 fetchProgramsFromServer: got response")
         
         guard let httpResponse = response as? HTTPURLResponse,
               (200...299).contains(httpResponse.statusCode) else {
