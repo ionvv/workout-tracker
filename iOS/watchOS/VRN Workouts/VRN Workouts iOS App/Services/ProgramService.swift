@@ -18,8 +18,8 @@ class ProgramService {
     func fetchPrograms() async throws -> [Program] {
         print("\(ts()) 📦 fetchPrograms: start")
         
-        // Return cached immediately if available
-        let cached = LocalStorageService.shared.loadPrograms()
+        // Return cached immediately if available (decode on background thread)
+        let cached = await LocalStorageService.shared.loadProgramsAsync()
         print("\(ts()) 📦 fetchPrograms: cache loaded, count=\(cached.count)")
         
         if !cached.isEmpty {

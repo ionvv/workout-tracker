@@ -50,6 +50,26 @@ class LocalStorageService {
         return programs
     }
     
+    /// Async version - decodes on background thread
+    func loadProgramsAsync() async -> [Program] {
+        print("\(ts()) 💾 loadProgramsAsync: start")
+        guard let data = defaults.data(forKey: programsKey) else {
+            print("\(ts()) 💾 loadProgramsAsync: no data")
+            return []
+        }
+        print("\(ts()) 💾 loadProgramsAsync: got data, size=\(data.count) bytes")
+        
+        // Decode on background thread
+        return await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                print("\(ts()) 💾 loadProgramsAsync: decoding on background")
+                let programs = (try? self.decoder.decode([Program].self, from: data)) ?? []
+                print("\(ts()) 💾 loadProgramsAsync: decoded \(programs.count) programs")
+                continuation.resume(returning: programs)
+            }
+        }
+    }
+    
     func saveProgram(_ program: Program) {
         var programs = loadPrograms()
         if let index = programs.firstIndex(where: { $0.programId == program.programId }) {
