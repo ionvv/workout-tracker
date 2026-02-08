@@ -41,16 +41,10 @@ class AuthService: ObservableObject {
     
     private init() {
         print("🔐 AuthService: init started at \(Date())")
-        // Disable auto refresh + emit local session immediately
+        // Create client with minimal options - no auth config to avoid blocking
         self.client = SupabaseClient(
             supabaseURL: URL(string: Config.supabaseURL)!,
-            supabaseKey: Config.supabaseAnonKey,
-            options: SupabaseClientOptions(
-                auth: SupabaseClientOptions.AuthOptions(
-                    autoRefreshToken: false,
-                    emitLocalSessionAsInitialSession: true
-                )
-            )
+            supabaseKey: Config.supabaseAnonKey
         )
         print("🔐 AuthService: SupabaseClient created at \(Date())")
         
