@@ -46,7 +46,9 @@ class AuthService: ObservableObject {
             supabaseKey: Config.supabaseAnonKey,
             options: SupabaseClientOptions(
                 auth: SupabaseClientOptions.AuthOptions(
-                    autoRefreshToken: true
+                    autoRefreshToken: true,
+                    // Use local session immediately, don't wait for network refresh
+                    emitLocalSessionAsInitialSession: true
                 )
             )
         )
