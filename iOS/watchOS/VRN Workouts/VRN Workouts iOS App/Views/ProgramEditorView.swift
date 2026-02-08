@@ -158,7 +158,7 @@ struct DayEditorView: View {
                     HStack {
                         Text("Warmup")
                         Spacer()
-                        Text("\(day.warmup?.exercises?.count ?? 0) exercises")
+                        Text("\(day.warmup?.exercises.count ?? 0) exercises")
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -171,7 +171,7 @@ struct DayEditorView: View {
                     HStack {
                         Text("Cooldown")
                         Spacer()
-                        Text("\(day.cooldown?.exercises?.count ?? 0) exercises")
+                        Text("\(day.cooldown?.exercises.count ?? 0) exercises")
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -549,11 +549,15 @@ struct EditableWarmupCooldown {
     }
 }
 
-struct EditableWarmupExercise: Identifiable {
+struct EditableWarmupExercise: Identifiable, Equatable {
     let id = UUID()
     var name: String
     var duration: Int?
     var reps: Int?
+    
+    static func == (lhs: EditableWarmupExercise, rhs: EditableWarmupExercise) -> Bool {
+        lhs.id == rhs.id && lhs.name == rhs.name && lhs.duration == rhs.duration && lhs.reps == rhs.reps
+    }
     
     init(name: String, duration: Int?, reps: Int?) {
         self.name = name
