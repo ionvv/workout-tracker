@@ -15,17 +15,23 @@ class SessionService {
     
     /// Offline-first: load from cache, sync in background
     func fetchSessions() async throws -> [WorkoutSession] {
-        // Return cached immediately
+        // Return cached immediately if available
         let cached = LocalStorageService.shared.loadSessions()
         
-        // Sync in background
-        Task {
-            if let fresh = try? await fetchSessionsFromServer() {
-                LocalStorageService.shared.saveSessions(fresh)
+        if !cached.isEmpty {
+            // Have cache - sync in background, return cache
+            Task {
+                if let fresh = try? await fetchSessionsFromServer() {
+                    LocalStorageService.shared.saveSessions(fresh)
+                }
             }
+            return cached
         }
         
-        return cached.isEmpty ? try await fetchSessionsFromServer() : cached
+        // No cache - must fetch from server and wait
+        let fresh = try await fetchSessionsFromServer()
+        LocalStorageService.shared.saveSessions(fresh)
+        return fresh
     }
     
     /// Direct server fetch

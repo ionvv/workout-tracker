@@ -15,17 +15,23 @@ class ProgramService {
     
     /// Offline-first: load from cache, sync in background
     func fetchPrograms() async throws -> [Program] {
-        // Return cached immediately
+        // Return cached immediately if available
         let cached = LocalStorageService.shared.loadPrograms()
         
-        // Sync in background
-        Task {
-            if let fresh = try? await fetchProgramsFromServer() {
-                LocalStorageService.shared.savePrograms(fresh)
+        if !cached.isEmpty {
+            // Have cache - sync in background, return cache
+            Task {
+                if let fresh = try? await fetchProgramsFromServer() {
+                    LocalStorageService.shared.savePrograms(fresh)
+                }
             }
+            return cached
         }
         
-        return cached.isEmpty ? try await fetchProgramsFromServer() : cached
+        // No cache - must fetch from server and wait
+        let fresh = try await fetchProgramsFromServer()
+        LocalStorageService.shared.savePrograms(fresh)
+        return fresh
     }
     
     /// Direct server fetch
