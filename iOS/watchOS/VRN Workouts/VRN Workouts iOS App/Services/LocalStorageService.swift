@@ -15,6 +15,11 @@ class LocalStorageService {
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
     
+    // In-memory cache to avoid re-decoding
+    private var programsCache: [Program]?
+    private var sessionsCache: [WorkoutSession]?
+    private let cacheLock = NSLock()
+    
     // Keys
     private let programsKey = "cached_programs"
     private let sessionsKey = "cached_sessions"
@@ -28,6 +33,10 @@ class LocalStorageService {
     // MARK: - Programs
     
     func savePrograms(_ programs: [Program]) {
+        // Update in-memory cache first
+        cacheLock.withLock { programsCache = programs }
+        
+        // Then persist to disk
         if let data = try? encoder.encode(programs) {
             defaults.set(data, forKey: programsKey)
             print("\(ts()) 💾 Cached \(programs.count) programs locally")
@@ -50,28 +59,38 @@ class LocalStorageService {
         return programs
     }
     
-    /// Async version - decodes on background thread
+    /// Async version - uses in-memory cache, decodes on background if needed
     func loadProgramsAsync() async -> [Program] {
         print("\(ts()) 💾 loadProgramsAsync: start")
+        
+        // Check in-memory cache first (instant)
+        if let cached = cacheLock.withLock({ programsCache }) {
+            print("\(ts()) 💾 loadProgramsAsync: returning \(cached.count) from memory cache")
+            return cached
+        }
+        
         guard let data = defaults.data(forKey: programsKey) else {
             print("\(ts()) 💾 loadProgramsAsync: no data")
             return []
         }
-        print("\(ts()) 💾 loadProgramsAsync: got data, size=\(data.count) bytes")
+        print("\(ts()) 💾 loadProgramsAsync: got data, size=\(data.count) bytes, decoding...")
         
         // Decode on background thread
-        return await withCheckedContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
-                print("\(ts()) 💾 loadProgramsAsync: decoding on background")
-                let programs = (try? self.decoder.decode([Program].self, from: data)) ?? []
-                print("\(ts()) 💾 loadProgramsAsync: decoded \(programs.count) programs")
-                continuation.resume(returning: programs)
-            }
-        }
+        let programs = await Task.detached(priority: .userInitiated) {
+            let result = (try? self.decoder.decode([Program].self, from: data)) ?? []
+            print("\(ts()) 💾 loadProgramsAsync: decoded \(result.count) programs")
+            return result
+        }.value
+        
+        // Cache in memory for next time
+        cacheLock.withLock { programsCache = programs }
+        
+        print("\(ts()) 💾 loadProgramsAsync: done")
+        return programs
     }
     
     func saveProgram(_ program: Program) {
-        var programs = loadPrograms()
+        var programs = cacheLock.withLock { programsCache } ?? loadPrograms()
         if let index = programs.firstIndex(where: { $0.programId == program.programId }) {
             programs[index] = program
         } else {
@@ -81,7 +100,7 @@ class LocalStorageService {
     }
     
     func deleteProgram(_ programId: String) {
-        var programs = loadPrograms()
+        var programs = cacheLock.withLock { programsCache } ?? loadPrograms()
         programs.removeAll { $0.programId == programId }
         savePrograms(programs)
     }
@@ -89,6 +108,9 @@ class LocalStorageService {
     // MARK: - Sessions
     
     func saveSessions(_ sessions: [WorkoutSession]) {
+        // Update in-memory cache first
+        cacheLock.withLock { sessionsCache = sessions }
+        
         if let data = try? encoder.encode(sessions) {
             defaults.set(data, forKey: sessionsKey)
             print("\(ts()) 💾 Cached \(sessions.count) sessions locally")
@@ -96,16 +118,25 @@ class LocalStorageService {
     }
     
     func loadSessions() -> [WorkoutSession] {
+        // Check in-memory cache first
+        if let cached = cacheLock.withLock({ sessionsCache }) {
+            print("\(ts()) 💾 Loaded \(cached.count) sessions from memory cache")
+            return cached
+        }
+        
         guard let data = defaults.data(forKey: sessionsKey),
               let sessions = try? decoder.decode([WorkoutSession].self, from: data) else {
             return []
         }
+        
+        // Cache in memory
+        cacheLock.withLock { sessionsCache = sessions }
         print("\(ts()) 💾 Loaded \(sessions.count) sessions from cache")
         return sessions
     }
     
     func addSession(_ session: WorkoutSession) {
-        var sessions = loadSessions()
+        var sessions = cacheLock.withLock { sessionsCache } ?? loadSessions()
         sessions.insert(session, at: 0)
         saveSessions(sessions)
     }
