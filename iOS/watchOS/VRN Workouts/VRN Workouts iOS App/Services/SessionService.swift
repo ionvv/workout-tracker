@@ -1,16 +1,17 @@
 import Foundation
-import Supabase
+
+/// Timestamp helper for logging
+private func ts() -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "HH:mm:ss.SSS"
+    return "[\(formatter.string(from: Date()))]"
+}
 
 class SessionService {
     static let shared = SessionService()
     
-    private let client: SupabaseClient
-    
     private init() {
-        self.client = SupabaseClient(
-            supabaseURL: URL(string: Config.supabaseURL)!,
-            supabaseKey: Config.supabaseAnonKey
-        )
+        print("\(ts()) 📋 SessionService: init")
     }
     
     /// Offline-first: load from cache, sync in background
