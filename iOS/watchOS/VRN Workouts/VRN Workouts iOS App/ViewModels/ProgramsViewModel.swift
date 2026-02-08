@@ -19,4 +19,22 @@ class ProgramsViewModel: ObservableObject {
         
         isLoading = false
     }
+    
+    func saveProgram(_ program: Program) async {
+        do {
+            try await ProgramService.shared.saveProgram(program)
+            await loadPrograms()
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+    
+    func deleteProgram(_ program: Program) async {
+        do {
+            try await ProgramService.shared.deleteProgram(program)
+            await loadPrograms()
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
 }

@@ -10,62 +10,108 @@ struct ActiveWorkoutView: View {
     @State private var showingSetLogger = false
     @State private var showingEndAlert = false
     @State private var currentExerciseIndex = 0
+    @State private var currentPhase: WorkoutPhase = .warmup
+    
+    private var hasWarmup: Bool { day.warmup?.exercises?.isEmpty == false }
+    private var hasCooldown: Bool { day.cooldown?.exercises?.isEmpty == false }
+    
+    private var initialPhase: WorkoutPhase {
+        hasWarmup ? .warmup : .workout
+    }
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                // Phase indicator (if has warmup or cooldown)
+                if hasWarmup || hasCooldown {
+                    WorkoutPhaseIndicator(
+                        currentPhase: currentPhase,
+                        hasWarmup: hasWarmup,
+                        hasCooldown: hasCooldown
+                    )
+                }
+                
                 // Header with timer, heart rate, and rest timer
                 WorkoutHeaderView(viewModel: viewModel, dayName: day.dayName)
                 
-                if day.exerciseList.isEmpty {
-                    // Empty state
-                    ContentUnavailableView(
-                        "No Exercises",
-                        systemImage: "figure.strengthtraining.traditional",
-                        description: Text("This workout day has no exercises.")
-                    )
-                } else {
-                    // Exercise cards
-                    TabView(selection: $currentExerciseIndex) {
-                        ForEach(Array(day.exerciseList.enumerated()), id: \.element.id) { index, exercise in
-                            ExerciseCardView(
-                                exercise: exercise,
-                                exerciseIndex: index,
-                                session: viewModel.activeSession,
-                                onLogSet: {
-                                    currentExerciseIndex = index
-                                    showingSetLogger = true
-                                },
-                                onSkip: {
-                                    viewModel.skipExercise(at: index)
-                                    if index < day.exerciseList.count - 1 {
-                                        currentExerciseIndex = index + 1
-                                    }
-                                }
-                            )
-                            .tag(index)
-                        }
+                // Phase content
+                switch currentPhase {
+                case .warmup:
+                    if let warmup = day.warmup {
+                        WarmupCooldownSectionView(
+                            title: "Warm-up",
+                            section: warmup,
+                            onComplete: {
+                                withAnimation { currentPhase = .workout }
+                            }
+                        )
                     }
-                    .tabViewStyle(.page(indexDisplayMode: .never))
                     
-                    // Bottom action bar
-                    WorkoutActionBar(
-                        currentIndex: currentExerciseIndex,
-                        totalExercises: day.exerciseList.count,
-                        onPrevious: {
-                            if currentExerciseIndex > 0 {
-                                currentExerciseIndex -= 1
+                case .workout:
+                    if day.exerciseList.isEmpty {
+                        ContentUnavailableView(
+                            "No Exercises",
+                            systemImage: "figure.strengthtraining.traditional",
+                            description: Text("This workout day has no exercises.")
+                        )
+                    } else {
+                        // Exercise cards
+                        TabView(selection: $currentExerciseIndex) {
+                            ForEach(Array(day.exerciseList.enumerated()), id: \.element.id) { index, exercise in
+                                ExerciseCardView(
+                                    exercise: exercise,
+                                    exerciseIndex: index,
+                                    session: viewModel.activeSession,
+                                    onLogSet: {
+                                        currentExerciseIndex = index
+                                        showingSetLogger = true
+                                    },
+                                    onSkip: {
+                                        viewModel.skipExercise(at: index)
+                                        if index < day.exerciseList.count - 1 {
+                                            currentExerciseIndex = index + 1
+                                        }
+                                    }
+                                )
+                                .tag(index)
                             }
-                        },
-                        onNext: {
-                            if currentExerciseIndex < day.exerciseList.count - 1 {
-                                currentExerciseIndex += 1
-                            }
-                        },
-                        onFinish: {
-                            showingEndAlert = true
                         }
-                    )
+                        .tabViewStyle(.page(indexDisplayMode: .never))
+                        
+                        // Bottom action bar
+                        WorkoutActionBar(
+                            currentIndex: currentExerciseIndex,
+                            totalExercises: day.exerciseList.count,
+                            onPrevious: {
+                                if currentExerciseIndex > 0 {
+                                    currentExerciseIndex -= 1
+                                }
+                            },
+                            onNext: {
+                                if currentExerciseIndex < day.exerciseList.count - 1 {
+                                    currentExerciseIndex += 1
+                                }
+                            },
+                            onFinish: {
+                                if hasCooldown {
+                                    withAnimation { currentPhase = .cooldown }
+                                } else {
+                                    showingEndAlert = true
+                                }
+                            }
+                        )
+                    }
+                    
+                case .cooldown:
+                    if let cooldown = day.cooldown {
+                        WarmupCooldownSectionView(
+                            title: "Cool-down",
+                            section: cooldown,
+                            onComplete: {
+                                showingEndAlert = true
+                            }
+                        )
+                    }
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -128,12 +174,8 @@ struct ActiveWorkoutView: View {
                 Text("Save your progress or discard?")
             }
             .task {
-                print("ActiveWorkoutView: Starting workout")
-                print("ActiveWorkoutView: Day = \(day.dayName)")
-                print("ActiveWorkoutView: Exercises count = \(day.exerciseList.count)")
-                for (i, ex) in day.exerciseList.enumerated() {
-                    print("  Exercise \(i): \(ex.name)")
-                }
+                // Set initial phase
+                currentPhase = initialPhase
                 viewModel.startWorkout(program: program, day: day)
             }
         }

@@ -11,8 +11,18 @@ struct AnalyticsView: View {
                     // Weekly summary
                     WeeklySummaryCard(viewModel: viewModel)
                     
+                    // Streak
+                    if viewModel.currentStreak > 0 {
+                        StreakCard(streak: viewModel.currentStreak, longestStreak: viewModel.longestStreak)
+                    }
+                    
                     // Volume chart
                     VolumeChartCard(data: viewModel.weeklyVolume)
+                    
+                    // Muscle group breakdown
+                    if !viewModel.muscleGroupStats.isEmpty {
+                        MuscleGroupCard(stats: viewModel.muscleGroupStats)
+                    }
                     
                     // Personal records
                     PersonalRecordsCard(records: viewModel.personalRecords)
@@ -28,6 +38,82 @@ struct AnalyticsView: View {
             }
         }
     }
+}
+
+struct StreakCard: View {
+    let streak: Int
+    let longestStreak: Int
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Label("Current Streak", systemImage: "flame.fill")
+                    .font(.subheadline)
+                    .foregroundStyle(.orange)
+                Text("\(streak) days")
+                    .font(.title)
+                    .fontWeight(.bold)
+            }
+            
+            Spacer()
+            
+            VStack(alignment: .trailing, spacing: 4) {
+                Text("Best")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("\(longestStreak) days")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding()
+        .background(Color.orange.opacity(0.15))
+        .cornerRadius(16)
+    }
+}
+
+struct MuscleGroupCard: View {
+    let stats: [MuscleGroupStat]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Muscle Groups (This Week)")
+                .font(.headline)
+            
+            ForEach(stats.prefix(6)) { stat in
+                HStack {
+                    Text(stat.name)
+                        .font(.subheadline)
+                    Spacer()
+                    Text("\(stat.sets) sets")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
+                    // Progress bar
+                    GeometryReader { geo in
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.gray.opacity(0.2))
+                            .overlay(alignment: .leading) {
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(Color.blue)
+                                    .frame(width: geo.size.width * stat.percentage)
+                            }
+                    }
+                    .frame(width: 80, height: 8)
+                }
+            }
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(16)
+    }
+}
+
+struct MuscleGroupStat: Identifiable {
+    let id = UUID()
+    let name: String
+    let sets: Int
+    let percentage: Double
 }
 
 struct WeeklySummaryCard: View {

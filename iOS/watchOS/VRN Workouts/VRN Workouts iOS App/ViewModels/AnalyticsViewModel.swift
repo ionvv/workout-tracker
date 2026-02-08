@@ -8,6 +8,9 @@ class AnalyticsViewModel: ObservableObject {
     @Published var weeklySets = 0
     @Published var weeklyVolume: [DailyVolume] = []
     @Published var personalRecords: [PersonalRecord] = []
+    @Published var currentStreak = 0
+    @Published var longestStreak = 0
+    @Published var muscleGroupStats: [MuscleGroupStat] = []
     @Published var isLoading = false
     
     func loadAnalytics() async {
@@ -17,6 +20,8 @@ class AnalyticsViewModel: ObservableObject {
             let sessions = try await SessionService.shared.fetchSessions()
             calculateWeeklyStats(from: sessions)
             calculatePersonalRecords(from: sessions)
+            calculateStreak(from: sessions)
+            calculateMuscleGroups(from: sessions)
         } catch {
             print("Failed to load analytics:", error)
         }
@@ -70,5 +75,104 @@ class AnalyticsViewModel: ObservableObject {
             PersonalRecord(exerciseName: key, weight: value.weight, reps: value.reps, date: value.date)
         }
         .sorted { $0.date > $1.date }
+    }
+    
+    private func calculateStreak(from sessions: [WorkoutSession]) {
+        let calendar = Calendar.current
+        let sortedDates = sessions
+            .map { calendar.startOfDay(for: $0.startTime) }
+            .sorted(by: >)
+        
+        guard !sortedDates.isEmpty else {
+            currentStreak = 0
+            longestStreak = 0
+            return
+        }
+        
+        // Remove duplicates (multiple sessions on same day)
+        let uniqueDates = Array(Set(sortedDates)).sorted(by: >)
+        
+        // Calculate current streak
+        var streak = 0
+        var checkDate = calendar.startOfDay(for: Date())
+        
+        for date in uniqueDates {
+            if date == checkDate || date == calendar.date(byAdding: .day, value: -1, to: checkDate) {
+                streak += 1
+                checkDate = date
+            } else if date < calendar.date(byAdding: .day, value: -1, to: checkDate)! {
+                break
+            }
+        }
+        currentStreak = streak
+        
+        // Calculate longest streak
+        var longest = 0
+        var current = 1
+        for i in 1..<uniqueDates.count {
+            let diff = calendar.dateComponents([.day], from: uniqueDates[i], to: uniqueDates[i-1]).day ?? 0
+            if diff == 1 {
+                current += 1
+            } else {
+                longest = max(longest, current)
+                current = 1
+            }
+        }
+        longestStreak = max(longest, current)
+    }
+    
+    private func calculateMuscleGroups(from sessions: [WorkoutSession]) {
+        let calendar = Calendar.current
+        let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date()))!
+        
+        let thisWeekSessions = sessions.filter { $0.startTime >= startOfWeek }
+        
+        // Map exercise names to muscle groups (simplified)
+        let muscleMapping: [String: String] = [
+            "bench": "Chest",
+            "press": "Shoulders",
+            "squat": "Legs",
+            "deadlift": "Back",
+            "row": "Back",
+            "curl": "Biceps",
+            "tricep": "Triceps",
+            "pullup": "Back",
+            "pull-up": "Back",
+            "lunge": "Legs",
+            "leg": "Legs",
+            "calf": "Legs",
+            "shoulder": "Shoulders",
+            "lateral": "Shoulders",
+            "fly": "Chest",
+            "dip": "Chest"
+        ]
+        
+        var setsByMuscle: [String: Int] = [:]
+        
+        for session in thisWeekSessions {
+            for exercise in session.exercises where !exercise.skipped {
+                let name = exercise.exerciseName.lowercased()
+                var muscleGroup = "Other"
+                
+                for (keyword, muscle) in muscleMapping {
+                    if name.contains(keyword) {
+                        muscleGroup = muscle
+                        break
+                    }
+                }
+                
+                setsByMuscle[muscleGroup, default: 0] += exercise.sets.count
+            }
+        }
+        
+        let totalSets = setsByMuscle.values.reduce(0, +)
+        guard totalSets > 0 else {
+            muscleGroupStats = []
+            return
+        }
+        
+        muscleGroupStats = setsByMuscle
+            .map { MuscleGroupStat(name: $0.key, sets: $0.value, percentage: Double($0.value) / Double(totalSets)) }
+            .sorted { $0.sets > $1.sets }
     }
 }

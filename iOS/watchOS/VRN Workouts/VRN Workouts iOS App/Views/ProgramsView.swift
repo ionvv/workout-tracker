@@ -2,6 +2,8 @@ import SwiftUI
 
 struct ProgramsView: View {
     @StateObject private var viewModel = ProgramsViewModel()
+    @State private var showingCreateProgram = false
+    @State private var editingProgram: Program?
     
     var body: some View {
         NavigationStack {
@@ -12,12 +14,35 @@ struct ProgramsView: View {
                     ContentUnavailableView(
                         "No Programs",
                         systemImage: "list.bullet.clipboard",
-                        description: Text("Import a workout program to get started")
-                    )
+                        description: Text("Create a workout program to get started")
+                    ) {
+                        Button {
+                            showingCreateProgram = true
+                        } label: {
+                            Label("Create Program", systemImage: "plus.circle.fill")
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
                 } else {
-                    List(viewModel.programs) { program in
-                        NavigationLink(destination: ProgramDetailView(program: program)) {
-                            ProgramRow(program: program)
+                    List {
+                        ForEach(viewModel.programs) { program in
+                            NavigationLink(destination: ProgramDetailView(program: program)) {
+                                ProgramRow(program: program)
+                            }
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    Task { await viewModel.deleteProgram(program) }
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                                
+                                Button {
+                                    editingProgram = program
+                                } label: {
+                                    Label("Edit", systemImage: "pencil")
+                                }
+                                .tint(.blue)
+                            }
                         }
                     }
                     .listStyle(.insetGrouped)
@@ -25,11 +50,18 @@ struct ProgramsView: View {
             }
             .navigationTitle("Programs")
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button {
                         Task { await viewModel.loadPrograms() }
                     } label: {
                         Image(systemName: "arrow.clockwise")
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingCreateProgram = true
+                    } label: {
+                        Image(systemName: "plus")
                     }
                 }
             }
@@ -38,6 +70,20 @@ struct ProgramsView: View {
             }
             .refreshable {
                 await viewModel.loadPrograms()
+            }
+            .sheet(isPresented: $showingCreateProgram) {
+                ProgramEditorView { newProgram in
+                    Task {
+                        await viewModel.saveProgram(newProgram)
+                    }
+                }
+            }
+            .sheet(item: $editingProgram) { program in
+                ProgramEditorView(program: program) { updatedProgram in
+                    Task {
+                        await viewModel.saveProgram(updatedProgram)
+                    }
+                }
             }
         }
     }
