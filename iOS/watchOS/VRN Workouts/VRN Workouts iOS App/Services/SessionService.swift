@@ -13,7 +13,23 @@ class SessionService {
         )
     }
     
+    /// Offline-first: load from cache, sync in background
     func fetchSessions() async throws -> [WorkoutSession] {
+        // Return cached immediately
+        let cached = LocalStorageService.shared.loadSessions()
+        
+        // Sync in background
+        Task {
+            if let fresh = try? await fetchSessionsFromServer() {
+                LocalStorageService.shared.saveSessions(fresh)
+            }
+        }
+        
+        return cached.isEmpty ? try await fetchSessionsFromServer() : cached
+    }
+    
+    /// Direct server fetch
+    func fetchSessionsFromServer() async throws -> [WorkoutSession] {
         guard await AuthService.shared.isAuthenticated else {
             throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
@@ -54,7 +70,40 @@ class SessionService {
         }
     }
     
+    /// Offline-first: save locally, sync in background
     func saveSession(_ session: ActiveWorkoutSession) async throws {
+        // Convert to WorkoutSession for local storage
+        let stats = session.calculateStats()
+        let workoutSession = WorkoutSession(
+            dbId: UUID(),
+            odid: nil,
+            userId: UUID(uuidString: AuthService.shared.userId ?? ""),
+            sessionId: session.sessionId,
+            programId: session.programId,
+            dayId: session.dayId,
+            dayName: session.dayName,
+            startTime: session.startTime,
+            endTime: Date(),
+            exercises: session.exercises,
+            notes: nil,
+            totalVolume: stats.volume,
+            totalSets: stats.sets,
+            duration: stats.duration,
+            createdAt: Date(),
+            updatedAt: Date()
+        )
+        
+        // Save locally immediately
+        LocalStorageService.shared.addSession(workoutSession)
+        
+        // Sync to server in background
+        Task {
+            try? await saveSessionToServer(session)
+        }
+    }
+    
+    /// Direct server save
+    func saveSessionToServer(_ session: ActiveWorkoutSession) async throws {
         guard await AuthService.shared.isAuthenticated else {
             throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
@@ -97,6 +146,63 @@ class SessionService {
             "total_volume": stats.volume,
             "total_sets": stats.sets,
             "duration": stats.duration
+        ]
+        
+        var request = URLRequest(url: URL(string: "\(Config.supabaseURL)/rest/v1/sessions")!)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(Config.supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try JSONSerialization.data(withJSONObject: sessionData)
+        
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw NSError(domain: "SessionService", code: 500, userInfo: [NSLocalizedDescriptionKey: "Failed to save session"])
+        }
+    }
+    
+    /// Direct server save from WorkoutSession (for sync)
+    func saveSessionToServer(_ session: WorkoutSession) async throws {
+        guard await AuthService.shared.isAuthenticated else {
+            throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
+        }
+        
+        guard let token = await AuthService.shared.getAccessToken(),
+              let userId = await AuthService.shared.userId else {
+            throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "No access token"])
+        }
+        
+        let sessionData: [String: Any] = [
+            "user_id": userId,
+            "session_id": session.sessionId,
+            "program_id": session.programId as Any,
+            "day_id": session.dayId as Any,
+            "day_name": session.dayName,
+            "start_time": ISO8601DateFormatter().string(from: session.startTime),
+            "end_time": session.endTime.map { ISO8601DateFormatter().string(from: $0) } as Any,
+            "exercises": session.exercises.map { exercise in
+                [
+                    "exerciseId": exercise.exerciseId,
+                    "exerciseName": exercise.exerciseName,
+                    "prescribedSets": exercise.prescribedSets as Any,
+                    "prescribedReps": exercise.prescribedReps as Any,
+                    "skipped": exercise.skipped,
+                    "sets": exercise.sets.map { set in
+                        [
+                            "setNumber": set.setNumber,
+                            "weight": set.weight,
+                            "reps": set.reps,
+                            "timestamp": ISO8601DateFormatter().string(from: set.timestamp),
+                            "rpe": set.rpe as Any
+                        ]
+                    }
+                ]
+            },
+            "total_volume": session.totalVolume as Any,
+            "total_sets": session.totalSets as Any,
+            "duration": session.duration as Any
         ]
         
         var request = URLRequest(url: URL(string: "\(Config.supabaseURL)/rest/v1/sessions")!)

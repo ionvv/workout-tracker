@@ -13,7 +13,23 @@ class ProgramService {
         )
     }
     
+    /// Offline-first: load from cache, sync in background
     func fetchPrograms() async throws -> [Program] {
+        // Return cached immediately
+        let cached = LocalStorageService.shared.loadPrograms()
+        
+        // Sync in background
+        Task {
+            if let fresh = try? await fetchProgramsFromServer() {
+                LocalStorageService.shared.savePrograms(fresh)
+            }
+        }
+        
+        return cached.isEmpty ? try await fetchProgramsFromServer() : cached
+    }
+    
+    /// Direct server fetch
+    func fetchProgramsFromServer() async throws -> [Program] {
         guard await AuthService.shared.isAuthenticated else {
             throw NSError(domain: "ProgramService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
@@ -39,7 +55,19 @@ class ProgramService {
         return try decoder.decode([Program].self, from: data)
     }
     
+    /// Offline-first: save locally, sync in background
     func saveProgram(_ program: Program) async throws {
+        // Save locally immediately
+        LocalStorageService.shared.saveProgram(program)
+        
+        // Sync to server in background
+        Task {
+            try? await saveProgramToServer(program)
+        }
+    }
+    
+    /// Direct server save
+    func saveProgramToServer(_ program: Program) async throws {
         guard let token = await AuthService.shared.getAccessToken(),
               let userId = await AuthService.shared.userId else {
             throw NSError(domain: "ProgramService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
@@ -95,7 +123,19 @@ class ProgramService {
         }
     }
     
+    /// Offline-first: delete locally, sync in background
     func deleteProgram(_ program: Program) async throws {
+        // Delete locally immediately
+        LocalStorageService.shared.deleteProgram(program.programId)
+        
+        // Sync to server in background
+        Task {
+            try? await deleteProgramFromServer(program)
+        }
+    }
+    
+    /// Direct server delete
+    func deleteProgramFromServer(_ program: Program) async throws {
         guard let token = await AuthService.shared.getAccessToken() else {
             throw NSError(domain: "ProgramService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
