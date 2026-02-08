@@ -98,12 +98,24 @@ class AuthService: ObservableObject {
         userId = nil
     }
     
+    /// Get access token - uses cached session first (fast), falls back to network
     func getAccessToken() async -> String? {
+        // Try cached session first (instant, no network)
+        if let session = client.auth.currentSession {
+            return session.accessToken
+        }
+        
+        // Fallback to network if needed
         do {
             let session = try await client.auth.session
             return session.accessToken
         } catch {
             return nil
         }
+    }
+    
+    /// Synchronous access token from cache only (for background tasks)
+    var cachedAccessToken: String? {
+        client.auth.currentSession?.accessToken
     }
 }

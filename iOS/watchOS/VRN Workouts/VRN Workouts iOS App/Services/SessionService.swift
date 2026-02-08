@@ -19,9 +19,9 @@ class SessionService {
         let cached = LocalStorageService.shared.loadSessions()
         
         if !cached.isEmpty {
-            // Have cache - sync in background, return cache
-            Task {
-                if let fresh = try? await fetchSessionsFromServer() {
+            // Have cache - sync in truly detached background
+            Task.detached(priority: .background) {
+                if let fresh = try? await self.fetchSessionsFromServer() {
                     LocalStorageService.shared.saveSessions(fresh)
                 }
             }
@@ -36,12 +36,9 @@ class SessionService {
     
     /// Direct server fetch
     func fetchSessionsFromServer() async throws -> [WorkoutSession] {
-        guard await AuthService.shared.isAuthenticated else {
+        // Use cached token first to avoid blocking
+        guard let token = await AuthService.shared.cachedAccessToken ?? AuthService.shared.getAccessToken() else {
             throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
-        }
-        
-        guard let token = await AuthService.shared.getAccessToken() else {
-            throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "No access token"])
         }
         
         var request = URLRequest(url: URL(string: "\(Config.supabaseURL)/rest/v1/sessions?select=*&order=start_time.desc&limit=50")!)
@@ -102,21 +99,17 @@ class SessionService {
         // Save locally immediately
         LocalStorageService.shared.addSession(workoutSession)
         
-        // Sync to server in background
-        Task {
-            try? await saveSessionToServer(session)
+        // Sync to server in truly detached background
+        Task.detached(priority: .background) {
+            try? await self.saveSessionToServer(session)
         }
     }
     
     /// Direct server save
     func saveSessionToServer(_ session: ActiveWorkoutSession) async throws {
-        guard await AuthService.shared.isAuthenticated else {
-            throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
-        }
-        
-        guard let token = await AuthService.shared.getAccessToken(),
+        guard let token = await AuthService.shared.cachedAccessToken ?? AuthService.shared.getAccessToken(),
               let userId = await AuthService.shared.userId else {
-            throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "No access token"])
+            throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
         let stats = session.calculateStats()
@@ -171,13 +164,9 @@ class SessionService {
     
     /// Direct server save from WorkoutSession (for sync)
     func saveSessionToServer(_ session: WorkoutSession) async throws {
-        guard await AuthService.shared.isAuthenticated else {
-            throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
-        }
-        
-        guard let token = await AuthService.shared.getAccessToken(),
+        guard let token = await AuthService.shared.cachedAccessToken ?? AuthService.shared.getAccessToken(),
               let userId = await AuthService.shared.userId else {
-            throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "No access token"])
+            throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
         let sessionData: [String: Any] = [

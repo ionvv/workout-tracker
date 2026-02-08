@@ -19,9 +19,9 @@ class ProgramService {
         let cached = LocalStorageService.shared.loadPrograms()
         
         if !cached.isEmpty {
-            // Have cache - sync in background, return cache
-            Task {
-                if let fresh = try? await fetchProgramsFromServer() {
+            // Have cache - sync in truly detached background task
+            Task.detached(priority: .background) {
+                if let fresh = try? await self.fetchProgramsFromServer() {
                     LocalStorageService.shared.savePrograms(fresh)
                 }
             }
@@ -36,12 +36,9 @@ class ProgramService {
     
     /// Direct server fetch
     func fetchProgramsFromServer() async throws -> [Program] {
-        guard await AuthService.shared.isAuthenticated else {
+        // Use cached token first to avoid blocking
+        guard let token = await AuthService.shared.cachedAccessToken ?? AuthService.shared.getAccessToken() else {
             throw NSError(domain: "ProgramService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
-        }
-        
-        guard let token = await AuthService.shared.getAccessToken() else {
-            throw NSError(domain: "ProgramService", code: 401, userInfo: [NSLocalizedDescriptionKey: "No access token"])
         }
         
         var request = URLRequest(url: URL(string: "\(Config.supabaseURL)/rest/v1/programs?select=*&order=created_at.desc")!)
@@ -66,15 +63,15 @@ class ProgramService {
         // Save locally immediately
         LocalStorageService.shared.saveProgram(program)
         
-        // Sync to server in background
-        Task {
-            try? await saveProgramToServer(program)
+        // Sync to server in truly detached background
+        Task.detached(priority: .background) {
+            try? await self.saveProgramToServer(program)
         }
     }
     
     /// Direct server save
     func saveProgramToServer(_ program: Program) async throws {
-        guard let token = await AuthService.shared.getAccessToken(),
+        guard let token = await AuthService.shared.cachedAccessToken ?? AuthService.shared.getAccessToken(),
               let userId = await AuthService.shared.userId else {
             throw NSError(domain: "ProgramService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
@@ -134,15 +131,15 @@ class ProgramService {
         // Delete locally immediately
         LocalStorageService.shared.deleteProgram(program.programId)
         
-        // Sync to server in background
-        Task {
-            try? await deleteProgramFromServer(program)
+        // Sync to server in truly detached background
+        Task.detached(priority: .background) {
+            try? await self.deleteProgramFromServer(program)
         }
     }
     
     /// Direct server delete
     func deleteProgramFromServer(_ program: Program) async throws {
-        guard let token = await AuthService.shared.getAccessToken() else {
+        guard let token = await AuthService.shared.cachedAccessToken ?? AuthService.shared.getAccessToken() else {
             throw NSError(domain: "ProgramService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
