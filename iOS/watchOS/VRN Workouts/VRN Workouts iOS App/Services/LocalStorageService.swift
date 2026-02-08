@@ -21,7 +21,9 @@ class LocalStorageService {
     private let pendingSyncsKey = "pending_syncs"
     private let lastSyncKey = "last_sync_timestamp"
     
-    private init() {}
+    private init() {
+        print("\(ts()) 💾 LocalStorageService: init")
+    }
     
     // MARK: - Programs
     
@@ -33,11 +35,18 @@ class LocalStorageService {
     }
     
     func loadPrograms() -> [Program] {
-        guard let data = defaults.data(forKey: programsKey),
-              let programs = try? decoder.decode([Program].self, from: data) else {
+        print("\(ts()) 💾 loadPrograms: start")
+        guard let data = defaults.data(forKey: programsKey) else {
+            print("\(ts()) 💾 loadPrograms: no data in UserDefaults")
             return []
         }
-        print("\(ts()) 💾 Loaded \(programs.count) programs from cache")
+        print("\(ts()) 💾 loadPrograms: got data, size=\(data.count) bytes")
+        
+        guard let programs = try? decoder.decode([Program].self, from: data) else {
+            print("\(ts()) 💾 loadPrograms: decode failed")
+            return []
+        }
+        print("\(ts()) 💾 loadPrograms: decoded \(programs.count) programs")
         return programs
     }
     
