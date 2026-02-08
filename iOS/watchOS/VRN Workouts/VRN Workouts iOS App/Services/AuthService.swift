@@ -2,20 +2,42 @@ import Foundation
 import Combine
 import Supabase
 
+/// Thread-safe cache for auth tokens (accessible without MainActor hop)
+final class AuthCache: @unchecked Sendable {
+    static let shared = AuthCache()
+    private let lock = NSLock()
+    private var _token: String?
+    private var _userId: String?
+    
+    var token: String? {
+        get { lock.withLock { _token } }
+        set { lock.withLock { _token = newValue } }
+    }
+    
+    var userId: String? {
+        get { lock.withLock { _userId } }
+        set { lock.withLock { _userId = newValue } }
+    }
+    
+    func clear() {
+        lock.withLock {
+            _token = nil
+            _userId = nil
+        }
+    }
+}
+
 @MainActor
 class AuthService: ObservableObject {
     static let shared = AuthService()
     
     private let client: SupabaseClient
+    private let cache = AuthCache.shared
     
     @Published var isAuthenticated = false
     @Published var isLoading = false  // Start false - show login immediately
     @Published var userEmail: String?
     @Published var userId: String?
-    
-    // Nonisolated cached values for background access (no main thread hop)
-    nonisolated private(set) var cachedToken: String?
-    nonisolated private(set) var cachedUserId: String?
     
     private init() {
         print("🔐 AuthService: init started at \(Date())")
@@ -36,9 +58,9 @@ class AuthService: ObservableObject {
             self.isAuthenticated = true
             self.userEmail = session.user.email
             self.userId = session.user.id.uuidString
-            // Update nonisolated cache
-            self.cachedToken = session.accessToken
-            self.cachedUserId = session.user.id.uuidString
+            // Update thread-safe cache
+            cache.token = session.accessToken
+            cache.userId = session.user.id.uuidString
         }
         print("🔐 AuthService: init complete, isAuthenticated=\(isAuthenticated)")
     }
@@ -57,8 +79,8 @@ class AuthService: ObservableObject {
             isAuthenticated = true
             userEmail = session.user.email
             userId = session.user.id.uuidString
-            cachedToken = session.accessToken
-            cachedUserId = session.user.id.uuidString
+            cache.token = session.accessToken
+            cache.userId = session.user.id.uuidString
             print("🔐 checkSession: isAuthenticated is now \(isAuthenticated)")
             print("🔐 checkSession: Finished (cached) at \(Date())")
             return
@@ -83,8 +105,8 @@ class AuthService: ObservableObject {
             isAuthenticated = true
             userEmail = session.user.email
             userId = session.user.id.uuidString
-            cachedToken = session.accessToken
-            cachedUserId = session.user.id.uuidString
+            cache.token = session.accessToken
+            cache.userId = session.user.id.uuidString
         } catch {
             print("🔐 checkSession: Error: \(error) at \(Date())")
             didComplete = true
@@ -100,8 +122,8 @@ class AuthService: ObservableObject {
         isAuthenticated = true
         userEmail = session.user.email
         userId = session.user.id.uuidString
-        cachedToken = session.accessToken
-        cachedUserId = session.user.id.uuidString
+        cache.token = session.accessToken
+        cache.userId = session.user.id.uuidString
     }
     
     func signOut() async throws {
@@ -109,28 +131,27 @@ class AuthService: ObservableObject {
         isAuthenticated = false
         userEmail = nil
         userId = nil
-        cachedToken = nil
-        cachedUserId = nil
+        cache.clear()
     }
     
     /// Get access token - uses cached session first (fast), falls back to network
     func getAccessToken() async -> String? {
-        // Try nonisolated cache first (instant, no actor hop)
-        if let token = cachedToken {
+        // Try thread-safe cache first (instant, no actor hop)
+        if let token = cache.token {
             return token
         }
         
         // Try cached session (still fast)
         if let session = client.auth.currentSession {
-            cachedToken = session.accessToken
+            cache.token = session.accessToken
             return session.accessToken
         }
         
         // Fallback to network if needed
         do {
             let session = try await client.auth.session
-            cachedToken = session.accessToken
-            cachedUserId = session.user.id.uuidString
+            cache.token = session.accessToken
+            cache.userId = session.user.id.uuidString
             return session.accessToken
         } catch {
             return nil

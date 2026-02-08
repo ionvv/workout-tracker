@@ -36,8 +36,8 @@ class SessionService {
     
     /// Direct server fetch
     func fetchSessionsFromServer() async throws -> [WorkoutSession] {
-        // Use nonisolated cached token (no main thread hop)
-        guard let token = AuthService.shared.cachedToken else {
+        // Use thread-safe cache (no main thread hop)
+        guard let token = AuthCache.shared.token else {
             throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
@@ -107,9 +107,9 @@ class SessionService {
     
     /// Direct server save
     func saveSessionToServer(_ session: ActiveWorkoutSession) async throws {
-        // Use nonisolated cached values (no main thread hop)
-        guard let token = AuthService.shared.cachedToken,
-              let userId = AuthService.shared.cachedUserId else {
+        // Use thread-safe cache (no main thread hop)
+        guard let token = AuthCache.shared.token,
+              let userId = AuthCache.shared.userId else {
             throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
@@ -165,9 +165,9 @@ class SessionService {
     
     /// Direct server save from WorkoutSession (for sync)
     func saveSessionToServer(_ session: WorkoutSession) async throws {
-        // Use nonisolated cached values (no main thread hop)
-        guard let token = AuthService.shared.cachedToken,
-              let userId = AuthService.shared.cachedUserId else {
+        // Use thread-safe cache (no main thread hop)
+        guard let token = AuthCache.shared.token,
+              let userId = AuthCache.shared.userId else {
             throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         

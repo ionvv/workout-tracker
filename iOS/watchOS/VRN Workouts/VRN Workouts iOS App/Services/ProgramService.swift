@@ -36,8 +36,8 @@ class ProgramService {
     
     /// Direct server fetch
     func fetchProgramsFromServer() async throws -> [Program] {
-        // Use nonisolated cached token (no main thread hop)
-        guard let token = AuthService.shared.cachedToken else {
+        // Use thread-safe cache (no main thread hop)
+        guard let token = AuthCache.shared.token else {
             throw NSError(domain: "ProgramService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
@@ -71,9 +71,9 @@ class ProgramService {
     
     /// Direct server save
     func saveProgramToServer(_ program: Program) async throws {
-        // Use nonisolated cached values (no main thread hop)
-        guard let token = AuthService.shared.cachedToken,
-              let userId = AuthService.shared.cachedUserId else {
+        // Use thread-safe cache (no main thread hop)
+        guard let token = AuthCache.shared.token,
+              let userId = AuthCache.shared.userId else {
             throw NSError(domain: "ProgramService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
@@ -140,8 +140,8 @@ class ProgramService {
     
     /// Direct server delete
     func deleteProgramFromServer(_ program: Program) async throws {
-        // Use nonisolated cached token (no main thread hop)
-        guard let token = AuthService.shared.cachedToken else {
+        // Use thread-safe cache (no main thread hop)
+        guard let token = AuthCache.shared.token else {
             throw NSError(domain: "ProgramService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
