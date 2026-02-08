@@ -1,6 +1,13 @@
 import Foundation
 import Combine
 
+/// Timestamp helper for logging
+private func ts() -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "HH:mm:ss.SSS"
+    return "[\(formatter.string(from: Date()))]"
+}
+
 /// Handles background sync between local storage and server
 @MainActor
 class SyncService: ObservableObject {
@@ -137,9 +144,9 @@ class SyncService: ObservableObject {
         do {
             let programs = try await ProgramService.shared.fetchProgramsFromServer()
             localStorage.savePrograms(programs)
-            print("✅ Synced \(programs.count) programs from server")
+            print("\(ts()) ✅ Synced \(programs.count) programs from server")
         } catch {
-            print("⚠️ Failed to fetch programs: \(error.localizedDescription)")
+            print("\(ts()) ⚠️ Failed to fetch programs: \(error.localizedDescription)")
         }
     }
     
@@ -147,9 +154,9 @@ class SyncService: ObservableObject {
         do {
             let sessions = try await SessionService.shared.fetchSessionsFromServer()
             localStorage.saveSessions(sessions)
-            print("✅ Synced \(sessions.count) sessions from server")
+            print("\(ts()) ✅ Synced \(sessions.count) sessions from server")
         } catch {
-            print("⚠️ Failed to fetch sessions: \(error.localizedDescription)")
+            print("\(ts()) ⚠️ Failed to fetch sessions: \(error.localizedDescription)")
         }
     }
     
@@ -157,9 +164,9 @@ class SyncService: ObservableObject {
         do {
             try await ProgramService.shared.saveProgramToServer(program)
             removePendingSync(for: program.programId, type: .saveProgram)
-            print("✅ Program synced to server")
+            print("\(ts()) ✅ Program synced to server")
         } catch {
-            print("⚠️ Failed to sync program: \(error.localizedDescription)")
+            print("\(ts()) ⚠️ Failed to sync program: \(error.localizedDescription)")
             // Will retry on next sync
         }
     }
@@ -168,9 +175,9 @@ class SyncService: ObservableObject {
         do {
             try await ProgramService.shared.deleteProgramFromServer(program)
             removePendingSync(for: program.programId, type: .deleteProgram)
-            print("✅ Program deletion synced")
+            print("\(ts()) ✅ Program deletion synced")
         } catch {
-            print("⚠️ Failed to delete program from server: \(error.localizedDescription)")
+            print("\(ts()) ⚠️ Failed to delete program from server: \(error.localizedDescription)")
         }
     }
     
@@ -178,9 +185,9 @@ class SyncService: ObservableObject {
         do {
             try await SessionService.shared.saveSessionToServer(session)
             removePendingSync(for: session.sessionId, type: .saveSession)
-            print("✅ Session synced to server")
+            print("\(ts()) ✅ Session synced to server")
         } catch {
-            print("⚠️ Failed to sync session: \(error.localizedDescription)")
+            print("\(ts()) ⚠️ Failed to sync session: \(error.localizedDescription)")
         }
     }
     

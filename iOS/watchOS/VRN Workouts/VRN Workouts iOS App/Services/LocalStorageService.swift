@@ -1,5 +1,12 @@
 import Foundation
 
+/// Timestamp helper for logging
+private func ts() -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "HH:mm:ss.SSS"
+    return "[\(formatter.string(from: Date()))]"
+}
+
 /// Offline-first local storage using UserDefaults
 class LocalStorageService {
     static let shared = LocalStorageService()
@@ -21,7 +28,7 @@ class LocalStorageService {
     func savePrograms(_ programs: [Program]) {
         if let data = try? encoder.encode(programs) {
             defaults.set(data, forKey: programsKey)
-            print("💾 Cached \(programs.count) programs locally")
+            print("\(ts()) 💾 Cached \(programs.count) programs locally")
         }
     }
     
@@ -30,7 +37,7 @@ class LocalStorageService {
               let programs = try? decoder.decode([Program].self, from: data) else {
             return []
         }
-        print("💾 Loaded \(programs.count) programs from cache")
+        print("\(ts()) 💾 Loaded \(programs.count) programs from cache")
         return programs
     }
     
@@ -55,7 +62,7 @@ class LocalStorageService {
     func saveSessions(_ sessions: [WorkoutSession]) {
         if let data = try? encoder.encode(sessions) {
             defaults.set(data, forKey: sessionsKey)
-            print("💾 Cached \(sessions.count) sessions locally")
+            print("\(ts()) 💾 Cached \(sessions.count) sessions locally")
         }
     }
     
@@ -64,7 +71,7 @@ class LocalStorageService {
               let sessions = try? decoder.decode([WorkoutSession].self, from: data) else {
             return []
         }
-        print("💾 Loaded \(sessions.count) sessions from cache")
+        print("\(ts()) 💾 Loaded \(sessions.count) sessions from cache")
         return sessions
     }
     
@@ -82,7 +89,7 @@ class LocalStorageService {
         if let data = try? encoder.encode(pending) {
             defaults.set(data, forKey: pendingSyncsKey)
         }
-        print("💾 Added pending sync: \(sync.type)")
+        print("\(ts()) 💾 Added pending sync: \(sync.type)")
     }
     
     func loadPendingSyncs() -> [PendingSync] {
