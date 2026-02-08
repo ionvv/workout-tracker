@@ -13,6 +13,10 @@ class AuthService: ObservableObject {
     @Published var userEmail: String?
     @Published var userId: String?
     
+    // Nonisolated cached values for background access (no main thread hop)
+    nonisolated private(set) var cachedToken: String?
+    nonisolated private(set) var cachedUserId: String?
+    
     private init() {
         print("🔐 AuthService: init started at \(Date())")
         self.client = SupabaseClient(
@@ -32,6 +36,9 @@ class AuthService: ObservableObject {
             self.isAuthenticated = true
             self.userEmail = session.user.email
             self.userId = session.user.id.uuidString
+            // Update nonisolated cache
+            self.cachedToken = session.accessToken
+            self.cachedUserId = session.user.id.uuidString
         }
         print("🔐 AuthService: init complete, isAuthenticated=\(isAuthenticated)")
     }
@@ -50,6 +57,8 @@ class AuthService: ObservableObject {
             isAuthenticated = true
             userEmail = session.user.email
             userId = session.user.id.uuidString
+            cachedToken = session.accessToken
+            cachedUserId = session.user.id.uuidString
             print("🔐 checkSession: isAuthenticated is now \(isAuthenticated)")
             print("🔐 checkSession: Finished (cached) at \(Date())")
             return
@@ -74,6 +83,8 @@ class AuthService: ObservableObject {
             isAuthenticated = true
             userEmail = session.user.email
             userId = session.user.id.uuidString
+            cachedToken = session.accessToken
+            cachedUserId = session.user.id.uuidString
         } catch {
             print("🔐 checkSession: Error: \(error) at \(Date())")
             didComplete = true
@@ -89,6 +100,8 @@ class AuthService: ObservableObject {
         isAuthenticated = true
         userEmail = session.user.email
         userId = session.user.id.uuidString
+        cachedToken = session.accessToken
+        cachedUserId = session.user.id.uuidString
     }
     
     func signOut() async throws {
@@ -96,26 +109,31 @@ class AuthService: ObservableObject {
         isAuthenticated = false
         userEmail = nil
         userId = nil
+        cachedToken = nil
+        cachedUserId = nil
     }
     
     /// Get access token - uses cached session first (fast), falls back to network
     func getAccessToken() async -> String? {
-        // Try cached session first (instant, no network)
+        // Try nonisolated cache first (instant, no actor hop)
+        if let token = cachedToken {
+            return token
+        }
+        
+        // Try cached session (still fast)
         if let session = client.auth.currentSession {
+            cachedToken = session.accessToken
             return session.accessToken
         }
         
         // Fallback to network if needed
         do {
             let session = try await client.auth.session
+            cachedToken = session.accessToken
+            cachedUserId = session.user.id.uuidString
             return session.accessToken
         } catch {
             return nil
         }
-    }
-    
-    /// Synchronous access token from cache only (for background tasks)
-    var cachedAccessToken: String? {
-        client.auth.currentSession?.accessToken
     }
 }
