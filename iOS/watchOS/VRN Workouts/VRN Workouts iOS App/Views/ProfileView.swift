@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ProfileView: View {
     @StateObject private var authService = AuthService.shared
+    @StateObject private var profileService = ProfileService.shared
     @State private var showingSignOutAlert = false
     
     var body: some View {
@@ -27,12 +28,61 @@ struct ProfileView: View {
                     }
                 }
                 
+                // Body Stats
+                Section("Body Stats") {
+                    NavigationLink {
+                        ProfileEditView()
+                    } label: {
+                        HStack {
+                            Label("Weight", systemImage: "scalemass")
+                            Spacer()
+                            if let weight = profileService.profile.weightInDisplayUnit {
+                                Text(String(format: "%.1f %@", weight, profileService.profile.unitSystem.weightUnit))
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("Not set")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    
+                    NavigationLink {
+                        ProfileEditView()
+                    } label: {
+                        HStack {
+                            Label("Height", systemImage: "ruler")
+                            Spacer()
+                            if let height = profileService.profile.heightInDisplayUnit {
+                                Text(String(format: "%.0f %@", height, profileService.profile.unitSystem.heightUnit))
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("Not set")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    
+                    if let bmi = profileService.profile.bmi, let category = profileService.profile.bmiCategory {
+                        HStack {
+                            Label("BMI", systemImage: "heart.text.square")
+                            Spacer()
+                            Text(String(format: "%.1f (%@)", bmi, category))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                
                 // Settings
                 Section("Settings") {
-                    NavigationLink {
-                        Text("Units settings coming soon")
+                    Picker(selection: $profileService.profile.unitSystem) {
+                        ForEach(UserProfile.UnitSystem.allCases, id: \.self) { system in
+                            Text(system.displayName).tag(system)
+                        }
                     } label: {
                         Label("Units", systemImage: "ruler")
+                    }
+                    .onChange(of: profileService.profile.unitSystem) { _, newValue in
+                        profileService.updateUnitSystem(newValue)
                     }
                     
                     NavigationLink {
