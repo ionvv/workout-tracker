@@ -9,6 +9,7 @@ struct ActiveWorkoutView: View {
     @StateObject private var viewModel = WorkoutViewModel()
     @State private var showingSetLogger = false
     @State private var showingEndAlert = false
+    @State private var showingBodyWeightSheet = false
     @State private var currentExerciseIndex = 0
     @State private var currentPhase: WorkoutPhase = .warmup
     
@@ -161,10 +162,7 @@ struct ActiveWorkoutView: View {
             .alert("End Workout?", isPresented: $showingEndAlert) {
                 Button("Continue", role: .cancel) { }
                 Button("Save & End") {
-                    Task {
-                        await viewModel.endWorkout()
-                        dismiss()
-                    }
+                    showingBodyWeightSheet = true
                 }
                 Button("Discard", role: .destructive) {
                     viewModel.cancelWorkout()
@@ -172,6 +170,15 @@ struct ActiveWorkoutView: View {
                 }
             } message: {
                 Text("Save your progress or discard?")
+            }
+            .sheet(isPresented: $showingBodyWeightSheet) {
+                BodyWeightLogSheet { weight in
+                    viewModel.activeSession?.bodyWeight = weight
+                    Task {
+                        await viewModel.endWorkout()
+                        dismiss()
+                    }
+                }
             }
             .task {
                 // Set initial phase

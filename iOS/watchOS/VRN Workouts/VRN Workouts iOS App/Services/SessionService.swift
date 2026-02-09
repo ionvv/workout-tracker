@@ -97,6 +97,7 @@ class SessionService {
             totalVolume: stats.volume,
             totalSets: stats.sets,
             duration: stats.duration,
+            bodyWeight: session.bodyWeight,
             createdAt: Date(),
             updatedAt: Date()
         )
@@ -122,7 +123,7 @@ class SessionService {
         let endTime = Date()
         
         // Prepare the session data
-        let sessionData: [String: Any] = [
+        var sessionData: [String: Any] = [
             "user_id": userId,
             "session_id": session.sessionId,
             "program_id": session.programId,
@@ -153,6 +154,11 @@ class SessionService {
             "duration": stats.duration
         ]
         
+        // Add body weight if logged
+        if let bodyWeight = session.bodyWeight {
+            sessionData["body_weight"] = bodyWeight
+        }
+        
         var request = URLRequest(url: URL(string: "\(Config.supabaseURL)/rest/v1/sessions")!)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -176,7 +182,7 @@ class SessionService {
             throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
-        let sessionData: [String: Any] = [
+        var sessionData: [String: Any] = [
             "user_id": userId,
             "session_id": session.sessionId,
             "program_id": session.programId as Any,
@@ -206,6 +212,10 @@ class SessionService {
             "total_sets": session.totalSets as Any,
             "duration": session.duration as Any
         ]
+        
+        if let bodyWeight = session.bodyWeight {
+            sessionData["body_weight"] = bodyWeight
+        }
         
         var request = URLRequest(url: URL(string: "\(Config.supabaseURL)/rest/v1/sessions")!)
         request.httpMethod = "POST"

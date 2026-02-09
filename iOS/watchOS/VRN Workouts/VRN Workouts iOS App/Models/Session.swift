@@ -16,6 +16,7 @@ struct WorkoutSession: Codable, Identifiable {
     var totalVolume: Int?
     var totalSets: Int?
     var duration: Int?
+    var bodyWeight: Double?  // User's body weight logged during this session (kg)
     var createdAt: Date?
     var updatedAt: Date?
     
@@ -37,11 +38,12 @@ struct WorkoutSession: Codable, Identifiable {
         case totalVolume = "total_volume"
         case totalSets = "total_sets"
         case duration
+        case bodyWeight = "body_weight"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
     }
     
-    init(dbId: UUID?, odid: Int? = nil, userId: UUID?, sessionId: String, programId: String?, dayId: String?, dayName: String, startTime: Date, endTime: Date?, exercises: [SessionExercise], notes: String?, totalVolume: Int?, totalSets: Int?, duration: Int?, createdAt: Date?, updatedAt: Date?) {
+    init(dbId: UUID?, odid: Int? = nil, userId: UUID?, sessionId: String, programId: String?, dayId: String?, dayName: String, startTime: Date, endTime: Date?, exercises: [SessionExercise], notes: String?, totalVolume: Int?, totalSets: Int?, duration: Int?, bodyWeight: Double? = nil, createdAt: Date?, updatedAt: Date?) {
         self.dbId = dbId
         self.odid = odid
         self.userId = userId
@@ -56,6 +58,7 @@ struct WorkoutSession: Codable, Identifiable {
         self.totalVolume = totalVolume
         self.totalSets = totalSets
         self.duration = duration
+        self.bodyWeight = bodyWeight
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -75,6 +78,7 @@ struct WorkoutSession: Codable, Identifiable {
         totalVolume = try container.decodeIfPresent(Int.self, forKey: .totalVolume)
         totalSets = try container.decodeIfPresent(Int.self, forKey: .totalSets)
         duration = try container.decodeIfPresent(Int.self, forKey: .duration)
+        bodyWeight = try container.decodeIfPresent(Double.self, forKey: .bodyWeight)
         
         // Flexible date decoding
         startTime = Self.decodeDate(from: container, forKey: .startTime) ?? Date()
@@ -190,6 +194,7 @@ class ActiveWorkoutSession: ObservableObject {
     @Published var startTime: Date
     @Published var exercises: [SessionExercise]
     @Published var currentExerciseIndex: Int = 0
+    @Published var bodyWeight: Double?
     
     init(program: Program, day: WorkoutDay) {
         self.sessionId = UUID().uuidString
