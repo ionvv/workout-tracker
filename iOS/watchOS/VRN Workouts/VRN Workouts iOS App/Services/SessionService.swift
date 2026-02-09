@@ -231,4 +231,64 @@ class SessionService {
             throw NSError(domain: "SessionService", code: 500, userInfo: [NSLocalizedDescriptionKey: "Failed to save session"])
         }
     }
+    
+    /// Update an existing session on the server
+    func updateSessionOnServer(_ session: WorkoutSession) async throws {
+        guard let token = AuthCache.shared.token else {
+            throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
+        }
+        
+        var sessionData: [String: Any] = [
+            "exercises": session.exercises.map { exercise in
+                [
+                    "exerciseId": exercise.exerciseId,
+                    "exerciseName": exercise.exerciseName,
+                    "prescribedSets": exercise.prescribedSets as Any,
+                    "prescribedReps": exercise.prescribedReps as Any,
+                    "skipped": exercise.skipped,
+                    "sets": exercise.sets.map { set in
+                        [
+                            "setNumber": set.setNumber,
+                            "weight": set.weight,
+                            "reps": set.reps,
+                            "timestamp": ISO8601DateFormatter().string(from: set.timestamp),
+                            "rpe": set.rpe as Any
+                        ]
+                    }
+                ]
+            },
+            "notes": session.notes as Any,
+            "total_volume": session.totalVolume as Any,
+            "total_sets": session.totalSets as Any,
+            "updated_at": ISO8601DateFormatter().string(from: Date())
+        ]
+        
+        if let bodyWeight = session.bodyWeight {
+            sessionData["body_weight"] = bodyWeight
+        }
+        
+        // Use PATCH to update existing session
+        let urlString = "\(Config.supabaseURL)/rest/v1/sessions?session_id=eq.\(session.sessionId)"
+        guard let url = URL(string: urlString) else {
+            throw NSError(domain: "SessionService", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(Config.supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try JSONSerialization.data(withJSONObject: sessionData)
+        
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
+            print("SessionService: Update failed with status \(statusCode)")
+            throw NSError(domain: "SessionService", code: statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to update session"])
+        }
+        
+        print("SessionService: Session updated successfully")
+    }
 }

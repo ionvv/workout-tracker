@@ -1,7 +1,15 @@
 import SwiftUI
 
 struct SessionDetailView: View {
-    let session: WorkoutSession
+    @State var session: WorkoutSession
+    let onUpdate: ((WorkoutSession) -> Void)?
+    
+    @State private var showingEditSheet = false
+    
+    init(session: WorkoutSession, onUpdate: ((WorkoutSession) -> Void)? = nil) {
+        self._session = State(initialValue: session)
+        self.onUpdate = onUpdate
+    }
     
     var body: some View {
         List {
@@ -14,6 +22,18 @@ struct SessionDetailView: View {
                 }
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
+            }
+            
+            // Body Weight
+            if let bodyWeight = session.bodyWeight {
+                Section("Body Weight") {
+                    HStack {
+                        Image(systemName: "scalemass")
+                            .foregroundStyle(.blue)
+                        Text(String(format: "%.1f kg", bodyWeight))
+                            .fontWeight(.medium)
+                    }
+                }
             }
             
             // Exercises
@@ -36,6 +56,27 @@ struct SessionDetailView: View {
         .listStyle(.insetGrouped)
         .navigationTitle(session.dayName)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showingEditSheet = true
+                } label: {
+                    Text("Edit")
+                }
+            }
+        }
+        .sheet(isPresented: $showingEditSheet) {
+            SessionEditView(session: $session) { updatedSession in
+                session = updatedSession
+                onUpdate?(updatedSession)
+                
+                // Save to storage
+                Task {
+                    LocalStorageService.shared.updateSession(updatedSession)
+                    try? await SessionService.shared.updateSessionOnServer(updatedSession)
+                }
+            }
+        }
     }
 }
 

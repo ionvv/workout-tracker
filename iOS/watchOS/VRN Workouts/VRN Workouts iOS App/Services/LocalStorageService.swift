@@ -145,6 +145,22 @@ class LocalStorageService {
         saveSessions(sessions)
     }
     
+    func updateSession(_ session: WorkoutSession) {
+        var sessions = cacheLock.withLock { sessionsCache } ?? loadSessions()
+        if let index = sessions.firstIndex(where: { $0.sessionId == session.sessionId }) {
+            sessions[index] = session
+            saveSessions(sessions)
+            print("\(ts()) 💾 Updated session \(session.sessionId)")
+        }
+    }
+    
+    func deleteSession(_ sessionId: String) {
+        var sessions = cacheLock.withLock { sessionsCache } ?? loadSessions()
+        sessions.removeAll { $0.sessionId == sessionId }
+        saveSessions(sessions)
+        print("\(ts()) 💾 Deleted session \(sessionId)")
+    }
+    
     // MARK: - Pending Syncs
     
     func addPendingSync(_ sync: PendingSync) {
