@@ -125,6 +125,29 @@ struct Exercise: Codable, Identifiable {
     }
     var rest: Int { restSeconds ?? 90 }
     var imageUrl: String? { media?.gifUrl ?? gifUrl ?? demoUrl }
+    
+    /// Check if this is a timed exercise (planks, holds, etc.)
+    var isTimed: Bool {
+        // Check type field
+        if let t = type?.lowercased() {
+            if t.contains("timed") || t.contains("hold") || t.contains("isometric") {
+                return true
+            }
+        }
+        // Check category field
+        if let c = category?.lowercased() {
+            if c.contains("timed") || c.contains("hold") || c.contains("isometric") {
+                return true
+            }
+        }
+        // Check exercise name for common timed exercises
+        let timedKeywords = ["plank", "hold", "hang", "wall sit", "l-sit", "dead hang"]
+        let nameLower = name.lowercased()
+        return timedKeywords.contains { nameLower.contains($0) }
+    }
+    
+    /// Unit label for reps/seconds
+    var repUnit: String { isTimed ? "sec" : "reps" }
 }
 
 struct MuscleGroups: Codable {

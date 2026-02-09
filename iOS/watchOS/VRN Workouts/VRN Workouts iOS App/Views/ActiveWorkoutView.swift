@@ -286,7 +286,7 @@ struct ExerciseCardView: View {
                     
                     HStack(spacing: 16) {
                         Label("\(exercise.sets) sets", systemImage: "number")
-                        Label("\(exercise.reps) reps", systemImage: "arrow.counterclockwise")
+                        Label("\(exercise.reps) \(exercise.repUnit)", systemImage: exercise.isTimed ? "stopwatch" : "arrow.counterclockwise")
                         Label("\(exercise.rest)s rest", systemImage: "timer")
                     }
                     .font(.subheadline)
@@ -314,7 +314,17 @@ struct ExerciseCardView: View {
                                 Text("Set \(set.setNumber)")
                                     .fontWeight(.medium)
                                 Spacer()
-                                Text("\(Int(set.weight)) kg × \(set.reps)")
+                                if exercise.isTimed {
+                                    // Timed exercise: show seconds, optionally weight
+                                    if set.weight > 0 {
+                                        Text("\(set.reps)s @ \(Int(set.weight)) kg")
+                                    } else {
+                                        Text("\(set.reps)s")
+                                    }
+                                } else {
+                                    // Regular exercise: show weight × reps
+                                    Text("\(Int(set.weight)) kg × \(set.reps)")
+                                }
                                 if let rpe = set.rpe {
                                     Text("@ RPE \(rpe)")
                                         .foregroundStyle(.secondary)
