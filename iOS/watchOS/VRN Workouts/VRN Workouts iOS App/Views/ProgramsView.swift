@@ -2,8 +2,10 @@ import SwiftUI
 
 struct ProgramsView: View {
     @StateObject private var viewModel = ProgramsViewModel()
+    @StateObject private var storeKit = StoreKitManager.shared
     @State private var showingCreateProgram = false
     @State private var showingImportSheet = false
+    @State private var showingGenerateProgram = false
     @State private var editingProgram: Program?
     
     var body: some View {
@@ -63,15 +65,21 @@ struct ProgramsView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Button {
+                            showingGenerateProgram = true
+                        } label: {
+                            Label("AI Generate", systemImage: "wand.and.stars")
+                        }
+                        
+                        Button {
                             showingCreateProgram = true
                         } label: {
-                            Label("Create Program", systemImage: "plus")
+                            Label("Create Manual", systemImage: "plus")
                         }
                         
                         Button {
                             showingImportSheet = true
                         } label: {
-                            Label("Import from JSON", systemImage: "square.and.arrow.down")
+                            Label("Import JSON", systemImage: "square.and.arrow.down")
                         }
                     } label: {
                         Image(systemName: "plus")
@@ -102,6 +110,13 @@ struct ProgramsView: View {
                 ImportProgramView { importedProgram in
                     Task {
                         await viewModel.saveProgram(importedProgram)
+                    }
+                }
+            }
+            .sheet(isPresented: $showingGenerateProgram) {
+                GenerateProgramView { generatedProgram in
+                    Task {
+                        await viewModel.saveProgram(generatedProgram)
                     }
                 }
             }

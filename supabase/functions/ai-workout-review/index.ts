@@ -9,8 +9,79 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// System prompt for Arnold (AI Coach)
+// System prompt for Arnold (AI Coach) - Workout Reviews
 const SYSTEM_PROMPT = `You are Arnold, an elite fitness coach and trainer. You are analyzing workout data for your client.
+
+// System prompt for Arnold (AI Coach) - Program Generation  
+const PROGRAM_GENERATION_PROMPT = `You are Arnold, an elite fitness coach and trainer. You are creating a personalized workout program.
+
+YOUR TASK:
+Generate a complete workout program in JSON format based on the user's goals, schedule, and equipment.
+
+PROGRAM DESIGN PRINCIPLES:
+1. Progressive overload built in (rep ranges allow progression)
+2. Balanced muscle development (push/pull ratios, anterior/posterior)
+3. Appropriate volume for experience level
+4. Recovery considerations (muscle groups need 48-72h between sessions)
+5. Compound movements prioritized
+6. Include warmup (5-10 min) and cooldown (5 min) for each day
+
+EXERCISE SELECTION:
+- Beginners: Simpler movements, machines OK, focus on form
+- Intermediate: Mix of compounds and isolation, free weights preferred
+- Advanced: Complex movements, intensity techniques allowed
+
+REP RANGES BY GOAL:
+- Strength: 3-6 reps, heavier weights
+- Muscle gain: 8-12 reps, moderate weights
+- Fat loss: 10-15 reps, shorter rest, some circuits
+- Recomp: Mix of 6-10 reps
+
+CRITICAL: Your response must be ONLY valid JSON, no other text. Use this exact structure:
+
+{
+  "program_id": "generated-uuid",
+  "program_name": "Program Name Based on Goal",
+  "workout_days": [
+    {
+      "dayId": "1",
+      "dayName": "Day 1 - Descriptive Name",
+      "dayType": "push/pull/legs/upper/lower/full",
+      "estimatedTime": 60,
+      "warmup": {
+        "duration": 10,
+        "exercises": [
+          { "name": "Exercise Name", "duration": 60 },
+          { "name": "Exercise Name", "reps": 10, "sets": 2 }
+        ]
+      },
+      "exercises": [
+        {
+          "exerciseId": "ex-1",
+          "name": "Exercise Name",
+          "workingSets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "restSeconds": 90,
+          "rpe": 7,
+          "notes": "Form cues or notes",
+          "category": "compound/isolation",
+          "equipment": ["barbell", "bench"]
+        }
+      ],
+      "cooldown": {
+        "duration": 5,
+        "exercises": [
+          { "name": "Stretch Name", "duration": 30 }
+        ]
+      }
+    }
+  ]
+}
+
+Generate ONLY the JSON, no explanations or markdown.`
+
+// System prompt for Arnold (AI Coach) - Reviews (original)
 
 YOUR ROLE:
 - Provide expert, evidence-based coaching feedback
@@ -319,6 +390,78 @@ serve(async (req) => {
       )
     }
 
+    if (action === 'generate_program') {
+      const { params } = body
+      
+      // Build program generation prompt
+      const programPrompt = buildProgramGenerationPrompt(params)
+      
+      // Call Anthropic API
+      const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': anthropicApiKey,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 4000,
+          temperature: 0.7,
+          system: PROGRAM_GENERATION_PROMPT,
+          messages: [{ role: 'user', content: programPrompt }]
+        })
+      })
+
+      if (!anthropicResponse.ok) {
+        const errorText = await anthropicResponse.text()
+        console.error('Anthropic API error:', errorText)
+        throw new Error('AI service temporarily unavailable')
+      }
+
+      const aiResult = await anthropicResponse.json()
+      const responseText = aiResult.content[0].text
+      const inputTokens = aiResult.usage?.input_tokens || 0
+      const outputTokens = aiResult.usage?.output_tokens || 0
+      const totalCost = ((inputTokens / 1000000) * 3.00) + ((outputTokens / 1000000) * 15.00)
+
+      // Parse the JSON from the response
+      let program: any
+      try {
+        // Extract JSON from response (might be wrapped in markdown code blocks)
+        const jsonMatch = responseText.match(/```json\n?([\s\S]*?)\n?```/) || 
+                          responseText.match(/```\n?([\s\S]*?)\n?```/)
+        const jsonStr = jsonMatch ? jsonMatch[1] : responseText
+        program = JSON.parse(jsonStr.trim())
+      } catch (parseError) {
+        console.error('Failed to parse program JSON:', parseError)
+        console.error('Response text:', responseText)
+        throw new Error('Failed to generate valid program structure')
+      }
+
+      // Update usage
+      await supabaseAdmin
+        .from('ai_review_usage')
+        .update({
+          reviews_used: usage.reviews_used + 1,
+          total_cost_usd: parseFloat(usage.total_cost_usd) + totalCost,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', usage.id)
+
+      return new Response(
+        JSON.stringify({
+          program: program,
+          usage: {
+            used: usage.reviews_used + 1,
+            limit: usage.reviews_limit,
+            remaining: usage.reviews_limit - usage.reviews_used - 1
+          }
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     throw new Error('Invalid action')
 
   } catch (error) {
@@ -419,4 +562,72 @@ function buildUserMessage(context: any, workoutData: any): string {
   message += `Please analyze this workout and provide feedback, progressive overload recommendations, and suggestions for next session.`
   
   return message
+}
+
+// Build program generation prompt from user parameters
+function buildProgramGenerationPrompt(params: any): string {
+  const {
+    goal,
+    daysPerWeek,
+    experience,
+    equipment,
+    sessionLength,
+    injuries,
+    preferences,
+    weight,
+    height,
+    age,
+    gender
+  } = params
+
+  const goalMap: Record<string, string> = {
+    'muscle_gain': 'Build muscle (hypertrophy focus)',
+    'fat_loss': 'Lose fat while maintaining muscle',
+    'strength': 'Build strength (powerlifting style)',
+    'recomp': 'Body recomposition (lose fat + build muscle)',
+    'general_fitness': 'General health and fitness'
+  }
+
+  const equipmentMap: Record<string, string> = {
+    'full_gym': 'Full commercial gym (all equipment available)',
+    'home_gym': 'Home gym (dumbbells, bench, maybe a rack)',
+    'bodyweight': 'Bodyweight only (no equipment)'
+  }
+
+  let prompt = `CREATE A WORKOUT PROGRAM
+
+CLIENT PROFILE:
+- Goal: ${goalMap[goal] || goal}
+- Days per week: ${daysPerWeek}
+- Experience: ${experience}
+- Equipment: ${equipmentMap[equipment] || equipment}
+- Session length: ${sessionLength} minutes (including warmup/cooldown)
+`
+
+  if (weight) prompt += `- Body weight: ${weight}kg\n`
+  if (height) prompt += `- Height: ${height}cm\n`
+  if (age) prompt += `- Age: ${age}\n`
+  if (gender) prompt += `- Gender: ${gender}\n`
+  
+  if (injuries) {
+    prompt += `\nINJURIES/LIMITATIONS:\n${injuries}\n`
+  }
+  
+  if (preferences) {
+    prompt += `\nPREFERENCES:\n${preferences}\n`
+  }
+
+  prompt += `
+REQUIREMENTS:
+1. Create exactly ${daysPerWeek} workout days
+2. Each workout should take approximately ${sessionLength} minutes
+3. Include warmup (5-10 min) and cooldown (5 min) for each day
+4. Use exercises appropriate for ${equipment} equipment
+5. Design for ${experience} level
+6. Optimize for ${goal} goal
+${injuries ? '7. Avoid exercises that aggravate: ' + injuries : ''}
+
+Generate the complete program as JSON only.`
+
+  return prompt
 }
