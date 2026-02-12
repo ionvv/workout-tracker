@@ -145,7 +145,7 @@ struct StatCard: View {
 }
 
 struct ExerciseSessionRow: View {
-    let exercise: WorkoutSessionExercise
+    let exercise: SessionExercise
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
