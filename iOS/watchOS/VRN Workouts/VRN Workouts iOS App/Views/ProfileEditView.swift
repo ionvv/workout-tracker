@@ -51,7 +51,8 @@ struct ProfileEditView: View {
                 }
             }
             
-            if let bmi = calculateBMI(), let category = bmiCategory(bmi) {
+            if let bmi = calculateBMI() {
+                let category = bmiCategory(bmi)
                 Section("Stats") {
                     HStack {
                         Text("BMI")

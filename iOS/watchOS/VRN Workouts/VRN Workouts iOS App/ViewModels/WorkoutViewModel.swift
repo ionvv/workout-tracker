@@ -113,9 +113,8 @@ class WorkoutViewModel: NSObject, ObservableObject {
         restTimeRemaining = seconds
         
         restTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
-            
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
                 guard let startTime = self.restStartTime else { return }
                 
                 let elapsed = Int(Date().timeIntervalSince(startTime))

@@ -1,14 +1,10 @@
 import Foundation
 
-/// Timestamp helper for logging (cached formatter)
-private let tsFormatter: DateFormatter = {
-    let f = DateFormatter()
-    f.dateFormat = "HH:mm:ss.SSS"
-    return f
-}()
-
+/// Timestamp helper for logging
 private func ts() -> String {
-    return "[\(tsFormatter.string(from: Date()))]"
+    let formatter = DateFormatter()
+    formatter.dateFormat = "HH:mm:ss.SSS"
+    return "[\(formatter.string(from: Date()))]"
 }
 
 class SessionService {
