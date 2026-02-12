@@ -464,7 +464,7 @@ struct AIReviewView: View {
         isAskingFollowUp = false
         
         if result.error == nil {
-            followUpAnswer = result.answer
+            followUpAnswer = result.review
             reviewsRemaining = result.reviewsRemaining
             showingFollowUp = false
         }

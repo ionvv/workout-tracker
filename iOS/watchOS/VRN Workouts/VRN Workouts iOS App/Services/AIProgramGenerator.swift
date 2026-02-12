@@ -70,7 +70,7 @@ actor AIProgramGenerator {
                     return GenerationResult(program: nil, remainingCredits: 0, error: "Monthly limit reached")
                 }
                 if httpResponse.statusCode >= 400 {
-                    let errorJson = try? JSONDecoder().decode(ErrorResponse.self, from: data)
+                    let errorJson = try? JSONDecoder().decode(ProgramErrorResponse.self, from: data)
                     return GenerationResult(program: nil, remainingCredits: 0, error: errorJson?.error ?? "Failed to generate program")
                 }
             }
@@ -89,17 +89,17 @@ actor AIProgramGenerator {
 
 // MARK: - Response Models
 
-private struct GenerateProgramResponse: Codable {
+private struct GenerateProgramResponse: Codable, Sendable {
     let program: Program
-    let usage: UsageInfo
+    let usage: ProgramUsageInfo
 }
 
-private struct UsageInfo: Codable {
+private struct ProgramUsageInfo: Codable, Sendable {
     let used: Int
     let limit: Int
     let remaining: Int
 }
 
-private struct ErrorResponse: Codable {
+private struct ProgramErrorResponse: Codable, Sendable {
     let error: String
 }
