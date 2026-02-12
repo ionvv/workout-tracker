@@ -193,11 +193,11 @@ struct ImportProgramView: View {
                 jsonObj["program_id"] = UUID().uuidString
             }
             
-            // Auto-generate dayId for each day if missing
+            // Auto-generate dayId for each day if missing (1, 2, 3, etc.)
             if var days = jsonObj["workout_days"] as? [[String: Any]] {
                 for i in days.indices {
                     if days[i]["dayId"] == nil || (days[i]["dayId"] as? String)?.isEmpty == true {
-                        days[i]["dayId"] = "day-\(i + 1)-\(UUID().uuidString.prefix(8))"
+                        days[i]["dayId"] = "\(i + 1)"
                     }
                     
                     // Auto-generate exerciseId for each exercise if missing
