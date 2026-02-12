@@ -98,6 +98,20 @@ struct ProfileView: View {
                     }
                 }
                 
+                // AI Coach
+                Section("AI Coach") {
+                    NavigationLink {
+                        AIReviewHistoryView()
+                    } label: {
+                        HStack {
+                            Label("Review History", systemImage: "brain.head.profile")
+                            Spacer()
+                            Image(systemName: "sparkles")
+                                .foregroundStyle(.yellow)
+                        }
+                    }
+                }
+                
                 // Health & Devices
                 Section("Health & Devices") {
                     NavigationLink {
