@@ -187,9 +187,8 @@ class WorkoutViewModel: NSObject, ObservableObject {
         restTimeRemaining = seconds
         
         restTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
-            
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
                 if self.restTimeRemaining > 0 {
                     self.restTimeRemaining -= 1
                 } else {

@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 class ProfileService: ObservableObject {
     static let shared = ProfileService()
