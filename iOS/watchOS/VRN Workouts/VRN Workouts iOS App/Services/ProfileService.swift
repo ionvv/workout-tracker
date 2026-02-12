@@ -49,4 +49,8 @@ class ProfileService: ObservableObject {
         profile.unitSystem = system
         save()
     }
+    
+    func getProfile() -> UserProfile {
+        return profile
+    }
 }
