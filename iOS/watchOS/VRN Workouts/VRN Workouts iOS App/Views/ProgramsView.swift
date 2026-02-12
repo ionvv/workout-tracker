@@ -184,8 +184,39 @@ struct ImportProgramView: View {
         
         do {
             let data = jsonText.data(using: .utf8)!
+            
+            // First try to decode as-is
+            var jsonObj = try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+            
+            // Auto-generate program_id if missing
+            if jsonObj["program_id"] == nil || (jsonObj["program_id"] as? String)?.isEmpty == true {
+                jsonObj["program_id"] = UUID().uuidString
+            }
+            
+            // Auto-generate dayId for each day if missing
+            if var days = jsonObj["workout_days"] as? [[String: Any]] {
+                for i in days.indices {
+                    if days[i]["dayId"] == nil || (days[i]["dayId"] as? String)?.isEmpty == true {
+                        days[i]["dayId"] = "day-\(i + 1)-\(UUID().uuidString.prefix(8))"
+                    }
+                    
+                    // Auto-generate exerciseId for each exercise if missing
+                    if var exercises = days[i]["exercises"] as? [[String: Any]] {
+                        for j in exercises.indices {
+                            if exercises[j]["exerciseId"] == nil || (exercises[j]["exerciseId"] as? String)?.isEmpty == true {
+                                exercises[j]["exerciseId"] = "ex-\(j + 1)-\(UUID().uuidString.prefix(8))"
+                            }
+                        }
+                        days[i]["exercises"] = exercises
+                    }
+                }
+                jsonObj["workout_days"] = days
+            }
+            
+            // Re-encode and decode as Program
+            let modifiedData = try JSONSerialization.data(withJSONObject: jsonObj)
             let decoder = JSONDecoder()
-            let program = try decoder.decode(Program.self, from: data)
+            let program = try decoder.decode(Program.self, from: modifiedData)
             
             onImport(program)
             dismiss()
