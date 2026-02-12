@@ -165,6 +165,18 @@ class AuthService: ObservableObject {
         print("\(ts()) 🔐 Signed out")
     }
     
+    /// Get current access token
+    func getAccessToken() async -> String? {
+        // Refresh if needed first
+        _ = await refreshTokenIfNeeded()
+        return AuthCache.shared.token
+    }
+    
+    /// Get current user ID
+    func getCurrentUserId() async -> String? {
+        return userId
+    }
+    
     func refreshTokenIfNeeded() async -> Bool {
         guard let refreshToken = cache.refreshToken else { return false }
         
