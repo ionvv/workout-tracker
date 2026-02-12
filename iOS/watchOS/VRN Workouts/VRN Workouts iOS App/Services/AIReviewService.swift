@@ -85,7 +85,7 @@ actor AIReviewService {
     }
     
     /// Request an AI review for a workout session
-    func getReview(for session: Session, program: Program?, allSessions: [Session]) async -> ReviewResult {
+    func getReview(for session: WorkoutSession, program: Program?, allSessions: [WorkoutSession]) async -> ReviewResult {
         guard let token = await AuthService.shared.getAccessToken() else {
             return ReviewResult(review: "", reviewId: nil, reviewsRemaining: 0, error: .unauthorized)
         }
@@ -140,7 +140,7 @@ actor AIReviewService {
     // MARK: - Follow-Up Question
     
     /// Ask a follow-up question about a review
-    func askFollowUp(question: String, reviewId: String, session: Session, program: Program?, allSessions: [Session]) async -> ReviewResult {
+    func askFollowUp(question: String, reviewId: String, session: WorkoutSession, program: Program?, allSessions: [WorkoutSession]) async -> ReviewResult {
         guard let token = await AuthService.shared.getAccessToken() else {
             return ReviewResult(review: "", reviewId: nil, reviewsRemaining: 0, error: .unauthorized)
         }
@@ -205,7 +205,7 @@ actor AIReviewService {
     
     // MARK: - Context Building
     
-    private func buildContext(for session: Session, program: Program?, allSessions: [Session]) async -> [String: Any] {
+    private func buildContext(for session: WorkoutSession, program: Program?, allSessions: [WorkoutSession]) async -> [String: Any] {
         var context: [String: Any] = [:]
         
         // User profile
@@ -264,18 +264,20 @@ actor AIReviewService {
         return context
     }
     
-    private func buildWorkoutData(for session: Session) -> [String: Any] {
+    private func buildWorkoutData(for session: WorkoutSession) -> [String: Any] {
+        let dateFormatter = ISO8601DateFormatter()
         var data: [String: Any] = [
-            "sessionId": session.id ?? "",
-            "date": session.completedAt ?? session.startedAt ?? "",
+            "sessionId": session.sessionId,
+            "date": dateFormatter.string(from: session.endTime ?? session.startTime),
             "dayId": session.dayId ?? "",
-            "dayName": session.dayName ?? "Workout"
+            "dayName": session.dayName
         ]
         
         // Calculate duration
-        if let start = parseDate(session.startedAt ?? ""),
-           let end = parseDate(session.completedAt ?? "") {
-            data["duration"] = Int(end.timeIntervalSince(start) / 60)
+        if let end = session.endTime {
+            data["duration"] = Int(end.timeIntervalSince(session.startTime) / 60)
+        } else if let dur = session.duration {
+            data["duration"] = dur
         }
         
         // Calculate total volume
@@ -321,28 +323,27 @@ actor AIReviewService {
         return data
     }
     
-    private func findPreviousSameWorkout(session: Session, allSessions: [Session]) -> Session? {
+    private func findPreviousSameWorkout(session: WorkoutSession, allSessions: [WorkoutSession]) -> WorkoutSession? {
         let currentDayId = session.dayId
-        let currentDate = parseDate(session.completedAt ?? session.startedAt ?? "") ?? Date()
+        let currentDate = session.endTime ?? session.startTime
         
         return allSessions
-            .filter { $0.dayId == currentDayId && $0.id != session.id }
-            .filter { parseDate($0.completedAt ?? $0.startedAt ?? "") ?? Date() < currentDate }
-            .sorted { (parseDate($0.completedAt ?? "") ?? Date()) > (parseDate($1.completedAt ?? "") ?? Date()) }
+            .filter { $0.dayId == currentDayId && $0.sessionId != session.sessionId }
+            .filter { ($0.endTime ?? $0.startTime) < currentDate }
+            .sorted { ($0.endTime ?? $0.startTime) > ($1.endTime ?? $1.startTime) }
             .first
     }
     
-    private func calculateCurrentWeek(sessions: [Session]) -> Int {
+    private func calculateCurrentWeek(sessions: [WorkoutSession]) -> Int {
         // Simplified - count weeks since first session
-        guard let firstSession = sessions.sorted(by: { ($0.startedAt ?? "") < ($1.startedAt ?? "") }).first,
-              let firstDate = parseDate(firstSession.startedAt ?? "") else { return 1 }
+        guard let firstSession = sessions.sorted(by: { $0.startTime < $1.startTime }).first else { return 1 }
         
-        let weeks = Calendar.current.dateComponents([.weekOfYear], from: firstDate, to: Date()).weekOfYear ?? 0
+        let weeks = Calendar.current.dateComponents([.weekOfYear], from: firstSession.startTime, to: Date()).weekOfYear ?? 0
         return max(1, weeks + 1)
     }
     
-    private func extractRecentPRs(session: Session, allSessions: [Session]) -> [[String: Any]] {
-        // Simplified PR detection
+    private func extractRecentPRs(session: WorkoutSession, allSessions: [WorkoutSession]) -> [[String: Any]] {
+        let dateFormatter = ISO8601DateFormatter()
         var prs: [[String: Any]] = []
         
         for exercise in session.exercises {
@@ -351,7 +352,7 @@ actor AIReviewService {
             
             // Check if this is a PR compared to previous sessions
             let previousMax = allSessions
-                .filter { $0.id != session.id }
+                .filter { $0.sessionId != session.sessionId }
                 .flatMap { $0.exercises }
                 .filter { $0.exerciseId == exercise.exerciseId }
                 .flatMap { $0.sets }
@@ -363,20 +364,12 @@ actor AIReviewService {
                     "name": exercise.exerciseName,
                     "weight": maxWeight,
                     "reps": maxReps,
-                    "date": session.completedAt ?? ""
+                    "date": dateFormatter.string(from: session.endTime ?? session.startTime)
                 ])
             }
         }
         
         return prs
-    }
-    
-    private func parseDate(_ string: String) -> Date? {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let date = formatter.date(from: string) { return date }
-        formatter.formatOptions = [.withInternetDateTime]
-        return formatter.date(from: string)
     }
 }
 

@@ -10,8 +10,8 @@ actor SummaryService {
     // MARK: - Generate Summary After Workout
     
     /// Call this after saving a workout session
-    func generateSummaries(for session: Session, allSessions: [Session]) async {
-        let date = parseDate(session.completedAt ?? session.startedAt ?? "") ?? Date()
+    func generateSummaries(for session: WorkoutSession, allSessions: [WorkoutSession]) async {
+        let date = session.endTime ?? session.startTime
         
         // Generate weekly summary
         await generateWeeklySummary(for: date, sessions: allSessions)
@@ -24,7 +24,7 @@ actor SummaryService {
     
     // MARK: - Weekly Summary
     
-    func generateWeeklySummary(for date: Date, sessions: [Session]) async {
+    func generateWeeklySummary(for date: Date, sessions: [WorkoutSession]) async {
         let weekStart = startOfWeek(date)
         let weekEnd = endOfWeek(date)
         let weekNumber = weekNumber(for: date)
@@ -32,7 +32,7 @@ actor SummaryService {
         
         // Filter sessions for this week
         let weekSessions = sessions.filter { session in
-            guard let sessionDate = parseDate(session.completedAt ?? session.startedAt ?? "") else { return false }
+            let sessionDate = session.endTime ?? session.startTime
             return sessionDate >= weekStart && sessionDate <= weekEnd
         }
         
@@ -66,14 +66,14 @@ actor SummaryService {
     
     // MARK: - Monthly Summary
     
-    func generateMonthlySummary(for date: Date, sessions: [Session]) async {
+    func generateMonthlySummary(for date: Date, sessions: [WorkoutSession]) async {
         let monthStart = startOfMonth(date)
         let monthEnd = endOfMonth(date)
         let periodKey = "\(year(for: date))-\(String(format: "%02d", month(for: date)))"
         
         // Filter sessions for this month
         let monthSessions = sessions.filter { session in
-            guard let sessionDate = parseDate(session.completedAt ?? session.startedAt ?? "") else { return false }
+            let sessionDate = session.endTime ?? session.startTime
             return sessionDate >= monthStart && sessionDate <= monthEnd
         }
         
@@ -178,7 +178,7 @@ actor SummaryService {
         }
     }
     
-    private func calculateVolume(for session: Session) -> Int {
+    private func calculateVolume(for session: WorkoutSession) -> Int {
         session.exercises.reduce(0) { total, exercise in
             total + exercise.sets.reduce(0) { setTotal, set in
                 setTotal + Int((set.weight ?? 0) * Double(set.reps ?? 0))
@@ -186,7 +186,7 @@ actor SummaryService {
         }
     }
     
-    private func calculateAverageRPE(sessions: [Session]) -> Double {
+    private func calculateAverageRPE(sessions: [WorkoutSession]) -> Double {
         var totalRPE = 0.0
         var count = 0
         for session in sessions {
@@ -202,7 +202,7 @@ actor SummaryService {
         return count > 0 ? totalRPE / Double(count) : 0
     }
     
-    private func extractKeyLifts(from sessions: [Session]) -> [String: KeyLiftSummary] {
+    private func extractKeyLifts(from sessions: [WorkoutSession]) -> [String: KeyLiftSummary] {
         var lifts: [String: KeyLiftSummary] = [:]
         let keyLiftNames = ["bench press", "squat", "deadlift", "overhead press", "barbell row"]
         
@@ -226,14 +226,14 @@ actor SummaryService {
         return lifts
     }
     
-    private func extractPRs(from weekSessions: [Session], allSessions: [Session]) -> [String] {
+    private func extractPRs(from weekSessions: [WorkoutSession], allSessions: [WorkoutSession]) -> [String] {
         var prs: [String] = []
         // Simplified PR detection - compare to all previous sessions
         // In production, would track PRs in separate table
         return prs
     }
     
-    private func calculateStrengthGains(monthSessions: [Session], allSessions: [Session]) -> [String: Double] {
+    private func calculateStrengthGains(monthSessions: [WorkoutSession], allSessions: [WorkoutSession]) -> [String: Double] {
         // Compare first week to last week of month
         return [:]
     }

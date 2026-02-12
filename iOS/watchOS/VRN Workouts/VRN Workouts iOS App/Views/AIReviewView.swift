@@ -2,9 +2,9 @@ import SwiftUI
 
 /// View for displaying AI workout review
 struct AIReviewView: View {
-    let session: Session
+    let session: WorkoutSession
     let program: Program?
-    let allSessions: [Session]
+    let allSessions: [WorkoutSession]
     
     @Environment(\.dismiss) private var dismiss
     @StateObject private var storeKit = StoreKitManager.shared

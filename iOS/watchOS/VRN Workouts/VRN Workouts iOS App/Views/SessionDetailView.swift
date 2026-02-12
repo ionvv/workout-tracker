@@ -4,12 +4,12 @@ struct SessionDetailView: View {
     @State var session: WorkoutSession
     let onUpdate: ((WorkoutSession) -> Void)?
     var program: Program?
-    var allSessions: [Session]?
+    var allSessions: [WorkoutSession]?
     
     @State private var showingEditSheet = false
     @State private var showingAIReview = false
     
-    init(session: WorkoutSession, program: Program? = nil, allSessions: [Session]? = nil, onUpdate: ((WorkoutSession) -> Void)? = nil) {
+    init(session: WorkoutSession, program: Program? = nil, allSessions: [WorkoutSession]? = nil, onUpdate: ((WorkoutSession) -> Void)? = nil) {
         self._session = State(initialValue: session)
         self.program = program
         self.allSessions = allSessions
@@ -110,63 +110,12 @@ struct SessionDetailView: View {
             }
         }
         .sheet(isPresented: $showingAIReview) {
-            if let convertedSession = convertToSession(session) {
-                AIReviewView(
-                    session: convertedSession,
-                    program: program,
-                    allSessions: allSessions ?? []
-                )
-            }
+            AIReviewView(
+                session: session,
+                program: program,
+                allSessions: allSessions ?? []
+            )
         }
-    }
-    
-    /// Convert WorkoutSession to Session for AI review
-    private func convertToSession(_ workoutSession: WorkoutSession) -> Session? {
-        Session(
-            id: workoutSession.dbId,
-            odid: workoutSession.odid,
-            userId: workoutSession.userId,
-            sessionId: workoutSession.sessionId,
-            programId: workoutSession.programId,
-            dayId: workoutSession.dayId,
-            dayName: workoutSession.dayName,
-            startedAt: ISO8601DateFormatter().string(from: workoutSession.startTime),
-            completedAt: workoutSession.endTime.map { ISO8601DateFormatter().string(from: $0) },
-            durationMinutes: workoutSession.duration,
-            exercises: workoutSession.exercises.map { exercise in
-                SessionExerciseData(
-                    odid: nil,
-                    odidSession: nil,
-                    odidExercise: nil,
-                    exerciseId: exercise.exerciseId,
-                    exerciseName: exercise.exerciseName,
-                    prescribedSets: nil,
-                    prescribedReps: nil,
-                    prescribedWeight: nil,
-                    notes: nil,
-                    skipped: exercise.skipped,
-                    sets: exercise.sets.map { set in
-                        SetLog(
-                            odid: nil,
-                            odidSessionExercise: nil,
-                            setNumber: set.setNumber,
-                            weight: set.weight,
-                            reps: set.reps,
-                            rpe: set.rpe,
-                            completed: true,
-                            notes: nil,
-                            completedAt: nil
-                        )
-                    }
-                )
-            },
-            notes: workoutSession.notes,
-            totalVolume: workoutSession.totalVolume,
-            bodyWeight: workoutSession.bodyWeight,
-            createdAt: workoutSession.createdAt.map { ISO8601DateFormatter().string(from: $0) },
-            updatedAt: workoutSession.updatedAt.map { ISO8601DateFormatter().string(from: $0) },
-            syncStatus: nil
-        )
     }
 }
 
@@ -196,7 +145,7 @@ struct StatCard: View {
 }
 
 struct ExerciseSessionRow: View {
-    let exercise: SessionExercise
+    let exercise: WorkoutSessionExercise
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
