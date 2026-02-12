@@ -3,7 +3,9 @@ import SwiftUI
 struct ProfileView: View {
     @StateObject private var authService = AuthService.shared
     @StateObject private var profileService = ProfileService.shared
+    @StateObject private var storeKit = StoreKitManager.shared
     @State private var showingSignOutAlert = false
+    @State private var showingUpgrade = false
     
     var body: some View {
         NavigationStack {
@@ -98,6 +100,35 @@ struct ProfileView: View {
                     }
                 }
                 
+                // PRO Subscription
+                Section {
+                    if storeKit.isPro {
+                        HStack {
+                            Label("PRO Member", systemImage: "crown.fill")
+                                .foregroundStyle(.yellow)
+                            Spacer()
+                            Text("Active")
+                                .foregroundStyle(.green)
+                        }
+                    } else {
+                        Button {
+                            showingUpgrade = true
+                        } label: {
+                            HStack {
+                                Label("Upgrade to PRO", systemImage: "crown")
+                                Spacer()
+                                Text("$6.99/mo")
+                                    .foregroundStyle(.secondary)
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Subscription")
+                }
+                
                 // AI Coach
                 Section("AI Coach") {
                     NavigationLink {
@@ -106,8 +137,17 @@ struct ProfileView: View {
                         HStack {
                             Label("Review History", systemImage: "brain.head.profile")
                             Spacer()
-                            Image(systemName: "sparkles")
-                                .foregroundStyle(.yellow)
+                            if storeKit.isPro {
+                                Image(systemName: "sparkles")
+                                    .foregroundStyle(.yellow)
+                            } else {
+                                Text("PRO")
+                                    .font(.caption)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color.yellow.opacity(0.2))
+                                    .clipShape(Capsule())
+                            }
                         }
                     }
                 }
@@ -164,6 +204,9 @@ struct ProfileView: View {
                 }
             } message: {
                 Text("You'll need to sign in again to access your workouts.")
+            }
+            .sheet(isPresented: $showingUpgrade) {
+                ProUpgradeView()
             }
         }
     }

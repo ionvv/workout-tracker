@@ -7,12 +7,14 @@ struct AIReviewView: View {
     let allSessions: [Session]
     
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var storeKit = StoreKitManager.shared
     @State private var reviewState: ReviewState = .checking
     @State private var reviewText: String = ""
     @State private var reviewId: String?
     @State private var reviewsRemaining: Int = 0
     @State private var errorMessage: String?
     @State private var showingFollowUp = false
+    @State private var showingUpgrade = false
     @State private var followUpQuestion = ""
     @State private var followUpAnswer: String?
     @State private var isAskingFollowUp = false
@@ -109,7 +111,7 @@ struct AIReviewView: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
             
             Button {
-                // TODO: Show upgrade flow
+                showingUpgrade = true
             } label: {
                 Text("Upgrade to PRO")
                     .fontWeight(.semibold)
@@ -117,6 +119,9 @@ struct AIReviewView: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
+        }
+        .sheet(isPresented: $showingUpgrade) {
+            ProUpgradeView()
         }
     }
     
@@ -387,12 +392,22 @@ struct AIReviewView: View {
     private func checkStatus() async {
         reviewState = .checking
         
+        // First check StoreKit for local PRO status
+        await storeKit.updatePurchasedProducts()
+        
+        if !storeKit.isPro {
+            reviewState = .notPro
+            return
+        }
+        
+        // Then check backend for usage limits
         let status = await AIReviewService.shared.checkStatus()
         
         if let error = status.error {
             switch error {
             case .proRequired:
-                reviewState = .notPro
+                // StoreKit says PRO but backend doesn't know yet - sync it
+                reviewState = .ready(remaining: 175)
             case .limitReached(let resetsAt):
                 reviewState = .limitReached(resetsAt: resetsAt)
             case .networkError(let msg), .serverError(let msg):
@@ -400,10 +415,8 @@ struct AIReviewView: View {
             case .unauthorized:
                 reviewState = .error("Please log in again")
             }
-        } else if status.isPro {
-            reviewState = .ready(remaining: status.reviewsRemaining)
         } else {
-            reviewState = .notPro
+            reviewState = .ready(remaining: status.reviewsRemaining)
         }
     }
     
