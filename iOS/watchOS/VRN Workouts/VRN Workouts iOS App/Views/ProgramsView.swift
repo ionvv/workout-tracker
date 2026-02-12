@@ -118,6 +118,50 @@ struct ImportProgramView: View {
     @State private var jsonText = ""
     @State private var errorMessage: String?
     @State private var isImporting = false
+    @State private var showingSchema = false
+    
+    private let schemaExample = """
+{
+  "program_name": "My Program",
+  "workout_days": [
+    {
+      "dayName": "Day A - Push",
+      "estimatedTime": 60,
+      "warmup": {
+        "duration": 10,
+        "exercises": [
+          { "name": "Arm Circles", "duration": 30 },
+          { "name": "Push-ups", "reps": 10 }
+        ]
+      },
+      "exercises": [
+        {
+          "name": "Bench Press",
+          "workingSets": 4,
+          "repsMin": 8,
+          "repsMax": 10,
+          "restSeconds": 120,
+          "rpe": 8,
+          "notes": "Pause at bottom"
+        },
+        {
+          "name": "Plank Hold",
+          "workingSets": 3,
+          "repsMin": 60,
+          "repsMax": 60,
+          "type": "timed"
+        }
+      ],
+      "cooldown": {
+        "duration": 5,
+        "exercises": [
+          { "name": "Chest Stretch", "duration": 30 }
+        ]
+      }
+    }
+  ]
+}
+"""
     
     var body: some View {
         NavigationStack {
@@ -150,6 +194,13 @@ struct ImportProgramView: View {
                     }
                     .buttonStyle(.bordered)
                     
+                    Button {
+                        showingSchema = true
+                    } label: {
+                        Label("Schema", systemImage: "doc.text")
+                    }
+                    .buttonStyle(.bordered)
+                    
                     Spacer()
                     
                     Button {
@@ -172,6 +223,32 @@ struct ImportProgramView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") {
                         dismiss()
+                    }
+                }
+            }
+            .sheet(isPresented: $showingSchema) {
+                NavigationStack {
+                    ScrollView {
+                        Text(schemaExample)
+                            .font(.system(.caption, design: .monospaced))
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .navigationTitle("JSON Schema")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button("Close") {
+                                showingSchema = false
+                            }
+                        }
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button {
+                                UIPasteboard.general.string = schemaExample
+                            } label: {
+                                Label("Copy", systemImage: "doc.on.doc")
+                            }
+                        }
                     }
                 }
             }
