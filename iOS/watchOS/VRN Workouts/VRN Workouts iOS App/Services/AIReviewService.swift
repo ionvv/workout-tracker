@@ -211,10 +211,10 @@ actor AIReviewService {
         // User profile
         let profile = ProfileService.shared.getProfile()
         context["user"] = [
-            "name": profile.name ?? "User",
+            "name": "User",
             "bodyweight": profile.weight ?? 0,
             "goal": "fat-loss-muscle-gain",
-            "units": profile.units.rawValue
+            "units": profile.unitSystem.rawValue
         ]
         
         // Program info
@@ -310,7 +310,7 @@ actor AIReviewService {
                 "sets": sets,
                 "volume": exerciseVolume
             ]
-            exerciseData["notes"] = exercise.notes ?? ""
+            // SessionExercise doesn't have notes
             
             totalVolume += exerciseVolume
             exercises.append(exerciseData)
@@ -375,36 +375,36 @@ actor AIReviewService {
 
 // MARK: - Response Models
 
-private struct StatusResponse: Codable {
+private struct StatusResponse: Codable, Sendable {
     let isPro: Bool
     let usage: UsageInfo
 }
 
-private struct ReviewResponse: Codable {
+private struct ReviewResponse: Codable, Sendable {
     let review: String
     let reviewId: String?
     let usage: UsageInfo
 }
 
-private struct FollowUpResponse: Codable {
+private struct FollowUpResponse: Codable, Sendable {
     let answer: String
     let usage: UsageInfo
 }
 
-private struct LimitReachedResponse: Codable {
+private struct LimitReachedResponse: Codable, Sendable {
     let error: String
     let message: String
     let usage: UsageInfo
 }
 
-private struct UsageInfo: Codable {
+private struct UsageInfo: Codable, Sendable {
     let used: Int
     let limit: Int
     let remaining: Int
     let resetsAt: String?
 }
 
-private struct ErrorResponse: Codable {
+private struct ErrorResponse: Codable, Sendable {
     let error: String
     let message: String?
 }
