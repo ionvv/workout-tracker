@@ -28,7 +28,12 @@ struct ActiveWorkoutView: View {
                     WorkoutPhaseIndicator(
                         currentPhase: currentPhase,
                         hasWarmup: hasWarmup,
-                        hasCooldown: hasCooldown
+                        hasCooldown: hasCooldown,
+                        onPhaseSelected: { phase in
+                            withAnimation {
+                                currentPhase = phase
+                            }
+                        }
                     )
                 }
                 

@@ -145,6 +145,7 @@ struct WorkoutPhaseIndicator: View {
     let currentPhase: WorkoutPhase
     let hasWarmup: Bool
     let hasCooldown: Bool
+    var onPhaseSelected: ((WorkoutPhase) -> Void)? = nil
     
     var body: some View {
         HStack(spacing: 8) {
@@ -152,21 +153,24 @@ struct WorkoutPhaseIndicator: View {
                 PhaseChip(
                     title: "Warm-up",
                     isActive: currentPhase == .warmup,
-                    isCompleted: currentPhase == .workout || currentPhase == .cooldown
+                    isCompleted: currentPhase == .workout || currentPhase == .cooldown,
+                    onTap: { onPhaseSelected?(.warmup) }
                 )
             }
             
             PhaseChip(
                 title: "Workout",
                 isActive: currentPhase == .workout,
-                isCompleted: currentPhase == .cooldown
+                isCompleted: currentPhase == .cooldown,
+                onTap: { onPhaseSelected?(.workout) }
             )
             
             if hasCooldown {
                 PhaseChip(
                     title: "Cool-down",
                     isActive: currentPhase == .cooldown,
-                    isCompleted: false
+                    isCompleted: false,
+                    onTap: { onPhaseSelected?(.cooldown) }
                 )
             }
         }
@@ -179,23 +183,29 @@ struct PhaseChip: View {
     let title: String
     let isActive: Bool
     let isCompleted: Bool
+    var onTap: (() -> Void)? = nil
     
     var body: some View {
-        HStack(spacing: 4) {
-            if isCompleted {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.caption2)
-                    .foregroundStyle(.green)
+        Button {
+            onTap?()
+        } label: {
+            HStack(spacing: 4) {
+                if isCompleted {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.caption2)
+                        .foregroundStyle(.green)
+                }
+                Text(title)
+                    .font(.caption)
+                    .fontWeight(isActive ? .semibold : .regular)
             }
-            Text(title)
-                .font(.caption)
-                .fontWeight(isActive ? .semibold : .regular)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(isActive ? Color.blue.opacity(0.2) : Color(.systemGray5))
+            .foregroundStyle(isActive ? .blue : .secondary)
+            .cornerRadius(16)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(isActive ? Color.blue.opacity(0.2) : Color(.systemGray5))
-        .foregroundStyle(isActive ? .blue : .secondary)
-        .cornerRadius(16)
+        .buttonStyle(.plain)
     }
 }
 
