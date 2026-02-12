@@ -39,10 +39,12 @@ struct SessionEditView: View {
                 
                 // Exercises
                 ForEach(exercises.indices, id: \.self) { exerciseIndex in
+                    let isTimed = isTimedExercise(exercises[exerciseIndex].exerciseName)
                     Section(exercises[exerciseIndex].exerciseName) {
                         ForEach(exercises[exerciseIndex].sets.indices, id: \.self) { setIndex in
                             EditableSetRow(
                                 set: $exercises[exerciseIndex].sets[setIndex],
+                                isTimed: isTimed,
                                 onDelete: {
                                     exercises[exerciseIndex].sets.remove(at: setIndex)
                                     renumberSets(exerciseIndex: exerciseIndex)
@@ -105,6 +107,12 @@ struct SessionEditView: View {
         }
     }
     
+    private func isTimedExercise(_ name: String) -> Bool {
+        let timedKeywords = ["plank", "hold", "hang", "wall sit", "l-sit", "dead hang"]
+        let nameLower = name.lowercased()
+        return timedKeywords.contains { nameLower.contains($0) }
+    }
+    
     private func saveChanges() {
         isSaving = true
         
@@ -132,6 +140,7 @@ struct SessionEditView: View {
 
 struct EditableSetRow: View {
     @Binding var set: SetLog
+    var isTimed: Bool = false
     let onDelete: () -> Void
     
     @State private var weightText: String = ""
@@ -144,30 +153,45 @@ struct EditableSetRow: View {
                 .font(.subheadline)
                 .frame(width: 50, alignment: .leading)
             
-            // Weight
-            TextField("0", text: $weightText)
-                .keyboardType(.decimalPad)
-                .frame(width: 60)
-                .textFieldStyle(.roundedBorder)
-                .onChange(of: weightText) { _, newValue in
-                    if let weight = Double(newValue) {
-                        updateSet(weight: weight)
+            if isTimed {
+                // Timed exercise: just show seconds
+                TextField("0", text: $repsText)
+                    .keyboardType(.numberPad)
+                    .frame(width: 70)
+                    .textFieldStyle(.roundedBorder)
+                    .onChange(of: repsText) { _, newValue in
+                        if let reps = Int(newValue) {
+                            updateSet(reps: reps)
+                        }
                     }
-                }
-            
-            Text("kg ×")
-                .foregroundStyle(.secondary)
-            
-            // Reps
-            TextField("0", text: $repsText)
-                .keyboardType(.numberPad)
-                .frame(width: 50)
-                .textFieldStyle(.roundedBorder)
-                .onChange(of: repsText) { _, newValue in
-                    if let reps = Int(newValue) {
-                        updateSet(reps: reps)
+                
+                Text("sec")
+                    .foregroundStyle(.secondary)
+            } else {
+                // Regular exercise: weight × reps
+                TextField("0", text: $weightText)
+                    .keyboardType(.decimalPad)
+                    .frame(width: 60)
+                    .textFieldStyle(.roundedBorder)
+                    .onChange(of: weightText) { _, newValue in
+                        if let weight = Double(newValue) {
+                            updateSet(weight: weight)
+                        }
                     }
-                }
+                
+                Text("kg ×")
+                    .foregroundStyle(.secondary)
+                
+                TextField("0", text: $repsText)
+                    .keyboardType(.numberPad)
+                    .frame(width: 50)
+                    .textFieldStyle(.roundedBorder)
+                    .onChange(of: repsText) { _, newValue in
+                        if let reps = Int(newValue) {
+                            updateSet(reps: reps)
+                        }
+                    }
+            }
             
             Spacer()
             
