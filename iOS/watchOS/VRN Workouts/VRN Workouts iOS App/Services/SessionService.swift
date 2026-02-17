@@ -76,8 +76,14 @@ class SessionService {
     
     /// Offline-first: save locally, sync in background
     func saveSession(_ session: ActiveWorkoutSession) async throws {
+        print("\(ts()) 📋 SessionService.saveSession() called")
+        print("\(ts()) 📋 Session ID: \(session.sessionId)")
+        print("\(ts()) 📋 Day: \(session.dayName)")
+        print("\(ts()) 📋 Exercises: \(session.exercises.count)")
+        
         // Convert to WorkoutSession for local storage
         let stats = session.calculateStats()
+        print("\(ts()) 📋 Stats - volume: \(stats.volume), sets: \(stats.sets), duration: \(stats.duration)")
         let workoutSession = WorkoutSession(
             dbId: UUID(),
             odid: nil,

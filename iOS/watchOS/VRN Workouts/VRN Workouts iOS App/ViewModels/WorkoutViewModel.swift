@@ -71,23 +71,39 @@ class WorkoutViewModel: NSObject, ObservableObject {
     }
     
     func endWorkout() async {
-        guard let session = activeSession else { return }
+        print("🏋️ endWorkout() called")
+        guard let session = activeSession else {
+            print("🏋️ ERROR: No active session to save!")
+            return
+        }
+        
+        print("🏋️ Saving session: \(session.sessionId) - \(session.dayName)")
+        print("🏋️ Session has \(session.exercises.count) exercises")
+        for (i, ex) in session.exercises.enumerated() {
+            print("🏋️   Exercise \(i): \(ex.exerciseName) with \(ex.sets.count) sets")
+        }
         
         isSaving = true
         
         // End HealthKit workout
+        print("🏋️ Ending HealthKit workout...")
         await endHealthKitWorkout()
+        print("🏋️ HealthKit workout ended")
         
         do {
+            print("🏋️ Calling SessionService.saveSession...")
             try await SessionService.shared.saveSession(session)
+            print("🏋️ Session saved successfully!")
             activeSession = nil
             WorkoutStateManager.shared.sessionEnded()
         } catch {
+            print("🏋️ ERROR saving session: \(error)")
             errorMessage = error.localizedDescription
         }
         
         isSaving = false
         stopRestTimer()
+        print("🏋️ endWorkout() complete")
     }
     
     func cancelWorkout() {
