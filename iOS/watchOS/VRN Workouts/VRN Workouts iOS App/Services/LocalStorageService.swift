@@ -12,8 +12,16 @@ class LocalStorageService {
     static let shared = LocalStorageService()
     
     private let defaults = UserDefaults.standard
-    private let encoder = JSONEncoder()
-    private let decoder = JSONDecoder()
+    private let encoder: JSONEncoder = {
+        let e = JSONEncoder()
+        e.dateEncodingStrategy = .iso8601
+        return e
+    }()
+    private let decoder: JSONDecoder = {
+        let d = JSONDecoder()
+        d.dateDecodingStrategy = .iso8601
+        return d
+    }()
     
     // In-memory cache to avoid re-decoding
     private var programsCache: [Program]?
@@ -111,9 +119,13 @@ class LocalStorageService {
         // Update in-memory cache first
         cacheLock.withLock { sessionsCache = sessions }
         
-        if let data = try? encoder.encode(sessions) {
+        do {
+            let data = try encoder.encode(sessions)
             defaults.set(data, forKey: sessionsKey)
-            print("\(ts()) 💾 Cached \(sessions.count) sessions locally")
+            defaults.synchronize()
+            print("\(ts()) 💾 Cached \(sessions.count) sessions locally (\(data.count) bytes)")
+        } catch {
+            print("\(ts()) ❌ Failed to encode sessions: \(error)")
         }
     }
     
@@ -124,19 +136,34 @@ class LocalStorageService {
             return cached
         }
         
-        guard let data = defaults.data(forKey: sessionsKey),
-              let sessions = try? decoder.decode([WorkoutSession].self, from: data) else {
+        guard let data = defaults.data(forKey: sessionsKey) else {
+            print("\(ts()) 💾 No sessions data in UserDefaults")
             return []
         }
         
-        // Cache in memory
-        cacheLock.withLock { sessionsCache = sessions }
-        print("\(ts()) 💾 Loaded \(sessions.count) sessions from cache")
-        return sessions
+        print("\(ts()) 💾 Found \(data.count) bytes of session data")
+        
+        do {
+            let sessions = try decoder.decode([WorkoutSession].self, from: data)
+            // Cache in memory
+            cacheLock.withLock { sessionsCache = sessions }
+            print("\(ts()) 💾 Loaded \(sessions.count) sessions from cache")
+            return sessions
+        } catch {
+            print("\(ts()) ❌ Failed to decode sessions: \(error)")
+            return []
+        }
     }
     
     func addSession(_ session: WorkoutSession) {
+        print("\(ts()) 💾 Adding session: \(session.sessionId) - \(session.dayName)")
+        print("\(ts()) 💾 Session has \(session.exercises.count) exercises")
+        for (i, ex) in session.exercises.enumerated() {
+            print("\(ts()) 💾   Exercise \(i): \(ex.exerciseName) with \(ex.sets.count) sets")
+        }
+        
         var sessions = cacheLock.withLock { sessionsCache } ?? loadSessions()
+        print("\(ts()) 💾 Current cache has \(sessions.count) sessions")
         sessions.insert(session, at: 0)
         saveSessions(sessions)
     }
