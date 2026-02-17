@@ -101,10 +101,11 @@ struct BodyWeightLogSheet: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Cancel") {
-                        dismiss()
+                        onSave(nil)  // Still save workout, just skip weight
                     }
                 }
             }
+            .interactiveDismissDisabled()  // Prevent swipe-to-dismiss losing workout
             .onAppear {
                 // Pre-fill with last known weight
                 if let weight = profileService.profile.weightInDisplayUnit {
