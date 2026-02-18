@@ -22,8 +22,23 @@ class SessionService {
         if !cached.isEmpty {
             // Have cache - sync in truly detached background
             Task.detached(priority: .background) {
-                if let fresh = try? await self.fetchSessionsFromServer() {
-                    LocalStorageService.shared.saveSessions(fresh)
+                if let serverSessions = try? await self.fetchSessionsFromServer() {
+                    // MERGE instead of replace - keep local sessions not yet on server
+                    let localSessions = LocalStorageService.shared.loadSessions()
+                    let serverIds = Set(serverSessions.map { $0.sessionId })
+                    
+                    // Find local sessions that aren't on server yet
+                    let localOnly = localSessions.filter { !serverIds.contains($0.sessionId) }
+                    
+                    if !localOnly.isEmpty {
+                        print("\(ts()) 📋 Keeping \(localOnly.count) local-only sessions during merge")
+                    }
+                    
+                    // Merge: server sessions + local-only sessions, sorted by date
+                    var merged = serverSessions + localOnly
+                    merged.sort { $0.startTime > $1.startTime }
+                    
+                    LocalStorageService.shared.saveSessions(merged)
                 }
             }
             return cached
