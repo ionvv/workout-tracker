@@ -177,8 +177,12 @@ struct ActiveWorkoutView: View {
                 Text("Save your progress or discard?")
             }
             .sheet(isPresented: $showingBodyWeightSheet) {
-                BodyWeightLogSheet { weight in
+                let durationMinutes = Int(Date().timeIntervalSince(viewModel.activeSession?.startTime ?? Date()) / 60)
+                BodyWeightLogSheet(sessionDurationMinutes: durationMinutes) { weight, customDuration in
                     viewModel.activeSession?.bodyWeight = weight
+                    if let customDuration = customDuration {
+                        viewModel.activeSession?.customDurationMinutes = customDuration
+                    }
                     Task {
                         await viewModel.endWorkout()
                         dismiss()

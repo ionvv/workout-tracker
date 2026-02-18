@@ -195,6 +195,7 @@ class ActiveWorkoutSession: ObservableObject {
     @Published var exercises: [SessionExercise]
     @Published var currentExerciseIndex: Int = 0
     @Published var bodyWeight: Double?
+    @Published var customDurationMinutes: Int?  // User-set duration if logged after workout
     
     init(program: Program, day: WorkoutDay) {
         self.sessionId = UUID().uuidString

@@ -98,7 +98,9 @@ class SessionService {
         
         // Convert to WorkoutSession for local storage
         let stats = session.calculateStats()
-        print("\(ts()) 📋 Stats - volume: \(stats.volume), sets: \(stats.sets), duration: \(stats.duration)")
+        // Use custom duration if user set it, otherwise use calculated
+        let finalDuration = session.customDurationMinutes ?? stats.duration
+        print("\(ts()) 📋 Stats - volume: \(stats.volume), sets: \(stats.sets), duration: \(finalDuration) (custom: \(session.customDurationMinutes != nil))")
         let workoutSession = WorkoutSession(
             dbId: UUID(),
             odid: nil,
@@ -113,7 +115,7 @@ class SessionService {
             notes: nil,
             totalVolume: stats.volume,
             totalSets: stats.sets,
-            duration: stats.duration,
+            duration: finalDuration,
             bodyWeight: session.bodyWeight,
             createdAt: Date(),
             updatedAt: Date()
@@ -138,6 +140,7 @@ class SessionService {
         
         let stats = session.calculateStats()
         let endTime = Date()
+        let finalDuration = session.customDurationMinutes ?? stats.duration
         
         // Prepare the session data
         var sessionData: [String: Any] = [
@@ -168,7 +171,7 @@ class SessionService {
             },
             "total_volume": stats.volume,
             "total_sets": stats.sets,
-            "duration": stats.duration
+            "duration": finalDuration
         ]
         
         // Add body weight if logged
