@@ -204,18 +204,52 @@ class WorkoutViewModel: NSObject, ObservableObject {
     private func endHealthKitWorkout() async {
         guard let session = hkWorkoutSession, let builder = hkWorkoutBuilder else { return }
         
-        let endDate = Date()
         session.end()
         
-        do {
-            try await builder.endCollection(at: endDate)
-            try await builder.finishWorkout()
-        } catch {
-            print("Failed to save HealthKit workout:", error)
+        // Check if user set custom duration
+        if let customMinutes = activeSession?.customDurationMinutes, 
+           let startTime = activeSession?.startTime {
+            // User logged after workout - create workout with custom duration
+            let customEndDate = startTime.addingTimeInterval(Double(customMinutes) * 60)
+            
+            do {
+                try await builder.endCollection(at: customEndDate)
+                try await builder.finishWorkout()
+                print("HealthKit: Saved with custom duration \(customMinutes) min")
+            } catch {
+                print("Failed to save HealthKit workout with custom duration:", error)
+                // Fallback: save manual workout
+                await saveManualHealthKitWorkout(startTime: startTime, endTime: customEndDate)
+            }
+        } else {
+            // Normal case - use actual end time
+            let endDate = Date()
+            do {
+                try await builder.endCollection(at: endDate)
+                try await builder.finishWorkout()
+            } catch {
+                print("Failed to save HealthKit workout:", error)
+            }
         }
         
         hkWorkoutSession = nil
         hkWorkoutBuilder = nil
+    }
+    
+    /// Fallback: save workout manually if live session fails with custom time
+    private func saveManualHealthKitWorkout(startTime: Date, endTime: Date) async {
+        let workout = HKWorkout(
+            activityType: .traditionalStrengthTraining,
+            start: startTime,
+            end: endTime
+        )
+        
+        do {
+            try await healthStore.save(workout)
+            print("HealthKit: Saved manual workout")
+        } catch {
+            print("Failed to save manual HealthKit workout:", error)
+        }
     }
 }
 
