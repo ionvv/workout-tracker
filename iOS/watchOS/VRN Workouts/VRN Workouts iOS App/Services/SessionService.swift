@@ -1,4 +1,5 @@
 import Foundation
+import HealthKit
 
 /// Timestamp helper for logging
 private func ts() -> String {
@@ -310,5 +311,85 @@ class SessionService {
         }
         
         print("SessionService: Session updated successfully")
+    }
+    
+    // MARK: - Delete
+    
+    /// Delete session from server
+    func deleteSessionFromServer(_ sessionId: String) async throws {
+        guard let token = AuthCache.shared.token else {
+            throw NSError(domain: "SessionService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
+        }
+        
+        let urlString = "\(Config.supabaseURL)/rest/v1/sessions?session_id=eq.\(sessionId)"
+        guard let url = URL(string: urlString) else {
+            throw NSError(domain: "SessionService", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue(Config.supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
+            print("SessionService: Delete failed with status \(statusCode)")
+            throw NSError(domain: "SessionService", code: statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to delete session"])
+        }
+        
+        print("SessionService: Session deleted from server")
+    }
+    
+    /// Delete matching workout from HealthKit
+    func deleteFromHealthKit(session: WorkoutSession) async {
+        let healthStore = HKHealthStore()
+        
+        guard HKHealthStore.isHealthDataAvailable() else {
+            print("HealthKit: Not available")
+            return
+        }
+        
+        // Query for workouts matching this session's time range
+        let workoutType = HKObjectType.workoutType()
+        
+        // Find workouts within a few minutes of session start time
+        let startDate = session.startTime.addingTimeInterval(-60) // 1 min buffer
+        let endDate = session.startTime.addingTimeInterval(60)
+        
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: .strictStartDate)
+        
+        do {
+            let workouts = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[HKWorkout], Error>) in
+                let query = HKSampleQuery(
+                    sampleType: workoutType,
+                    predicate: predicate,
+                    limit: 10,
+                    sortDescriptors: nil
+                ) { _, samples, error in
+                    if let error = error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume(returning: samples as? [HKWorkout] ?? [])
+                    }
+                }
+                healthStore.execute(query)
+            }
+            
+            // Find strength training workout matching our session
+            for workout in workouts {
+                if workout.workoutActivityType == .traditionalStrengthTraining {
+                    try await healthStore.delete(workout)
+                    print("HealthKit: Deleted workout from \(workout.startDate)")
+                    return
+                }
+            }
+            
+            print("HealthKit: No matching workout found to delete")
+        } catch {
+            print("HealthKit: Failed to delete workout - \(error)")
+        }
     }
 }

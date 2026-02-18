@@ -3,17 +3,22 @@ import SwiftUI
 struct SessionDetailView: View {
     @State var session: WorkoutSession
     let onUpdate: ((WorkoutSession) -> Void)?
+    let onDelete: (() -> Void)?
     var program: Program?
     var allSessions: [WorkoutSession]?
     
+    @Environment(\.dismiss) private var dismiss
     @State private var showingEditSheet = false
     @State private var showingAIReview = false
+    @State private var showingDeleteAlert = false
+    @State private var isDeleting = false
     
-    init(session: WorkoutSession, program: Program? = nil, allSessions: [WorkoutSession]? = nil, onUpdate: ((WorkoutSession) -> Void)? = nil) {
+    init(session: WorkoutSession, program: Program? = nil, allSessions: [WorkoutSession]? = nil, onUpdate: ((WorkoutSession) -> Void)? = nil, onDelete: (() -> Void)? = nil) {
         self._session = State(initialValue: session)
         self.program = program
         self.allSessions = allSessions
         self.onUpdate = onUpdate
+        self.onDelete = onDelete
     }
     
     var body: some View {
@@ -90,13 +95,32 @@ struct SessionDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingEditSheet = true
+                Menu {
+                    Button {
+                        showingEditSheet = true
+                    } label: {
+                        Label("Edit", systemImage: "pencil")
+                    }
+                    
+                    Button(role: .destructive) {
+                        showingDeleteAlert = true
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
                 } label: {
-                    Text("Edit")
+                    Image(systemName: "ellipsis.circle")
                 }
             }
         }
+        .alert("Delete Workout?", isPresented: $showingDeleteAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                deleteWorkout()
+            }
+        } message: {
+            Text("This will delete the workout from the app and Apple Health. This cannot be undone.")
+        }
+        .disabled(isDeleting)
         .sheet(isPresented: $showingEditSheet) {
             SessionEditView(session: $session) { updatedSession in
                 session = updatedSession
@@ -115,6 +139,26 @@ struct SessionDetailView: View {
                 program: program,
                 allSessions: allSessions ?? []
             )
+        }
+    }
+    
+    private func deleteWorkout() {
+        isDeleting = true
+        
+        Task {
+            // Delete from local storage
+            LocalStorageService.shared.deleteSession(session.sessionId)
+            
+            // Delete from server
+            try? await SessionService.shared.deleteSessionFromServer(session.sessionId)
+            
+            // Delete from HealthKit
+            await SessionService.shared.deleteFromHealthKit(session: session)
+            
+            await MainActor.run {
+                onDelete?()
+                dismiss()
+            }
         }
     }
 }

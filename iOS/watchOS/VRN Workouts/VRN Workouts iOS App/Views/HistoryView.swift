@@ -19,7 +19,14 @@ struct HistoryView: View {
                         ForEach(viewModel.groupedSessions.keys.sorted().reversed(), id: \.self) { date in
                             Section(header: Text(formatSectionDate(date))) {
                                 ForEach(viewModel.groupedSessions[date] ?? []) { session in
-                                    NavigationLink(destination: SessionDetailView(session: session)) {
+                                    NavigationLink(destination: SessionDetailView(
+                                        session: session,
+                                        onDelete: {
+                                            Task {
+                                                await viewModel.loadSessions()
+                                            }
+                                        }
+                                    )) {
                                         SessionRow(session: session)
                                     }
                                 }
